@@ -1,0 +1,27 @@
+/**
+ * Auth API contract + factory.
+ *
+ * Components/hooks only ever see this `authApi` object which satisfies the
+ * AuthApi interface. Whether it currently resolves to the in-browser mock or
+ * the real HTTP client depends ENTIRELY on VITE_API_MODE — nothing else.
+ */
+import type {
+  AuthResponse,
+  LoginRequest,
+  RefreshTokenResponse,
+  RegisterRequest,
+  User,
+} from '../types';
+import { apiConfig } from '../config';
+import { MockAuthApi } from '../mock/auth.mock';
+import { RealAuthApi } from '../real/auth.api';
+
+export interface AuthApi {
+  register(data: RegisterRequest): Promise<AuthResponse>;
+  login(data: LoginRequest): Promise<AuthResponse>;
+  logout(): Promise<void>;
+  getCurrentUser(): Promise<User>;
+  refreshToken(refreshToken: string): Promise<RefreshTokenResponse>;
+}
+
+export const authApi: AuthApi = apiConfig.mode === 'real' ? new RealAuthApi() : new MockAuthApi();

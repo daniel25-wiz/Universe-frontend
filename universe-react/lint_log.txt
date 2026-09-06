@@ -1,0 +1,236 @@
+
+> universe-react@0.0.0 lint
+> oxlint
+
+
+  ! react(only-export-components): Fast refresh only works when a file has exports. Move your component(s) to a separate file.
+    ,-[src/main.jsx:13:7]
+ 12 |  */
+ 13 | const BootSkeletonRemover = () => {
+    :       ^^^^^^^^^^^^^^^^^^^
+ 14 |   useLayoutEffect(() => {
+    `----
+
+  ! eslint(no-unused-vars): Catch parameter '_' is caught but never used.
+    ,-[src/lib/prefetch.js:58:12]
+ 57 |     window.dispatchEvent(new Event('universe:load-home-sections'));
+ 58 |   } catch (_) {
+    :            |
+    :            `-- '_' is declared here
+ 59 |     /* no-op */
+    `----
+  help: Consider handling this error.
+
+  ! eslint(no-unused-vars): Identifier 'ArrowIcon' is imported but never used.
+   ,-[src/components/FeaturesShowcase.jsx:3:8]
+ 2 | import Button from './ui/Button';
+ 3 | import ArrowIcon from './ui/ArrowIcon';
+   :        ^^^^|^^^^
+   :            `-- 'ArrowIcon' is imported here
+ 4 | 
+   `----
+  help: Consider removing this import.
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+   ,-[src/components/FeaturesShowcase.jsx:8:4]
+ 7 |   // All-in-One Marketplace
+ 8 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+   :    ^^^
+ 9 |     <circle cx="12" cy="12" r="10"></circle>
+   `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+    ,-[src/components/FeaturesShowcase.jsx:16:4]
+ 15 |   // Sell Products
+ 16 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+    :    ^^^
+ 17 |     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+    `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+    ,-[src/components/FeaturesShowcase.jsx:22:4]
+ 21 |   // Receive Payment
+ 22 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+    :    ^^^
+ 23 |     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+    `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+    ,-[src/components/FeaturesShowcase.jsx:29:4]
+ 28 |   // Shop Endlessly
+ 29 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+    :    ^^^
+ 30 |     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+    `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+    ,-[src/components/FeaturesShowcase.jsx:34:4]
+ 33 |   // Grow Your Business
+ 34 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+    :    ^^^
+ 35 |     <path d="M3 3v18h18"></path>
+    `----
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/hooks/useIntersectionObserver.js:17:11]
+ 16 |     return () => {
+ 17 |       if (elementRef.current) {
+    :           ^^^^^^^^^^^^^^^^^^
+ 18 |         observer.unobserve(elementRef.current);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/hooks/useIntersectionObserver.js:18:28]
+ 17 |       if (elementRef.current) {
+ 18 |         observer.unobserve(elementRef.current);
+    :                            ^^^^^^^^^^^^^^^^^^
+ 19 |       }
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! eslint(no-unused-vars): Identifier 'useEffect' is imported but never used.
+   ,-[src/components/DashboardSection.jsx:1:20]
+ 1 | import { useState, useEffect } from 'react';
+   :                    ^^^^|^^^^
+   :                        `-- 'useEffect' is imported here
+ 2 | import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+   `----
+  help: Consider removing this import.
+
+  ! eslint(no-unused-vars): Variable 'hoveredMetric' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/DashboardSection.jsx:10:10]
+  9 |   const [activeTab, setActiveTab] = useState("analytics");
+ 10 |   const [hoveredMetric, setHoveredMetric] = useState(null);
+    :          ^^^^^^|^^^^^^
+    :                `-- 'hoveredMetric' is declared here
+ 11 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'PRODUCTS' is declared but never used. Unused variables should start with a '_'.
+    ,-[src/components/seller-dashboard/views/PublicMarketplace.jsx:22:7]
+ 21 | 
+ 22 | const PRODUCTS = [
+    :       ^^^^|^^^
+    :           `-- 'PRODUCTS' is declared here
+ 23 |   {
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Function 'ProductCard' is declared but never used.
+     ,-[src/components/seller-dashboard/views/PublicMarketplace.jsx:125:10]
+ 124 | 
+ 125 | function ProductCard({ product }) {
+     :          ^^^^^|^^^^^
+     :               `-- 'ProductCard' is declared here
+ 126 |   return (
+     `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/components/ui/Counter.jsx:33:11]
+ 32 |     return () => {
+ 33 |       if (elementRef.current) {
+    :           ^^^^^^^^^^^^^^^^^^
+ 34 |         observer.unobserve(elementRef.current);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[src/components/ui/Counter.jsx:34:28]
+ 33 |       if (elementRef.current) {
+ 34 |         observer.unobserve(elementRef.current);
+    :                            ^^^^^^^^^^^^^^^^^^
+ 35 |       }
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! eslint(no-unused-vars): Variable 'hoveredMetric' is declared but never used. Unused variables should start with a '_'.
+     ,-[public/static/js/app.js:419:10]
+ 418 |   const [activeTab, setActiveTab] = React.useState("analytics");
+ 419 |   const [hoveredMetric, setHoveredMetric] = React.useState(null);
+     :          ^^^^^^|^^^^^^
+     :                `-- 'hoveredMetric' is declared here
+ 420 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[public/static/js/app.js:18:11]
+ 17 |     return () => {
+ 18 |       if (elementRef.current) {
+    :           ^^^^^^^^^^^^^^^^^^
+ 19 |         observer.unobserve(elementRef.current);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[public/static/js/app.js:19:28]
+ 18 |       if (elementRef.current) {
+ 19 |         observer.unobserve(elementRef.current);
+    :                            ^^^^^^^^^^^^^^^^^^
+ 20 |       }
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[public/static/js/app.js:58:11]
+ 57 |     return () => {
+ 58 |       if (elementRef.current) {
+    :           ^^^^^^^^^^^^^^^^^^
+ 59 |         observer.unobserve(elementRef.current);
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react-hooks(exhaustive-deps): The ref's value `.current` is accessed directly in the effect cleanup function.
+    ,-[public/static/js/app.js:59:28]
+ 58 |       if (elementRef.current) {
+ 59 |         observer.unobserve(elementRef.current);
+    :                            ^^^^^^^^^^^^^^^^^^
+ 60 |       }
+    `----
+  help: The ref value will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by react, copy it to a variable inside the effect and use that variable in the cleanup function.
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+     ,-[public/static/js/app.js:339:4]
+ 338 |   // All-in-One Marketplace
+ 339 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+     :    ^^^
+ 340 |     <circle cx="12" cy="12" r="10"></circle>
+     `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+     ,-[public/static/js/app.js:347:4]
+ 346 |   // Sell Products
+ 347 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+     :    ^^^
+ 348 |     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+     `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+     ,-[public/static/js/app.js:353:4]
+ 352 |   // Receive Payment
+ 353 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+     :    ^^^
+ 354 |     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+     `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+     ,-[public/static/js/app.js:360:4]
+ 359 |   // Shop Endlessly
+ 360 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+     :    ^^^
+ 361 |     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+     `----
+
+  ! react(jsx-key): Missing "key" prop for element in array.
+     ,-[public/static/js/app.js:365:4]
+ 364 |   // Grow Your Business
+ 365 |   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
+     :    ^^^
+ 366 |     <path d="M3 3v18h18"></path>
+     `----
+
+Found 26 warnings and 0 errors.
+Finished in 48ms on 70 files with 91 rules using 4 threads.

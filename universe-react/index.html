@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>Universe - Launch, Manage, and Scale Your Online Marketplace</title>
+    <meta name="description" content="Universe is a premium marketplace platform designed for modern entrepreneurs. Launch your online store in one click, accept secure payments, and grow your customer base.">
+    
+    <style>
+      /* Boot skeleton — pure CSS, paints instantly before JS loads. */
+      #boot-skeleton{position:fixed;inset:0;z-index:2147483000;background:#fff;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow:auto}
+      #boot-skeleton .bs-bar{display:block;border-radius:8px;background:linear-gradient(90deg,rgba(148,163,184,.10) 25%,rgba(148,163,184,.22) 37%,rgba(148,163,184,.10) 63%);background-size:400% 100%;animation:bs-shimmer 1.3s ease infinite}
+      @keyframes bs-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+      #boot-skeleton .bs-row{display:flex;align-items:center;gap:12px}
+      #boot-skeleton .bs-navbar{position:sticky;top:0;height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;border-bottom:1px solid #e2e8f0;background:#fff}
+      #boot-skeleton .bs-links,#boot-skeleton .bs-actions{display:flex;align-items:center;gap:20px}
+      @media (max-width:760px){#boot-skeleton .bs-links,#boot-skeleton .bs-actions{display:none}}
+      #boot-skeleton .bs-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:64px 24px;gap:14px}
+      #boot-skeleton .bs-blocks{max-width:1100px;margin:0 auto;padding:8px 24px 48px;display:flex;flex-direction:column;gap:28px}
+      #boot-skeleton .bs-block{display:flex;flex-direction:column;gap:12px}
+
+      /* Dashboard variant */
+      #boot-skeleton .bs-dash{display:none}
+      #boot-skeleton.is-dashboard{background:#faf8ff}
+      #boot-skeleton.is-dashboard .bs-home{display:none}
+      #boot-skeleton.is-dashboard .bs-dash{display:block}
+      #boot-skeleton .bs-dash-side{position:fixed;left:0;top:0;bottom:0;width:256px;padding:24px 20px;display:flex;flex-direction:column;gap:22px;background:#fff;border-right:1px solid #e2e8f0}
+      @media (min-width:1024px){#boot-skeleton .bs-dash-side{width:288px}}
+      @media (max-width:767px){#boot-skeleton .bs-dash-side{display:none}}
+      #boot-skeleton .bs-dash-main{min-height:100vh;margin-left:256px;display:flex;flex-direction:column}
+      @media (min-width:1024px){#boot-skeleton .bs-dash-main{margin-left:288px}}
+      @media (max-width:767px){#boot-skeleton .bs-dash-main{margin-left:0}}
+      #boot-skeleton .bs-dash-top{height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid #e2e8f0}
+      #boot-skeleton .bs-dash-body{flex:1;padding:32px;display:flex;flex-direction:column;gap:24px}
+      #boot-skeleton .bs-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+      @media (max-width:1024px){#boot-skeleton .bs-stats{grid-template-columns:repeat(2,1fr)}}
+      @media (max-width:640px){#boot-skeleton .bs-stats{grid-template-columns:1fr}}
+      #boot-skeleton .bs-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+      /* Auth variant */
+      #boot-skeleton .bs-auth{display:none}
+      #boot-skeleton.is-auth .bs-home,#boot-skeleton.is-auth .bs-dash{display:none}
+      #boot-skeleton.is-auth .bs-auth{display:block}
+      #boot-skeleton .bs-auth-wrap{min-height:100vh;padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 50%,#eef2ff 100%)}
+      #boot-skeleton .bs-auth-card{width:min(440px,100%);background:#fff;border-radius:16px;box-shadow:0 20px 45px -12px rgba(15,23,42,.12);overflow:hidden}
+      #boot-skeleton .bs-accent{height:4px;background:linear-gradient(90deg,#2563eb,#3b82f6,#60a5fa)}
+      #boot-skeleton .bs-auth-body{padding:32px 28px 40px;display:flex;flex-direction:column;align-items:center;gap:14px}
+    </style>
+  </head>
+  <body>
+    <!-- Boot skeleton: visible from the very first paint until React mounts -->
+    <div id="boot-skeleton" class="boot-skeleton" aria-hidden="true">
+      <!-- Home variant -->
+      <div class="bs-home">
+        <div class="bs-navbar">
+          <div class="bs-bar" style="width:112px;height:30px"></div>
+          <div class="bs-links">
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+            <div class="bs-bar" style="width:64px;height:14px"></div>
+          </div>
+          <div class="bs-actions">
+            <div class="bs-bar" style="width:92px;height:38px"></div>
+            <div class="bs-bar" style="width:132px;height:38px"></div>
+          </div>
+        </div>
+        <div class="bs-hero">
+          <div class="bs-bar" style="width:min(52%,480px);height:54px"></div>
+          <div class="bs-bar" style="width:min(36%,320px);height:54px"></div>
+          <div class="bs-bar" style="width:min(46%,420px);height:16px;margin-top:8px"></div>
+          <div class="bs-bar" style="width:min(32%,300px);height:16px"></div>
+          <div class="bs-bar" style="width:180px;height:46px;margin-top:10px"></div>
+        </div>
+        <div class="bs-blocks">
+          <div class="bs-block"><div class="bs-bar" style="width:14%;height:16px"></div><div class="bs-bar" style="width:100%;height:170px"></div></div>
+          <div class="bs-block"><div class="bs-bar" style="width:16%;height:16px;align-self:flex-end"></div><div class="bs-bar" style="width:100%;height:150px"></div></div>
+          <div class="bs-block"><div class="bs-bar" style="width:12%;height:16px"></div><div class="bs-bar" style="width:100%;height:170px"></div></div>
+        </div>
+      </div>
+    <!-- Dashboard variant -->
+      <div class="bs-dash">
+        <div class="bs-dash-side">
+          <div class="bs-bar" style="width:112px;height:30px"></div>
+          <div class="bs-bar" style="width:100%;height:42px"></div>
+          <div class="bs-row" style="flex-direction:column;gap:12px">
+            <div class="bs-bar" style="width:100%;height:34px"></div>
+            <div class="bs-bar" style="width:100%;height:34px"></div>
+            <div class="bs-bar" style="width:100%;height:34px"></div>
+            <div class="bs-bar" style="width:100%;height:34px"></div>
+            <div class="bs-bar" style="width:100%;height:34px"></div>
+          </div>
+        </div>
+        <div class="bs-dash-main">
+          <div class="bs-dash-top">
+            <div class="bs-row"><div class="bs-bar" style="width:40px;height:40px;border-radius:50%"></div><div class="bs-bar" style="width:180px;height:36px"></div></div>
+            <div class="bs-row"><div class="bs-bar" style="width:40px;height:40px;border-radius:50%"></div><div class="bs-bar" style="width:40px;height:40px;border-radius:50%"></div><div class="bs-bar" style="width:40px;height:40px;border-radius:50%"></div></div>
+          </div>
+          <div class="bs-dash-body">
+            <div class="bs-row" style="justify-content:space-between;flex-wrap:wrap">
+              <div class="bs-bar" style="width:34%;height:30px"></div>
+              <div class="bs-row"><div class="bs-bar" style="width:90px;height:34px"></div><div class="bs-bar" style="width:80px;height:34px"></div></div>
+            </div>
+            <div class="bs-stats">
+              <div class="bs-card"><div class="bs-bar" style="width:70%;height:14px"></div><div class="bs-bar" style="width:55%;height:26px"></div><div class="bs-bar" style="width:80%;height:12px"></div></div>
+              <div class="bs-card"><div class="bs-bar" style="width:70%;height:14px"></div><div class="bs-bar" style="width:55%;height:26px"></div><div class="bs-bar" style="width:80%;height:12px"></div></div>
+              <div class="bs-card"><div class="bs-bar" style="width:70%;height:14px"></div><div class="bs-bar" style="width:55%;height:26px"></div><div class="bs-bar" style="width:80%;height:12px"></div></div>
+              <div class="bs-card"><div class="bs-bar" style="width:70%;height:14px"></div><div class="bs-bar" style="width:55%;height:26px"></div><div class="bs-bar" style="width:80%;height:12px"></div></div>
+            </div>
+            <div class="bs-bar" style="width:100%;height:180px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth variant -->
+      <div class="bs-auth">
+        <div class="bs-auth-wrap">
+          <div class="bs-auth-card" style="margin-top:32px">
+            <div class="bs-accent"></div>
+            <div class="bs-auth-body">
+              <div class="bs-bar" style="width:72px;height:56px"></div>
+              <div class="bs-bar" style="width:45%;height:26px"></div>
+              <div class="bs-bar" style="width:70%;height:14px"></div>
+              <div class="bs-bar" style="width:100%;height:46px"></div>
+              <div class="bs-bar" style="width:100%;height:46px"></div>
+              <div class="bs-bar" style="width:55%;height:16px"></div>
+              <div class="bs-bar" style="width:100%;height:44px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var s = document.getElementById('boot-skeleton');
+        if (!s) return;
+        var p = window.location.pathname || '/';
+        if (p.indexOf('/seller') === 0) s.className += ' is-dashboard';
+        else if (p.indexOf('/auth') === 0) s.className += ' is-auth';
+      })();
+    </script>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

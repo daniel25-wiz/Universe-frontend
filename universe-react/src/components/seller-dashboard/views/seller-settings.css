@@ -1,0 +1,250 @@
+/* ==========================================================================
+   SELLER SETTINGS — seller_settings.html
+   Settings hub page: sidebar + "Account Settings" list of items.
+   Self-contained palette (slate + blue #2563eb).
+   ========================================================================== */
+
+.st-root {
+  --st-primary: #2563eb;
+  --st-surface: #f8fafc;
+  --st-surface-container: #f3f3fe;
+  --st-outline: #74777f;
+  --st-outline-variant: #c4c6d0;
+  --st-on-surface: #1e293b;
+  --st-on-surface-variant: #475569;
+  --st-error: #dc2626;
+
+  background: var(--st-surface);
+  color: var(--st-on-surface);
+  font-family: var(--gs-font-headline);
+
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- TopAppBar --- */
+.st-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid var(--st-outline-variant);
+  padding: 16px 24px;
+  z-index: 10;
+}
+.st-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.st-topbar-hamburger {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--st-on-surface);
+  cursor: pointer;
+  padding: 4px;
+}
+.st-topbar-hamburger svg {
+  width: 24px;
+  height: 24px;
+}
+.st-bell svg {
+  width: 20px;
+  height: 20px;
+}
+.st-item-chevron svg {
+  width: 20px;
+  height: 20px;
+}
+.st-topbar-hamburger:hover { color: var(--st-primary); }
+@media (min-width: 768px) {
+  .st-topbar-hamburger { display: none; }
+}
+.st-topbar-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--st-on-surface);
+}
+.st-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.st-bell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--st-on-surface-variant);
+  padding: 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.st-bell:hover {
+  color: var(--st-primary);
+  background: var(--st-surface-container);
+}
+.st-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: var(--st-surface-container);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* --- Canvas --- */
+.st-canvas {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+@media (min-width: 768px) {
+  .st-canvas { padding: 40px; }
+}
+.st-container {
+  max-width: 768px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* --- Header section --- */
+.st-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--st-outline-variant);
+  padding-bottom: 24px;
+}
+.st-head-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--st-surface-container);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.st-head-icon svg { width: 28px; height: 28px; }
+.st-head-title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--st-on-surface);
+}
+.st-head-sub {
+  color: var(--st-on-surface-variant);
+  margin-top: 4px;
+}
+
+/* --- Settings list --- */
+.st-list {
+  background: #ffffff;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+}
+.st-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.st-list li {
+  border-top: 1px solid var(--st-outline-variant);
+}
+.st-list li:first-child {
+  border-top: none;
+}
+.st-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  text-decoration: none;
+  color: inherit;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.st-item:hover {
+  background: var(--st-surface-container);
+}
+@media (min-width: 768px) {
+  .st-item { padding: 24px; }
+}
+.st-item-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.st-item-icon {
+  color: var(--st-on-surface-variant);
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+  display: flex;
+}
+.st-item-icon svg { width: 24px; height: 24px; }
+.st-item:hover .st-item-icon { color: var(--st-primary); }
+.st-item-title {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--st-on-surface);
+}
+.st-item-desc {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--st-on-surface-variant);
+}
+.st-item-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--st-outline);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.st-item-chevron svg {
+  width: 20px;
+  height: 20px;
+}
+.st-item:hover .st-item-chevron { color: var(--st-primary); }
+
+/* Logout item (red) */
+.st-item-logout:hover {
+  background: #fef2f2;
+}
+.st-item-logout .st-item-icon {
+  color: var(--st-error);
+  transform: rotate(180deg);
+}
+.st-item-logout:hover .st-item-icon { color: var(--st-error); }
+.st-logout-title {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--st-error);
+}

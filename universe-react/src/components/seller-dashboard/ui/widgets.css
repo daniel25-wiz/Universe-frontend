@@ -1,0 +1,349 @@
+/* ==========================================================================
+   Shared dashboard widgets: user chips, dropdown menus, modals, danger zone.
+   Used by the sidebar, dashboard overview topbar, workshop cards and settings.
+   Palette follows the blue seller-dashboard theme.
+   ========================================================================== */
+
+/* ---------- User identity chip (sidebar footer) ---------- */
+.sd-user-card {
+  margin: 4px 12px 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  min-width: 0;
+}
+
+.sd-user-avatar,
+.dh-user-avatar,
+.ws-avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.sd-user-avatar { width: 36px; height: 36px; font-size: 0.8rem; }
+
+.sd-user-meta { min-width: 0; }
+.sd-user-name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sd-user-email {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Topbar user button + dropdown (dashboard overview) ---------- */
+.dh-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dbe3ee;
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 12px 5px 6px;
+  cursor: pointer;
+  font: inherit;
+  color: #0f172a;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.dh-user-btn:hover,
+.dh-user-btn:focus-visible {
+  border-color: #93b4f8;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+.dh-user-avatar { width: 30px; height: 30px; font-size: 0.72rem; }
+.dh-user-btn .dh-store-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dh-usermenu-wrap { position: relative; }
+
+.dh-usermenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 260px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  padding: 8px;
+  z-index: 70;
+  animation: dhMenuIn 0.16s ease;
+}
+@keyframes dhMenuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dh-usermenu-head {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  margin-bottom: 6px;
+}
+.dh-usermenu-name { margin: 0; font-weight: 700; font-size: 0.9rem; color: #0f172a; }
+.dh-usermenu-email { margin: 2px 0 0; font-size: 0.76rem; color: #64748b; word-break: break-all; }
+
+.dh-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+}
+.dh-menu-item .material-symbols-outlined { font-size: 20px; color: #2563eb; }
+.dh-menu-item:hover { background: #f1f5f9; }
+.dh-menu-item.dh-menu-danger, .dh-menu-item.dh-menu-danger .material-symbols-outlined {
+  color: #dc2626;
+}
+.dh-menu-item.dh-menu-danger:hover { background: #fef2f2; }
+.dh-menu-divider { height: 1px; background: #eef2f7; margin: 6px 4px; }
+
+/* ---------- Small card action menus (workshop products) ---------- */
+.ws-menu-wrap { position: relative; }
+.ws-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 8px;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
+  padding: 6px;
+  z-index: 60;
+  animation: dhMenuIn 0.14s ease;
+}
+.ws-menu .dh-menu-item { font-size: 0.84rem; padding: 9px 10px; }
+
+/* ---------- Toolbar dropdowns (filter / sort) ---------- */
+.ws-toolbar-wrap { position: relative; }
+
+/* ---------- Modals ---------- */
+.sd-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  animation: sdFadeIn 0.15s ease;
+}
+@keyframes sdFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.sd-modal {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  animation: dhMenuIn 0.18s ease;
+}
+.sd-modal-title { margin: 0 0 6px; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+.sd-modal-message { margin: 0 0 16px; font-size: 0.9rem; line-height: 1.5; color: #475569; }
+
+.sd-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.sd-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.sd-btn-ghost { background: #f1f5f9; color: #334155; }
+.sd-btn-ghost:hover:not(:disabled) { background: #e2e8f0; }
+.sd-btn-primary { background: #2563eb; color: #fff; }
+.sd-btn-primary:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+.sd-btn-danger { background: #dc2626; color: #fff; }
+.sd-btn-danger:hover:not(:disabled) { background: #b91c1c; box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3); }
+
+/* ---------- Modal form fields (settings dialogs) ---------- */
+.sd-field { margin-bottom: 14px; }
+.sd-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+.sd-field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #dbe3ee;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.sd-field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+.sd-field-error { margin: 4px 0 0; font-size: 0.75rem; color: #dc2626; }
+.sd-form-error {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 0.83rem;
+  margin-bottom: 14px;
+}
+.sd-form-success {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  font-size: 0.83rem;
+  margin-bottom: 14px;
+}
+
+/* ---------- Danger zone (settings) ---------- */
+.st-danger-card {
+  margin-top: 28px;
+  border: 1.5px solid #fecaca;
+  background: #fff5f5;
+  border-radius: 18px;
+  padding: 20px;
+}
+.st-danger-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #b91c1c;
+}
+.st-danger-desc { margin: 0 0 14px; font-size: 0.86rem; color: #7f1d1d; line-height: 1.5; }
+
+/* ---------- Account summary card (settings) ---------- */
+.st-account-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  margin-bottom: 24px;
+}
+.st-account-avatar { width: 52px; height: 52px; font-size: 1rem; }
+.st-account-name { margin: 0; font-weight: 800; font-size: 1rem; color: #0f172a; }
+.st-account-email { margin: 2px 0 0; font-size: 0.82rem; color: #64748b; word-break: break-all; }
+.st-account-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.st-account-since { margin-left: auto; font-size: 0.78rem; color: #94a3b8; text-align: right; }
+
+/* ---------- Empty state (workshop) ---------- */
+.ws-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 42px 20px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 18px;
+  color: #64748b;
+  background: #f8fafc;
+}
+.ws-empty h3 { margin: 0 0 6px; font-size: 1.02rem; color: #334155; }
+.ws-empty p { margin: 0; font-size: 0.88rem; }
+
+/* ---------- Image preview (add/edit product) ---------- */
+.ap-preview {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.ap-preview img { width: 100%; height: 100%; object-fit: cover; }
+.ap-preview-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}

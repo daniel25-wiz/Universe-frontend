@@ -1,0 +1,46 @@
+
+> universe-react@0.0.0 build
+> vite build
+
+[36mvite v8.1.5 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 142 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   11.21 kB │ gzip:  2.57 kB
+dist/assets/SellerSettings-BNXZT6AA.css            3.85 kB │ gzip:  1.03 kB
+dist/assets/MyMarketplace-BR4tuz9L.css             3.94 kB │ gzip:  1.10 kB
+dist/assets/SalesAnalytics-D5preYtB.css            4.11 kB │ gzip:  1.04 kB
+dist/assets/add-product-Mzeu1BAq.css               5.25 kB │ gzip:  1.30 kB
+dist/assets/widgets-Bv50Z0wd.css                   6.53 kB │ gzip:  1.87 kB
+dist/assets/SellerProfile-6I0jsf7D.css             6.63 kB │ gzip:  1.54 kB
+dist/assets/seller-dashboard-DZPbxhSm.css          9.69 kB │ gzip:  2.48 kB
+dist/assets/PublicMarketplace-COMs_xbt.css        11.08 kB │ gzip:  2.36 kB
+dist/assets/DashboardOverview-BJl98NRu.css        11.26 kB │ gzip:  2.41 kB
+dist/assets/index-CmhduERx.css                    42.62 kB │ gzip:  7.86 kB
+dist/assets/SellerDashboard-CqEf5Fqz.js            0.20 kB │ gzip:  0.17 kB
+dist/assets/useIntersectionObserver-B8SIb_A_.js    0.37 kB │ gzip:  0.25 kB
+dist/assets/rolldown-runtime-Bh1tDfsg.js           0.56 kB │ gzip:  0.36 kB
+dist/assets/sessionGuard-Bd9GcZNs.js               0.68 kB │ gzip:  0.43 kB
+dist/assets/user-C9TG2WWo.js                       0.87 kB │ gzip:  0.46 kB
+dist/assets/ArrowIcon-DkPdOJ7k.js                  0.95 kB │ gzip:  0.58 kB
+dist/assets/add-product-F8sYuuTI.js                1.15 kB │ gzip:  0.61 kB
+dist/assets/ConfirmDialog-DOHbEKlp.js              1.57 kB │ gzip:  0.77 kB
+dist/assets/prefetch-CjTvwUEd.js                   2.98 kB │ gzip:  1.11 kB
+dist/assets/Sidebar-p3bcp3DX.js                    3.16 kB │ gzip:  1.14 kB
+dist/assets/SalesAnalytics-CJWxRmR7.js             4.78 kB │ gzip:  1.38 kB
+dist/assets/useProducts-B9pgkgVl.js                5.24 kB │ gzip:  1.99 kB
+dist/assets/useUser-BEDtbkBn.js                    5.44 kB │ gzip:  1.83 kB
+dist/assets/PublicMarketplace-r8IfE2w9.js          7.12 kB │ gzip:  2.09 kB
+dist/assets/AddProductPage-CMIr-6Fr.js             7.81 kB │ gzip:  2.16 kB
+dist/assets/MyMarketplace-BV0srFg0.js              8.36 kB │ gzip:  2.55 kB
+dist/assets/EditProductPage-BBGHIGxY.js            8.93 kB │ gzip:  2.55 kB
+dist/assets/HomePage-CwkCZyZ1.js                   9.73 kB │ gzip:  2.64 kB
+dist/assets/SellerProfile-KO6TU86t.js              9.87 kB │ gzip:  2.95 kB
+dist/assets/DashboardOverview-Uey9WBuO.js         10.57 kB │ gzip:  3.23 kB
+dist/assets/SellerSettings-DKEVF49f.js            15.00 kB │ gzip:  4.27 kB
+dist/assets/index-C__TxFuc.js                     28.04 kB │ gzip: 10.02 kB
+dist/assets/HomeSections-CtQIy6Q_.js              30.59 kB │ gzip:  6.99 kB
+dist/assets/AuthPage-CNCN-EFZ.js                  40.77 kB │ gzip:  8.27 kB
+dist/assets/react-vendor-Tp3t3X98.js             267.56 kB │ gzip: 84.16 kB
+
+[32m✓ built in 1.54s[39m
