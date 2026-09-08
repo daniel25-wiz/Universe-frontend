@@ -241,6 +241,143 @@
   color: var(--st-error);
   transform: rotate(180deg);
 }
+
+/* ==========================================================================
+   Storefront integration cards (Private Marketplace Domain + Store Branding)
+   Mirrors the page's card language: white surface, 1px outline border,
+   12px radius, soft shadow, 24px padding, 48px icon tiles.
+   ========================================================================== */
+.st-card {
+  background: #ffffff;
+  border: 1px solid var(--st-outline-variant);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.st-card-head { display: flex; align-items: flex-start; gap: 16px; }
+.st-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--st-surface-container);
+  color: var(--st-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.st-card-icon .material-symbols-outlined { font-size: 24px; }
+.st-card-heading { min-width: 0; }
+.st-card-title { margin: 0; font-size: 18px; line-height: 28px; font-weight: 500; color: var(--st-on-surface); }
+.st-card-desc { margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--st-on-surface-variant); }
+.st-card-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.st-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--st-outline-variant);
+}
+
+/* Domain address chip — mono pill like the onboarding domain preview */
+.st-domain-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--st-surface-container);
+  border: 1px solid var(--st-outline-variant);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--st-primary);
+  word-break: break-all;
+}
+.st-domain-chip .material-symbols-outlined { font-size: 18px; color: var(--st-primary); }
+
+/* Action buttons — match the app's blue primary actions */
+.st-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--st-outline-variant);
+  background: #ffffff;
+  color: var(--st-on-surface);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.st-btn .material-symbols-outlined { font-size: 18px; }
+.st-btn:hover { background: var(--st-surface-container); }
+.st-btn-primary { border-color: var(--st-primary); background: var(--st-primary); color: #ffffff; }
+.st-btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.st-btn:disabled { opacity: 0.55; cursor: default; }
+.st-btn:disabled:hover { background: var(--st-primary); }
+
+
+/* --- Store branding (logo + cover picture) --- */
+.st-brand-slots { display: flex; gap: 20px; flex-wrap: wrap; }
+.st-brand-slot { display: flex; flex-direction: column; gap: 8px; }
+.st-brand-slot-wide { flex: 1 1 260px; min-width: 240px; }
+.st-brand-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--st-on-surface-variant);
+}
+.st-brand-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px dashed var(--st-outline-variant);
+  border-radius: 12px;
+  background: var(--st-surface-container);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.st-brand-upload:hover { border-color: var(--st-primary); background: #eff6ff; }
+.st-brand-upload .material-symbols-outlined { font-size: 28px; color: var(--st-primary); }
+.st-brand-upload-square { width: 132px; height: 132px; }
+.st-brand-upload-wide { width: 100%; height: 132px; }
+.st-brand-upload-hint { font-size: 12px; font-weight: 600; color: var(--st-on-surface-variant); padding: 0 10px; text-align: center; }
+.st-brand-preview { width: 100%; height: 100%; object-fit: cover; display: block; }
+.st-brand-remove {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--st-error);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.st-brand-remove:hover { text-decoration: underline; }
+.st-brand-error { margin: 0; font-size: 13px; color: var(--st-error); }
+.st-brand-savehint { font-size: 13px; color: var(--st-on-surface-variant); }
+
+@media (max-width: 640px) {
+  .st-card { padding: 20px; }
+  .st-brand-slots { flex-direction: column; }
+  .st-brand-upload-square { width: 100%; height: 160px; }
+}
+
 .st-item-logout:hover .st-item-icon { color: var(--st-error); }
 .st-logout-title {
   font-size: 18px;
@@ -248,3 +385,27 @@
   font-weight: 500;
   color: var(--st-error);
 }
+
+/* --- Toast notification (successful branding upload etc.) --- */
+.st-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #1e293b;
+  color: #f0f0fb;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25), 0 8px 10px -6px rgba(15, 23, 42, 0.15);
+  transform: translateY(96px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  max-width: min(420px, calc(100vw - 48px));
+}
+.st-toast.show { transform: translateY(0); opacity: 1; }
+.st-toast-icon { font-size: 20px; color: #10b981; flex-shrink: 0; }
+.st-toast-msg { font-size: 14px; line-height: 20px; font-weight: 500; }

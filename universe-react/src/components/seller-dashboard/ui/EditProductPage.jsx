@@ -18,6 +18,8 @@ const CATEGORIES = [
   'Other',
 ];
 
+const MAX_IMAGES = 5;
+
 /**
  * Edit Product — same layout as Add New Product, prefilled from the product
  * record. Only the OWNER can edit: the API rejects non-owned ids with 404 and
@@ -32,6 +34,7 @@ function EditProductPage() {
 
   const [serverError, setServerError] = useState(null);
   const [imageError, setImageError] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [form, setForm] = useState({
     name: '',
     sku: '',
@@ -41,7 +44,7 @@ function EditProductPage() {
     stock: '',
     category: '',
     status: 'active',
-    imageUrl: '',
+    images: [],
   });
   const [loaded, setLoaded] = useState(false);
 
@@ -57,7 +60,12 @@ function EditProductPage() {
         stock: product.stock != null ? String(product.stock) : '',
         category: product.category ?? '',
         status: product.status ?? 'active',
-        imageUrl: product.imageUrl ?? '',
+        images:
+          product.images?.length > 0
+            ? product.images
+            : product.imageUrl
+              ? [product.imageUrl]
+              : [],
       });
       setLoaded(true);
     }
@@ -69,16 +77,56 @@ function EditProductPage() {
     setForm((f) => ({ ...f, [e.target.id]: e.target.value }));
   };
 
-  const handleImageFile = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // allow re-selecting the same file
-    if (!file) return;
+  /** Append raw image sources (data URLs from uploads, or pasted URLs). */
+  const addImages = (urls) => {
     setImageError(null);
+    setForm((f) => {
+      const clean = urls.filter((u) => u && u.trim());
+      if (!clean.length) return f;
+      const remaining = MAX_IMAGES - f.images.length;
+      return { ...f, images: [...f.images, ...clean.slice(0, remaining)] };
+    });
+  };
+
+  const handleImageFiles = async (e) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = ''; // allow re-selecting the same file(s)
+    if (!files.length) return;
+    setImageError(null);
+    const remaining = MAX_IMAGES - form.images.length;
+    if (remaining <= 0) {
+      setImageError(`You can add up to ${MAX_IMAGES} images.`);
+      return;
+    }
     try {
-      const dataUrl = await fileToCompressedDataUrl(file);
-      setForm((f) => ({ ...f, imageUrl: dataUrl }));
+      const results = await Promise.all(
+        files.slice(0, remaining).map((file) => fileToCompressedDataUrl(file)),
+      );
+      addImages(results);
     } catch (err) {
       setImageError(err.message || 'Could not process that image.');
+    }
+  };
+
+  const removeImage = (index) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  };
+
+  const handleImageUrlAdd = () => {
+    const url = imageUrl.trim();
+    if (!url) return;
+    if (form.images.length >= MAX_IMAGES) {
+      setImageError(`You can add up to ${MAX_IMAGES} images.`);
+      return;
+    }
+    addImages([url]);
+    setImageUrl('');
+  };
+
+  const handleImageUrlKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleImageUrlAdd();
     }
   };
 
@@ -103,7 +151,8 @@ function EditProductPage() {
           stock: form.stock ? parseInt(form.stock, 10) : null,
           category: form.category || undefined,
           status: form.status,
-          imageUrl: form.imageUrl || null,
+          imageUrl: form.images[0] || null,
+          images: form.images.length ? form.images : null,
         },
       },
       {
@@ -224,7 +273,7 @@ function EditProductPage() {
                     Regular Price <span className="ap-required">*</span>
                   </label>
                   <div className="ap-price-wrap">
-                    <span className="ap-prefix">$</span>
+                    <span className="ap-prefix">₦</span>
                     <input className="ap-input" id="price" type="number" min="0" step="0.01" placeholder="0.00" value={form.price} onChange={handleChange} />
                   </div>
                 </div>
@@ -233,7 +282,7 @@ function EditProductPage() {
                     Sale Price
                   </label>
                   <div className="ap-price-wrap">
-                    <span className="ap-prefix">$</span>
+                    <span className="ap-prefix">₦</span>
                     <input className="ap-input" id="salePrice" type="number" min="0" step="0.01" placeholder="0.00" value={form.salePrice} onChange={handleChange} />
                   </div>
                 </div>
@@ -264,10 +313,13 @@ function EditProductPage() {
             {/* Media Section */}
             <section className="ap-section">
               <div className="ap-media-head">
-                <h2 className="ap-section-title">Product Image</h2>
-                <span className="ap-media-hint">Upload a file or paste an image URL</span>
+                <h2 className="ap-section-title">Product Images</h2>
+                <span className="ap-media-hint">
+                  Up to {MAX_IMAGES} images · first image is the cover
+                </span>
               </div>
 
+              {/* Upload Area (multi-file, wired to a real file input, compressed in-browser) */}
               <label className="ap-upload" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
                 <div className="ap-upload-icon">
                   <span className="material-symbols-outlined">cloud_upload</span>
@@ -275,27 +327,61 @@ function EditProductPage() {
                 <p className="ap-upload-text">
                   <strong>Click to upload</strong> or drag and drop
                 </p>
-                <p className="ap-upload-hint">PNG or JPG — compressed automatically in your browser</p>
-                <input id="ap-image-input" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageFile} />
+                <p className="ap-upload-hint">
+                  PNG or JPG — compressed automatically in your browser ({form.images.length}/{MAX_IMAGES} added)
+                </p>
+                <input
+                  id="ap-image-input"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={handleImageFiles}
+                />
               </label>
               {imageError && <p className="sd-field-error" style={{ marginTop: 8 }}>{imageError}</p>}
 
-              <div className="ap-field" style={{ marginTop: 12 }}>
-                <label className="ap-label" htmlFor="imageUrl">Image URL</label>
-                <input className="ap-input" id="imageUrl" type="text" placeholder="https://…" value={form.imageUrl} onChange={handleChange} />
+              <div className="ap-image-url-row">
+                <input
+                  className="ap-input"
+                  type="text"
+                  placeholder="Paste an image URL and press Enter to add"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  onKeyDown={handleImageUrlKeyDown}
+                />
+                <button
+                  type="button"
+                  className="ap-btn-add-url"
+                  onClick={handleImageUrlAdd}
+                  disabled={!imageUrl.trim()}
+                >
+                  Add
+                </button>
               </div>
 
-              {form.imageUrl ? (
-                <div className="ap-preview">
-                  <img src={form.imageUrl} alt="Product preview" />
-                  <button
-                    type="button"
-                    className="ap-preview-remove"
-                    aria-label="Remove image"
-                    onClick={() => setForm((f) => ({ ...f, imageUrl: '' }))}
-                  >
-                    ×
-                  </button>
+              {/* Image Thumbnails (live previews, remove + cover badge) */}
+              {form.images.length > 0 ? (
+                <div className="ap-thumbs">
+                  {form.images.map((src, i) => (
+                    <div className="ap-preview" key={`${i}-${src.slice(0, 24)}`}>
+                      <img src={src} alt={`Product image ${i + 1}`} />
+                      {i === 0 && <span className="ap-cover-badge">Cover</span>}
+                      <button
+                        type="button"
+                        className="ap-preview-remove"
+                        aria-label={`Remove image ${i + 1}`}
+                        onClick={() => removeImage(i)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {form.images.length < MAX_IMAGES && (
+                    <label className="ap-thumb-add" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
+                      <span className="material-symbols-outlined">add</span>
+                    </label>
+                  )}
                 </div>
               ) : (
                 <div className="ap-thumbs">

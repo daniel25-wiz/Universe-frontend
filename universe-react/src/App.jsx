@@ -1,8 +1,10 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import HomeSkeleton from './components/skeletons/HomeSkeleton';
 import AuthSkeleton from './components/skeletons/AuthSkeleton';
 import DashboardSkeleton from './components/skeletons/DashboardSkeleton';
+import TermsSkeleton from './components/skeletons/TermsSkeleton';
+import { parseStoreSubdomain } from './lib/storeDomain';
 
 /**
  * Route-level code splitting.
@@ -41,6 +43,26 @@ const SellerProfile = lazy(() => import('./components/seller-dashboard/views/Sel
 const SellerSettings = lazy(() => import('./components/seller-dashboard/views/SellerSettings'));
 const AddProductPage = lazy(() => import('./components/seller-dashboard/ui/AddProductPage'));
 const EditProductPage = lazy(() => import('./components/seller-dashboard/ui/EditProductPage'));
+const StorefrontPage = lazy(() => import('./components/storefront/StorefrontPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+
+/**
+ * Store-domain gateway.
+ *
+ * When the app is served on a store domain (storename.localhost in dev,
+ * storename.<app-domain> in production with wildcard DNS), the visitor lands
+ * on the seller's PRIVATE MARKETPLACE instead of the platform home page.
+ * Hosts without wildcard subdomain support keep using the canonical
+ * /store/:storeSlug path form below.
+ */
+function SubdomainGateway() {
+  const location = useLocation();
+  const [storeSlug] = useState(() => parseStoreSubdomain(window.location.hostname));
+  if (storeSlug && (location.pathname === '/' || location.pathname === '')) {
+    return <Navigate to={`/store/${storeSlug}`} replace />;
+  }
+  return null;
+}
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
@@ -101,12 +123,39 @@ function App() {
         </div>
       )}
 
+      <SubdomainGateway />
       <Routes>
         <Route
           path="/"
           element={
             <Suspense fallback={<HomeSkeleton />}>
               <HomePage cartCount={cartCount} onAddToCart={handleAddToCart} />
+            </Suspense>
+          }
+        />
+        {/* Seller PRIVATE MARKETPLACE — served on their own domain
+            (storename.<app-domain>) or via this canonical path alias. */}
+        <Route
+          path="/store/:storeSlug"
+          element={
+            <Suspense
+              fallback={
+                <div
+                  style={{
+                    minHeight: '100vh',
+                    display: 'grid',
+                    placeItems: 'center',
+                    background: '#faf8ff',
+                    color: '#434655',
+                    fontFamily: 'system-ui, sans-serif',
+                    fontSize: 14,
+                  }}
+                >
+                  Opening storefront…
+                </div>
+              }
+            >
+              <StorefrontPage />
             </Suspense>
           }
         />
@@ -211,6 +260,14 @@ function App() {
             }
           />
         </Route>
+        <Route
+          path="/terms"
+          element={
+            <Suspense fallback={<TermsSkeleton />}>
+              <TermsPage />
+            </Suspense>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

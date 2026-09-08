@@ -62,6 +62,21 @@ function optionalText(value: string | undefined | null, max: number): string | u
   return trimmed.slice(0, max);
 }
 
+/**
+ * Image-field sanitizer (store logo / cover picture).
+ * Accepts http(s) URLs or compressed data URLs only, with a hard size cap —
+ * the same rules the products API applies to product images.
+ */
+function optionalImage(value: string | undefined | null): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!/^(https?:\/\/|data:image\/)/.test(trimmed)) return undefined;
+  if (trimmed.length > 500_000) return undefined;
+  return trimmed;
+}
+
 export class MockUsersApi implements UsersApi {
   async getSellerProfile(): Promise<SellerProfile> {
     logApi('GET', '/users/me/seller-profile');
@@ -102,6 +117,8 @@ export class MockUsersApi implements UsersApi {
       if (data.course !== undefined) patch.course = optionalText(data.course, 120) ?? null;
       if (data.school !== undefined) patch.school = optionalText(data.school, 120) ?? null;
       if (data.bio !== undefined) patch.bio = optionalText(data.bio, 1000) ?? null;
+      if (data.logoUrl !== undefined) patch.logoUrl = optionalImage(data.logoUrl) ?? null;
+      if (data.bannerUrl !== undefined) patch.bannerUrl = optionalImage(data.bannerUrl) ?? null;
 
       const profiles = mockDb.query('sellerProfiles', (p) => p.userId === user.id);
       if (profiles.length === 0) {
@@ -129,7 +146,12 @@ export class MockUsersApi implements UsersApi {
       const { user } = await requireSession();
       // MASS-ASSIGNMENT PROTECTION: build the patch from a strict whitelist.
       // Email, password, accountType and status can NEVER be changed here.
-      const patch: Partial<UpdateUserRequest> = {};
+      // Phone/avatar also accept null ("clear the value") even though
+      // UpdateUserRequest only exposes string — the DB row stores nulls.
+      const patch: Partial<Omit<UpdateUserRequest, 'phone' | 'avatarUrl'>> & {
+        phone?: string | null;
+        avatarUrl?: string | null;
+      } = {};
       if (data.fullName !== undefined) {
         const fullName = data.fullName.trim();
         if (fullName && (fullName.length < 2 || fullName.length > 80)) {
@@ -187,7 +209,7 @@ export class MockUsersApi implements UsersApi {
           message: 'Please choose a stronger password.',
           status: 422,
           code: 'WEAK_PASSWORD',
-          fieldErrors: { newPassword: policy.error },
+          fieldErrors: { newPassword: policy.error ?? 'Password does not meet the requirements' },
         });
       }
 

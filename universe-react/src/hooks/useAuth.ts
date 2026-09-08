@@ -18,7 +18,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/services/auth';
 import { ApiError, isAuthError } from '../api/errors';
 import { sessionStore } from '../api/session';
-import type { LoginRequest, RegisterRequest, User } from '../api/types';
+import type { GoogleLoginRequest, LoginRequest, RegisterRequest, User } from '../api/types';
 
 const CURRENT_USER_KEY = ['currentUser'];
 
@@ -87,6 +87,53 @@ export function useRegister() {
       queryClient.clear();
       queryClient.setQueryData(CURRENT_USER_KEY, user);
       navigate(user.accountType === 'seller' ? '/seller/onboarding' : '/');
+    },
+  });
+}
+
+/**
+ * Google sign-in mutation — same session/cache flow as useLogin, with two
+ * additions:
+ * - Guards against contract-violating backend responses (missing user or
+ *   tokens) so a broken backend surfaces as a normal auth error, never a
+ *   crash.
+ * - A brand-new Google user (isNewUser, first sign-in for that email) follows
+ *   the register-style redirect — sellers go to onboarding — while an
+ *   existing user follows the login-style one (return URL / dashboard).
+ *
+ * The credential is the Google ID token (JWT) obtained from the real Google
+ * Identity Services button; it is passed opaquely to authApi.googleLogin().
+ */
+export function useGoogleLogin() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from;
+
+  return useMutation<{ user: User; isNewUser: boolean }, ApiError, GoogleLoginRequest>({
+    mutationFn: async (data) => {
+      const res = await authApi.googleLogin(data);
+      if (!res || typeof res !== 'object' || !res.user?.id || !res.tokens?.accessToken) {
+        throw new ApiError({
+          message: 'Unexpected response from the authentication server.',
+          status: 0,
+          code: 'UNKNOWN',
+        });
+      }
+      return { user: res.user, isNewUser: Boolean(res.isNewUser) };
+    },
+    onSuccess: ({ user, isNewUser }) => {
+      // Clear any data cached under the previous account, then seed this one.
+      queryClient.clear();
+      queryClient.setQueryData(CURRENT_USER_KEY, user);
+      if (isNewUser) {
+        // Fresh Google signup — same destination as email registration.
+        navigate(user.accountType === 'seller' ? '/seller/onboarding' : '/');
+        return;
+      }
+      const fallback = user.accountType === 'seller' ? '/seller' : '/';
+      const returnTo = from?.pathname && from.pathname !== '/auth' ? from : null;
+      navigate(returnTo ? `${returnTo.pathname}${location.state?.from?.search ?? ''}` : fallback);
     },
   });
 }

@@ -28,6 +28,12 @@ export type {
   OrderStatus,
   Order,
   OrderQueryParams,
+  StorefrontCategory,
+  StorefrontProduct,
+  StorefrontReview,
+  StorefrontAssurance,
+  StorefrontBioBadge,
+  Storefront,
   ApiMessageResponse,
 } from '../api/types';
 

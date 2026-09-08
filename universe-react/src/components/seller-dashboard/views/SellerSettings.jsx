@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../Sidebar';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import { useCurrentUser, useLogout } from '../../../hooks/useAuth';
+import { useSellerProfile, useUpdateSellerProfile } from '../../../hooks/useUser';
 import {
   useChangePassword,
   useDeleteAccount,
   useUpdateEmail,
 } from '../../../hooks/useUser';
-import { getUserInitials } from '../../../lib/user';
+import { getUserInitials, getStoreDisplayName } from '../../../lib/user';
+import { getPrettyStoreDomain, slugifyStoreName } from '../../../lib/storeDomain';
+import { fileToCompressedDataUrl } from '../../../lib/image';
 import '../seller-dashboard.css';
 import './seller-settings.css';
 import '../ui/widgets.css';
@@ -146,8 +149,96 @@ function SellerSettings() {
   const closeMenu = () => setMenuOpen(false);
 
   const { data: user } = useCurrentUser();
+  const { data: profile } = useSellerProfile();
   const logout = useLogout();
   const deleteAccount = useDeleteAccount();
+
+  // The seller's private-marketplace domain: storename.<app-domain>.
+  const storeSlug = slugifyStoreName(getStoreDisplayName(profile?.storeName, user?.fullName));
+  const storeDomain = getPrettyStoreDomain(storeSlug);
+  const [domainCopied, setDomainCopied] = useState(false);
+  const copyStoreDomain = async () => {
+    try {
+      await navigator.clipboard.writeText(`https://${storeDomain}`);
+      setDomainCopied(true);
+      setTimeout(() => setDomainCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable — the address stays visible either way */
+    }
+  };
+
+  // ---- Store branding: logo + cover picture shown on the private marketplace.
+  const updateProfile = useUpdateSellerProfile();
+  const [branding, setBranding] = useState({ logoUrl: '', bannerUrl: '' });
+  const [brandingDirty, setBrandingDirty] = useState(false);
+  const [brandingBusy, setBrandingBusy] = useState(false);
+  const [brandingError, setBrandingError] = useState('');
+  const [brandingSaved, setBrandingSaved] = useState(false);
+
+  // Hydrate the editors once the profile loads (unless the user already edited).
+  useEffect(() => {
+    if (profile && !brandingDirty) {
+      setBranding({ logoUrl: profile.logoUrl || '', bannerUrl: profile.bannerUrl || '' });
+    }
+  }, [profile, brandingDirty]);
+
+  // Toast feedback — fires when the logo/cover upload is saved successfully.
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+  useEffect(() => () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+  }, []);
+
+  const showToast = (message, icon = 'check_circle') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, icon, show: true });
+    toastTimer.current = setTimeout(() => {
+      setToast((current) => (current ? { ...current, show: false } : current));
+    }, 3000);
+  };
+
+  const BRANDING_PARAMS = {
+    logo: { maxDim: 512, quality: 0.85 },
+    banner: { maxDim: 1200, quality: 0.8 },
+  };
+
+  const setBrandingImage = async (kind, file) => {
+    if (!file) return;
+    setBrandingError('');
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file, BRANDING_PARAMS[kind]);
+      setBranding((current) => ({ ...current, [kind === 'logo' ? 'logoUrl' : 'bannerUrl']: dataUrl }));
+      setBrandingDirty(true);
+      setBrandingSaved(false);
+    } catch (err) {
+      setBrandingError(err?.message || 'Could not process that image.');
+    }
+  };
+
+  const clearBrandingImage = (kind) => {
+    setBranding((current) => ({ ...current, [kind === 'logo' ? 'logoUrl' : 'bannerUrl']: '' }));
+    setBrandingDirty(true);
+    setBrandingSaved(false);
+  };
+
+  const saveBranding = async () => {
+    setBrandingError('');
+    setBrandingBusy(true);
+    try {
+      await updateProfile.mutateAsync({
+        logoUrl: branding.logoUrl || null,
+        bannerUrl: branding.bannerUrl || null,
+      });
+      setBrandingDirty(false);
+      setBrandingSaved(true);
+      showToast('Upload successful — your storefront branding has been updated!', 'check_circle');
+      setTimeout(() => setBrandingSaved(false), 2500);
+    } catch (err) {
+      setBrandingError(err?.message || 'Could not save your branding.');
+    } finally {
+      setBrandingBusy(false);
+    }
+  };
 
   const openModal = (key) => setActiveModal(key);
   const closeModal = () => setActiveModal(null);
@@ -204,6 +295,127 @@ function SellerSettings() {
                 </span>
               </div>
               {memberSince && <div className="st-account-since">Member since {memberSince}</div>}
+            </div>
+
+            {/* Private marketplace domain — storename.<app-domain> */}
+            <div className="st-card st-domain-card">
+              <div className="st-card-head">
+                <span className="st-card-icon">
+                  <span className="material-symbols-outlined">language</span>
+                </span>
+                <div className="st-card-heading">
+                  <p className="st-card-title">Private Marketplace Domain</p>
+                  <p className="st-card-desc">
+                    Your storefront lives at this address — it follows your store name (edit it in Seller Profile).
+                  </p>
+                </div>
+              </div>
+              <div className="st-domain-chip">
+                <span className="material-symbols-outlined">link</span>
+                {storeDomain}
+              </div>
+              <div className="st-card-actions">
+                <button type="button" className="st-btn" onClick={copyStoreDomain}>
+                  <span className="material-symbols-outlined">{domainCopied ? 'check' : 'content_copy'}</span>
+                  {domainCopied ? 'Copied' : 'Copy Link'}
+                </button>
+                <Link className="st-btn st-btn-primary" to={`/store/${storeSlug}`}>
+                  <span className="material-symbols-outlined">open_in_new</span>
+                  Open Storefront
+                </Link>
+              </div>
+            </div>
+
+            {/* Store branding — logo + cover picture for the private marketplace */}
+            <div className="st-card st-brand-card">
+              <div className="st-card-head">
+                <span className="st-card-icon">
+                  <span className="material-symbols-outlined">brush</span>
+                </span>
+                <div className="st-card-heading">
+                  <p className="st-card-title">Store Branding</p>
+                  <p className="st-card-desc">
+                    Your logo and cover picture appear on your private marketplace storefront.
+                  </p>
+                </div>
+              </div>
+              <div className="st-brand-slots">
+                {/* Logo slot */}
+                <div className="st-brand-slot">
+                  <span className="st-brand-label">Store Logo</span>
+                  <label className="st-brand-upload st-brand-upload-square" htmlFor="brand-logo-input" title="Upload logo">
+                    {branding.logoUrl ? (
+                      <img className="st-brand-preview" src={branding.logoUrl} alt="Store logo preview" />
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined">add_a_photo</span>
+                        <span className="st-brand-upload-hint">Upload logo</span>
+                      </>
+                    )}
+                  </label>
+                  <input
+                    id="brand-logo-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(event) => {
+                      setBrandingImage('logo', event.target.files?.[0]);
+                      event.target.value = '';
+                    }}
+                  />
+                  {branding.logoUrl && (
+                    <button type="button" className="st-brand-remove" onClick={() => clearBrandingImage('logo')}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {/* Cover picture slot */}
+                <div className="st-brand-slot st-brand-slot-wide">
+                  <span className="st-brand-label">Cover Picture</span>
+                  <label className="st-brand-upload st-brand-upload-wide" htmlFor="brand-cover-input" title="Upload cover picture">
+                    {branding.bannerUrl ? (
+                      <img className="st-brand-preview" src={branding.bannerUrl} alt="Cover picture preview" />
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined">panorama</span>
+                        <span className="st-brand-upload-hint">Upload cover picture</span>
+                      </>
+                    )}
+                  </label>
+                  <input
+                    id="brand-cover-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(event) => {
+                      setBrandingImage('banner', event.target.files?.[0]);
+                      event.target.value = '';
+                    }}
+                  />
+                  {branding.bannerUrl && (
+                    <button type="button" className="st-brand-remove" onClick={() => clearBrandingImage('banner')}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+              {brandingError && (
+                <p className="st-brand-error" role="alert">{brandingError}</p>
+              )}
+              <div className="st-card-foot">
+                <button
+                  type="button"
+                  className="st-btn st-btn-primary"
+                  onClick={saveBranding}
+                  disabled={brandingBusy || !brandingDirty}
+                >
+                  <span className="material-symbols-outlined">{brandingSaved ? 'check' : 'save'}</span>
+                  {brandingBusy ? 'Saving…' : brandingSaved ? 'Saved' : 'Save Branding'}
+                </button>
+                <span className="st-brand-savehint">
+                  Compressed automatically in your browser — applies to your storefront instantly.
+                </span>
+              </div>
             </div>
 
             {/* Settings List */}
@@ -292,6 +504,11 @@ function SellerSettings() {
           <p><strong>3. Payouts.</strong> Sale proceeds are held until the order is confirmed delivered, then released to your payout method.</p>
           <p><strong>4. Account security.</strong> Keep your password confidential. You are responsible for activity that happens under your account.</p>
           <p><strong>5. Termination.</strong> Accounts that repeatedly violate these terms may be suspended.</p>
+          <p style={{ color: 'var(--color-primary)' }}>
+            <Link to="/terms" style={{ fontWeight: 600, textDecoration: 'none', color: 'var(--color-primary)' }}>
+              Read the full Terms of Service →
+            </Link>
+          </p>
         </InfoModal>
       )}
 
@@ -329,6 +546,12 @@ function SellerSettings() {
           )}
         </div>
       </ConfirmDialog>
+
+      {/* Toast — successful branding upload feedback */}
+      <div className={toast?.show ? 'st-toast show' : 'st-toast'} role="status" aria-live="polite">
+        <span className="material-symbols-outlined st-toast-icon">{toast?.icon ?? 'check_circle'}</span>
+        <span className="st-toast-msg">{toast?.message ?? ''}</span>
+      </div>
     </>
   );
 }

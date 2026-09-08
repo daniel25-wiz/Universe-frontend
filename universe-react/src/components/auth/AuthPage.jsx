@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import AuthBackground from './AuthBackground';
 import LoginForm from './LoginForm';
 import AccountSelection from './AccountSelection';
@@ -226,7 +226,7 @@ const AuthPage = () => {
           padding: '0 24px',
         }}>
           By continuing, you agree to our{' '}
-          <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</a>
+          <Link to="/terms" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</Link>
           {' '}and{' '}
           <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</a>
         </p>

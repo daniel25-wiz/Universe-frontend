@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '../../hooks/useAuth';
 import { useSellerProfile, useUpdateCurrentUser, useUpdateSellerProfile } from '../../hooks/useUser';
+import { getPrettyStoreDomain, slugifyStoreName } from '../../lib/storeDomain';
 import './seller-onboarding.css';
 
 const StoreIcon = () => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18M5 10v10h14V10M4 10l1.5-6h13L20 10M8 10v3m4-3v3m4-3v3" /></svg>;
@@ -101,7 +102,12 @@ function SellerOnboarding() {
       </header>
 
       {step === 3 ? (
-        <Milestones onContinue={() => navigate('/seller')} />
+        <Milestones
+          onContinue={() => navigate('/seller')}
+          storeSlug={slugifyStoreName(
+            fields.storeName || profile?.storeName || user?.fullName || '',
+          )}
+        />
       ) : (
         <main className="setup-shell">
           <aside className="setup-steps" aria-label="Onboarding progress">
@@ -174,14 +180,80 @@ function GiftIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v4H3zM5 14v7h14v-7M12 10v11M4 7h16v3H4zM12 7H8.5a2.5 2.5 0 1 1 2.2-3.7L12 7Zm0 0h3.5a2.5 2.5 0 1 0-2.2-3.7L12 7Z" /></svg>;
 }
 
-function Milestones({ onContinue }) {
+function Milestones({ onContinue, storeSlug }) {
+  const [copied, setCopied] = useState(false);
+  const domain = getPrettyStoreDomain(storeSlug);
+
+  const copyDomain = async () => {
+    try {
+      await navigator.clipboard.writeText(`https://${domain}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable — the link stays visible either way */
+    }
+  };
+
   const items = [
     { icon: <StoreIcon />, title: 'Build Your Online Store', description: 'Set up and customize your online store in minutes.', action: 'Continue Setup', active: true },
-    { icon: <GlobeIcon />, title: 'Get Your Own Domain', description: 'Find and secure the perfect domain name for your brand.', action: 'Connect Domain' },
+    {
+      icon: <GlobeIcon />,
+      title: 'Get Your Own Domain',
+      description: storeSlug
+        ? `Your private marketplace is live at ${domain}`
+        : 'Find and secure the perfect domain name for your brand.',
+      action: storeSlug ? 'Open Storefront' : 'Connect Domain',
+      isDomain: Boolean(storeSlug),
+    },
     { icon: <ChartIcon />, title: 'Sale Analytics', description: 'Track your sales, customers and performance in real-time.', action: 'Configure' },
     { icon: <BoxIcon />, title: 'Post to Product', description: 'Add, manage and organize your products with ease.', action: 'Add Items' },
   ];
-  return <main className="milestones-page"><div className="milestones-heading"><h1>Getting Started with UNIVERSE</h1><p>Complete these foundational milestones to kickstart your e-commerce journey and start generating revenue today.</p></div><section className="milestones-card"><div className="milestones-title"><div><span className="eyebrow">STARTERS</span><h2>Launch Checklist</h2></div><span>Step 3 of 4 completed</span></div><div className="milestone-list">{items.map((item) => <div className={`milestone${item.active ? ' active' : ''}`} key={item.title}><span className="milestone-node" /><div className="milestone-content"><div className="milestone-info"><span className="milestone-icon">{item.icon}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></div><button type="button" onClick={item.active ? onContinue : undefined}>{item.action}</button></div></div>)}</div><div className="milestone-promos"><div><span><GiftIcon /></span><strong>Start 1 Month Free Trial</strong><small>Explore all features free for 1 month.</small></div><div><span><BoxIcon /></span><strong>Pay For Subscription Plan</strong><small>Choose the best plan for your business.</small></div></div></section></main>;
+
+  return (
+    <main className="milestones-page">
+      <div className="milestones-heading">
+        <h1>Getting Started with UNIVERSE</h1>
+        <p>Complete these foundational milestones to kickstart your e-commerce journey and start generating revenue today.</p>
+      </div>
+      <section className="milestones-card">
+        <div className="milestones-title">
+          <div><span className="eyebrow">STARTERS</span><h2>Launch Checklist</h2></div>
+          <span>Step 3 of 4 completed</span>
+        </div>
+        <div className="milestone-list">
+          {items.map((item) => (
+            <div className={`milestone${item.active ? ' active' : ''}`} key={item.title}>
+              <span className="milestone-node" />
+              <div className="milestone-content">
+                <div className="milestone-info">
+                  <span className="milestone-icon">{item.icon}</span>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                    {item.isDomain && (
+                      <div className="milestone-domain">
+                        <span className="milestone-domain-url">{domain}</span>
+                        <button type="button" className="milestone-domain-copy" onClick={copyDomain}>
+                          {copied ? 'Copied!' : 'Copy Link'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {item.isDomain ? (
+                  <Link className="milestone-domain-open" to={`/store/${storeSlug}`} onClick={onContinue}>
+                    {item.action}
+                  </Link>
+                ) : (
+                  <button type="button" onClick={item.active ? onContinue : undefined}>{item.action}</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default SellerOnboarding;

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Button from '../ui/Button';
 import ArrowIcon from '../ui/ArrowIcon';
-import { useLogin } from '../../hooks/useAuth';
+import GoogleSignInButton from './GoogleSignInButton';
+import { useLogin, useGoogleLogin } from '../../hooks/useAuth';
 import { ApiError } from '../../api/errors';
 
 const LoginForm = ({ onSwitchToAccountSelection }) => {
@@ -18,7 +19,11 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
   const formRef = useRef(null);
 
   const loginMutation = useLogin();
+  const googleLogin = useGoogleLogin();
   const isLoading = loginMutation.isPending;
+  // Busy while EITHER auth flow runs — the Google flow writes the same
+  // session, so both must block each other to prevent double sign-in races.
+  const isBusy = isLoading || googleLogin.isPending;
 
   // Focus management for accessibility
   useEffect(() => {
@@ -69,6 +74,34 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
   const handleForgotPassword = (e) => {
     e.preventDefault();
     console.log('Forgot password clicked');
+  };
+
+  // REAL Google flow: Google Identity Services hands back a signed ID token
+  // (JWT) after the user picks an account in Google's own chooser. It runs
+  // the SAME auth path as email/password login — useGoogleLogin ->
+  // authApi.googleLogin() -> POST /auth/google -> shared session + cache.
+  const handleGoogleCredential = (credential) => {
+    if (isBusy) return;
+    setServerError(null);
+    setErrors({});
+    googleLogin.mutate(
+      { credential, rememberMe },
+      {
+        onError: (error) => {
+          if (error instanceof ApiError && error.fieldErrors && Object.keys(error.fieldErrors).length > 0) {
+            setServerError(String(Object.values(error.fieldErrors)[0]));
+          } else {
+            setServerError(error instanceof ApiError ? error.message : 'Google sign-in failed. Please try again.');
+          }
+        },
+      },
+    );
+  };
+
+  // GIS setup/moment failures (script blocked, origin not authorized, popup
+  // closed, ...) surface through the same server-error banner.
+  const handleGoogleError = (message) => {
+    setServerError(message);
   };
 
   const inputStyle = (fieldName) => ({
@@ -139,7 +172,7 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
           onChange={(e) => setEmail(e.target.value)}
           onFocus={() => setFocusedField('email')}
           onBlur={() => setFocusedField(null)}
-          disabled={isLoading}
+          disabled={isBusy}
           style={{
             ...inputStyle('email'),
             paddingLeft: '52px',
@@ -196,7 +229,7 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
           onChange={(e) => setPassword(e.target.value)}
           onFocus={() => setFocusedField('password')}
           onBlur={() => setFocusedField(null)}
-          disabled={isLoading}
+          disabled={isBusy}
           style={{
             ...inputStyle('password'),
             paddingLeft: '52px',
@@ -261,7 +294,7 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isLoading}
+            disabled={isBusy}
             style={{
               width: '18px',
               height: '18px',
@@ -305,7 +338,7 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
       <Button
         type="submit"
         className="btn-primary auth-submit-btn"
-        disabled={isLoading}
+        disabled={isBusy}
         style={{ 
           width: '100%', 
           padding: '16px 24px', 
@@ -342,38 +375,16 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
       </div>
 
       {/* Social Sign In Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <button
-          type="button"
-          className="auth-social-btn"
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Continue with Google — real Google Identity Services button. The
+            returned ID token runs the SAME auth path as email/password
+            login. */}
+        <GoogleSignInButton
+          onCredential={handleGoogleCredential}
+          onError={handleGoogleError}
+          loading={googleLogin.isPending}
           disabled={isLoading}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            padding: '14px 20px',
-            border: '1.5px solid var(--color-gray-200)',
-            borderRadius: '14px',
-            background: 'var(--color-white)',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            fontWeight: 500,
-            fontSize: '0.95rem',
-            color: 'var(--color-gray-700)',
-            opacity: isLoading ? 0.6 : 1,
-          }}
-          onMouseOver={(e) => !isLoading && (e.target.style.borderColor = 'var(--color-primary)', e.target.style.backgroundColor = 'var(--color-primary-light)', e.target.style.transform = 'translateY(-2px)', e.target.style.boxShadow = '0 8px 24px -4px rgba(37, 99, 235, 0.15)')}
-          onMouseOut={(e) => !isLoading && (e.target.style.borderColor = 'var(--color-gray-200)', e.target.style.backgroundColor = 'var(--color-white)', e.target.style.transform = 'translateY(0)', e.target.style.boxShadow = 'none')}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Google
-        </button>
+        />
         <button
           type="button"
           className="auth-social-btn"

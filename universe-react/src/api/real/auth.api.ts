@@ -6,6 +6,7 @@
  */
 import type {
   AuthResponse,
+  GoogleLoginRequest,
   LoginRequest,
   RefreshTokenResponse,
   RegisterRequest,
@@ -24,6 +25,18 @@ export class RealAuthApi implements AuthApi {
 
   async login(data: LoginRequest): Promise<AuthResponse> {
     const res = await httpClient.post<AuthResponse>('/auth/login', data, true);
+    sessionStore.setTokens(res.tokens);
+    return res;
+  }
+
+  /**
+   * Real Google sign-in: POST /auth/google with the credential obtained from
+   * Google Identity Services. TODAY that credential is the mock account
+   * object (the real backend is not ready); when it lands, the exact same
+   * call carries the verified Google ID token (JWT) string instead.
+   */
+  async googleLogin(data: GoogleLoginRequest): Promise<AuthResponse> {
+    const res = await httpClient.post<AuthResponse>('/auth/google', data, true);
     sessionStore.setTokens(res.tokens);
     return res;
   }

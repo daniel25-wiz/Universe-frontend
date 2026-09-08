@@ -7,7 +7,7 @@ import './my-marketplace.css';
 import '../ui/widgets.css';
 import { useCurrentUser } from '../../../hooks/useAuth';
 import { useDeleteProduct, useProducts, useUpdateProduct } from '../../../hooks/useProducts';
-import { getUserInitials, getFirstName } from '../../../lib/user';
+import { getUserInitials, getFirstName, formatMoney } from '../../../lib/user';
 
 const FILTERS = [
   { key: 'all', label: 'All products' },
@@ -102,7 +102,7 @@ function WorkshopCard({ product, currentUser, onEdit, onDelete, onToggleStatus, 
         <h3 className="ws-card-title">{product.name}</h3>
         <p className="ws-card-desc">{product.description}</p>
         <div className="ws-card-footer">
-          <span className="ws-price">${product.salePrice ?? product.price}</span>
+          <span className="ws-price">{formatMoney(product.salePrice ?? product.price)}</span>
           <span className="ws-stock">Stock: {product.stock ?? '--'}</span>
         </div>
       </div>

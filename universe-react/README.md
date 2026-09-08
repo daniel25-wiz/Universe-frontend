@@ -69,6 +69,7 @@ src/
 |   |   +-- mockDatabase.ts    <- centralized localStorage-backed DB
 |   |   +-- mockLatency.ts     <- artificial network delay
 |   |   +-- seed.ts            <- demo users, products, orders, profiles
+|   |   +-- googleIdToken.ts   <- Google ID token decode + claim checks (mock)
 |   |   +-- auth.mock.ts       <- MockAuthApi
 |   |   +-- products.mock.ts   <- MockProductsApi
 |   |   +-- users.mock.ts      <- MockUsersApi
@@ -78,7 +79,7 @@ src/
 |       +-- products.api.ts    <- RealProductsApi
 |       +-- users.api.ts       <- RealUsersApi
 +-- hooks/
-|   +-- useAuth.ts             <- useLogin, useRegister, useLogout, useCurrentUser
+|   +-- useAuth.ts             <- useLogin, useRegister, useGoogleLogin, useLogout, useCurrentUser
 |   +-- useProducts.ts         <- useProducts, useProduct, useCreateProduct, ...
 |   +-- useUser.ts             <- useSellerProfile, useUpdateSellerProfile, ...
 +-- types/index.ts             <- re-exports of API types
@@ -92,6 +93,7 @@ See [docs/API_CONTRACT.md](docs/API_CONTRACT.md) for the full endpoint spec.
 |--------|----------|------|---------|
 | POST | /auth/register | No | Create account |
 | POST | /auth/login | No | Authenticate |
+| POST | /auth/google | No | Google sign-in/sign-up (Google ID token) |
 | POST | /auth/logout | Yes | Invalidate session |
 | GET | /auth/me | Yes | Current user |
 | POST | /auth/refresh | No | Refresh tokens |
@@ -109,3 +111,27 @@ See [docs/API_CONTRACT.md](docs/API_CONTRACT.md) for the full endpoint spec.
 1. Set `VITE_API_MODE=real` and `VITE_API_URL=...` in `.env`.
 2. Implement the endpoints in [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
 3. Restart the dev server. **No React code changes needed.**
+
+## Real Google sign-in setup
+
+"Continue with Google" uses **Google Identity Services** with the real Google
+account chooser. It needs a Google OAuth client ID (free; no secrets live in
+the frontend):
+
+1. Google Cloud Console → **APIs & Services → Credentials → Create
+   credentials → OAuth client ID → Web application**.
+2. Add every origin the app runs on to **Authorized JavaScript origins** —
+   e.g. `http://localhost:5173` and your dev-tunnel URL
+   (`https://<your-tunnel>.devtunnels.ms`).
+3. Put the client ID in `.env` and restart the dev server:
+
+   ```env
+   VITE_GOOGLE_CLIENT_ID=1234567890-abcdefg.apps.googleusercontent.com
+   ```
+
+The login and signup pages then render Google's official button. The signed
+Google ID token is sent to `POST /auth/google` — the mock backend validates
+its claims (expiry / audience / issuer / verified email); the real backend
+additionally verifies the signature server-side. Without
+`VITE_GOOGLE_CLIENT_ID` the button explains these setup steps instead of
+signing in.

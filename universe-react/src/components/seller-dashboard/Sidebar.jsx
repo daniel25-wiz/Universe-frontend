@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { prefetchPropsForPath } from '../../lib/prefetch';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
-import { getUserInitials } from '../../lib/user';
+import { useSellerProfile } from '../../hooks/useUser';
+import { getUserInitials, getStoreDisplayName } from '../../lib/user';
+import { slugifyStoreName } from '../../lib/storeDomain';
 import './ui/widgets.css';
 
 const NAV_ITEMS = [
@@ -18,12 +20,23 @@ const NAV_ITEMS = [
  * my_workshop_blue.html and seller_profile.html.
  *
  * Shows the signed-in user's identity (avatar initials, name, email) and a
- * fully working logout action.
+ * fully working logout action. Also links "My Storefront" — the seller's
+ * private marketplace on their own domain (storename.<app-domain>).
  */
 function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = false, onMobileClose }) {
   const { data: user } = useCurrentUser();
+  const { data: profile } = useSellerProfile();
   const logout = useLogout();
   const isProfile = variant === 'profile';
+
+  const storeSlug = slugifyStoreName(getStoreDisplayName(profile?.storeName, user?.fullName));
+  const navItems = [...NAV_ITEMS];
+  navItems.splice(3, 0, {
+    key: 'mystorefront',
+    label: 'My Storefront',
+    icon: 'language',
+    to: `/store/${storeSlug}`,
+  });
 
   const handleLogout = () => {
     logout.mutate();
@@ -37,7 +50,7 @@ function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = f
       </div>
 
       <div className={isProfile ? 'sd-nav sd-nav-tight' : 'sd-nav'}>
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <Link
             key={item.key}
             to={item.to}

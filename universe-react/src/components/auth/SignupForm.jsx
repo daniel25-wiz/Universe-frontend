@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRegister } from '../../hooks/useAuth';
+import GoogleSignInButton from './GoogleSignInButton';
+import { useRegister, useGoogleLogin } from '../../hooks/useAuth';
 import { ApiError } from '../../api/errors';
 
 const AccountTypeIcon = ({ buyer }) => (
@@ -24,7 +25,11 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
 
   const fullNameRef = useRef(null);
   const registerMutation = useRegister();
+  const googleLogin = useGoogleLogin();
   const isSubmitting = registerMutation.isPending;
+  // Busy while EITHER auth flow runs — the Google flow writes the same
+  // session, so both must block each other to prevent double sign-in races.
+  const isBusy = isSubmitting || googleLogin.isPending;
 
   useEffect(() => {
     fullNameRef.current?.focus();
@@ -88,6 +93,34 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
         },
       },
     );
+  };
+
+  // REAL Google flow: Google Identity Services hands back a signed ID token
+  // (JWT) after the user picks an account in Google's own chooser. It runs
+  // the SAME auth path as email registration — useGoogleLogin ->
+  // authApi.googleLogin() -> POST /auth/google -> shared session + cache.
+  const handleGoogleCredential = (credential) => {
+    if (isBusy) return;
+    setServerError(null);
+    setErrors({});
+    googleLogin.mutate(
+      { credential },
+      {
+        onError: (error) => {
+          if (error instanceof ApiError && error.fieldErrors && Object.keys(error.fieldErrors).length > 0) {
+            setServerError(String(Object.values(error.fieldErrors)[0]));
+          } else {
+            setServerError(error instanceof ApiError ? error.message : 'Google sign-up failed. Please try again.');
+          }
+        },
+      },
+    );
+  };
+
+  // GIS setup/moment failures (script blocked, origin not authorized, popup
+  // closed, ...) surface through the same server-error banner.
+  const handleGoogleError = (message) => {
+    setServerError(message);
   };
 
   const inputStyle = (fieldName) => ({
@@ -248,7 +281,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
             value={fullName}
             placeholder="John Doe"
             autoComplete="name"
-            disabled={isSubmitting}
+            disabled={isBusy}
             onChange={(e) => setFullName(e.target.value)}
             onFocus={() => setFocusedField('fullName')}
             onBlur={() => setFocusedField(null)}
@@ -273,7 +306,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
             value={email}
             placeholder="you@example.com"
             autoComplete="email"
-            disabled={isSubmitting}
+            disabled={isBusy}
             onChange={(e) => setEmail(e.target.value)}
             onFocus={() => setFocusedField('email')}
             onBlur={() => setFocusedField(null)}
@@ -298,7 +331,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
             value={password}
             placeholder="At least 8 characters"
             autoComplete="new-password"
-            disabled={isSubmitting}
+            disabled={isBusy}
             onChange={(e) => setPassword(e.target.value)}
             onFocus={() => setFocusedField('password')}
             onBlur={() => setFocusedField(null)}
@@ -340,7 +373,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
             value={confirmPassword}
             placeholder="Re-enter your password"
             autoComplete="new-password"
-            disabled={isSubmitting}
+            disabled={isBusy}
             onChange={(e) => setConfirmPassword(e.target.value)}
             onFocus={() => setFocusedField('confirmPassword')}
             onBlur={() => setFocusedField(null)}
@@ -375,7 +408,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
           <input
             type="checkbox"
             checked={agreeToTerms}
-            disabled={isSubmitting}
+            disabled={isBusy}
             onChange={(e) => setAgreeToTerms(e.target.checked)}
             style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: 'var(--color-primary)', cursor: 'pointer', flexShrink: 0 }}
           />
@@ -392,7 +425,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
       {/* Submit */}
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isBusy}
         style={{
           width: '100%',
           padding: '16px',
@@ -437,6 +470,22 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
           </>
         )}
       </button>
+
+      {/* Divider + Continue with Google — real Google Identity Services
+          button. The returned ID token runs the SAME auth path as email
+          registration. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+        <div style={{ flex: 1, height: '1px', background: 'var(--color-gray-200)' }} />
+        <span style={{ color: 'var(--color-gray-400)', fontSize: '0.8rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>OR</span>
+        <div style={{ flex: 1, height: '1px', background: 'var(--color-gray-200)' }} />
+      </div>
+
+      <GoogleSignInButton
+        onCredential={handleGoogleCredential}
+        onError={handleGoogleError}
+        loading={googleLogin.isPending}
+        disabled={isSubmitting}
+      />
 
       {/* Sign in link */}
       <div style={{ textAlign: 'center', marginTop: '4px', paddingTop: '16px', borderTop: '1px solid var(--color-gray-100)' }}>

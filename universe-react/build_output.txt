@@ -1,0 +1,61 @@
+[36mvite v8.1.5 [32mbuilding client environment for production...[36m[39m
+[2Ktransforming...✓ 154 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   10.37 kB │ gzip:  2.27 kB
+dist/assets/MyMarketplace-BR4tuz9L.css             3.94 kB │ gzip:  1.10 kB
+dist/assets/SalesAnalytics-D5preYtB.css            4.11 kB │ gzip:  1.04 kB
+dist/assets/add-product-Mzeu1BAq.css               5.25 kB │ gzip:  1.30 kB
+dist/assets/widgets-Bv50Z0wd.css                   6.53 kB │ gzip:  1.87 kB
+dist/assets/SellerProfile-6I0jsf7D.css             6.63 kB │ gzip:  1.54 kB
+dist/assets/SellerSettings-goAgHRJn.css            7.85 kB │ gzip:  1.85 kB
+dist/assets/seller-dashboard-CWYBUVEH.css          9.58 kB │ gzip:  2.44 kB
+dist/assets/SellerOnboarding-2Yf2khfw.css          9.74 kB │ gzip:  2.56 kB
+dist/assets/PublicMarketplace-COMs_xbt.css        11.08 kB │ gzip:  2.36 kB
+dist/assets/DashboardOverview-BJl98NRu.css        11.26 kB │ gzip:  2.41 kB
+dist/assets/TermsPage-BiFopcbK.css                15.94 kB │ gzip:  3.28 kB
+dist/assets/StorefrontPage-DUmYT-2v.css           31.62 kB │ gzip:  5.43 kB
+dist/assets/index-CmhduERx.css                    42.62 kB │ gzip:  7.86 kB
+dist/assets/SellerDashboard-BhJuEig3.js            0.20 kB │ gzip:  0.17 kB
+dist/assets/DashboardView-Ds4nYcI-.js              0.30 kB │ gzip:  0.23 kB
+dist/assets/useIntersectionObserver-B8SIb_A_.js    0.37 kB │ gzip:  0.25 kB
+dist/assets/RequireAuth-BJ24xFSn.js                0.55 kB │ gzip:  0.34 kB
+dist/assets/rolldown-runtime-Bh1tDfsg.js           0.56 kB │ gzip:  0.36 kB
+dist/assets/sessionGuard-DRD3Sf94.js               0.71 kB │ gzip:  0.45 kB
+dist/assets/CTA-Bbi01MLo.js                        0.81 kB │ gzip:  0.48 kB
+dist/assets/user-CspYYlRx.js                       0.87 kB │ gzip:  0.46 kB
+dist/assets/ArrowIcon-DkPdOJ7k.js                  0.95 kB │ gzip:  0.58 kB
+dist/assets/image-DVVa3KMy.js                      1.15 kB │ gzip:  0.61 kB
+dist/assets/ConfirmDialog-DOHbEKlp.js              1.57 kB │ gzip:  0.77 kB
+dist/assets/security-Ck6oZfsK.js                   1.97 kB │ gzip:  0.99 kB
+dist/assets/HomeSections-Dr25gFrf.js               2.49 kB │ gzip:  0.93 kB
+dist/assets/Testimonials-C2EQ6_Hr.js               2.99 kB │ gzip:  1.20 kB
+dist/assets/Features-Jg9Y4TDO.js                   3.12 kB │ gzip:  1.24 kB
+dist/assets/Sidebar-KW1GjAlD.js                    3.32 kB │ gzip:  1.18 kB
+dist/assets/FeaturesShowcase-BpeyrgEH.js           3.41 kB │ gzip:  1.07 kB
+dist/assets/prefetch-DR5X2LG2.js                   3.46 kB │ gzip:  1.28 kB
+dist/assets/ProductSection-CwMQ0lNC.js             3.94 kB │ gzip:  1.45 kB
+dist/assets/ConnectionSection-hNkOeLOi.js          4.04 kB │ gzip:  1.04 kB
+dist/assets/Footer-CVkVK1-i.js                     4.27 kB │ gzip:  1.22 kB
+dist/assets/SalesAnalytics-BH9vO8un.js             4.80 kB │ gzip:  1.40 kB
+dist/assets/useProducts-CPWVNkep.js                5.23 kB │ gzip:  1.98 kB
+dist/assets/useUser-BFEVav-Y.js                    5.75 kB │ gzip:  1.91 kB
+dist/assets/useAuth-D2Q9Djvw.js                    5.82 kB │ gzip:  2.14 kB
+dist/assets/PublicMarketplace-DFIWeEdJ.js          7.23 kB │ gzip:  2.14 kB
+dist/assets/DashboardSection-Sya9Vv8h.js           7.71 kB │ gzip:  2.45 kB
+dist/assets/AddProductPage--0nhUxc2.js             7.84 kB │ gzip:  2.17 kB
+dist/assets/MyMarketplace-CzM8K97a.js              8.28 kB │ gzip:  2.55 kB
+dist/assets/EditProductPage-nRlMwH3N.js            8.96 kB │ gzip:  2.55 kB
+dist/assets/client-BD8LybUo.js                     9.37 kB │ gzip:  4.27 kB
+dist/assets/HomePage-BiPha4ho.js                   9.52 kB │ gzip:  2.56 kB
+dist/assets/SellerProfile-DP6wEhYd.js              9.91 kB │ gzip:  2.99 kB
+dist/assets/SellerOnboarding-DpAhhwfk.js          10.34 kB │ gzip:  3.41 kB
+dist/assets/DashboardOverview-DJof8Ndx.js         10.73 kB │ gzip:  3.23 kB
+dist/assets/index-qr7lw-qj.js                     14.04 kB │ gzip:  4.12 kB
+dist/assets/TermsPage-iNfspJPj.js                 18.74 kB │ gzip:  6.14 kB
+dist/assets/SellerSettings-CBrYeKvx.js            20.79 kB │ gzip:  5.72 kB
+dist/assets/StorefrontPage-DQ5CjxQ5.js            33.67 kB │ gzip: 10.74 kB
+dist/assets/AuthPage-BuNHsqzw.js                  41.18 kB │ gzip:  8.39 kB
+dist/assets/react-vendor-Tp3t3X98.js             267.56 kB │ gzip: 84.16 kB
+
+[32m✓ built in 1.14s[39m

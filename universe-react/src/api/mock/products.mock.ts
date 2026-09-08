@@ -117,9 +117,41 @@ function sanitizeProductInput(
       errors.imageUrl = 'Image is too large — use one under 5MB';
     } else out.imageUrl = url || null;
   }
+  if (data.images !== undefined) {
+    if (data.images === null) {
+      out.images = null;
+    } else if (!Array.isArray(data.images)) {
+      errors.images = 'Images must be a list of URLs';
+    } else if (data.images.length > 5) {
+      errors.images = 'You can add up to 5 images';
+    } else {
+      const images = data.images.map((u) => u?.trim() || null);
+      for (const url of images) {
+        if (url && !/^(https?:\/\/|data:image\/)/.test(url)) {
+          errors.images = 'Each image must be an http(s) URL or an uploaded image';
+          break;
+        }
+        if (url && url.length > 500_000) {
+          errors.images = 'An image is too large — use files under 5MB';
+          break;
+        }
+      }
+      if (!errors.images) {
+        const cleanImages = images.filter((u): u is string => Boolean(u));
+        out.images = cleanImages.length ? cleanImages : null;
+      }
+    }
+  }
   if (data.imageAlt !== undefined) {
-    checkText(data.imageAlt, 'imageAlt', 200, errors);
+    checkText(data.imageAlt ?? undefined, 'imageAlt', 200, errors);
     out.imageAlt = data.imageAlt?.trim() || null;
+  }
+
+  // Keep the denormalized cover in sync with the gallery: when the caller
+  // provides `images` (but not an explicit `imageUrl`), the first image
+  // becomes the cover.
+  if (Array.isArray(out.images) && out.images.length > 0 && out.imageUrl === undefined) {
+    out.imageUrl = out.images[0];
   }
 
   if (Object.keys(errors).length > 0) failField(errors);

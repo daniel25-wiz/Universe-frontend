@@ -4,7 +4,7 @@ import '../seller-dashboard.css';
 import './sales-analytics.css';
 
 const STATS = [
-  { label: 'Total Revenue', value: '$12,480', trend: '+12.5%', trendUp: true, icon: 'payments' },
+  { label: 'Total Revenue', value: '₦19,344,000', trend: '+12.5%', trendUp: true, icon: 'payments' },
   { label: 'Orders', value: '1,248', trend: '+8.2%', trendUp: true, icon: 'shopping_bag' },
   { label: 'Products Sold', value: '2,310', trend: '+15.1%', trendUp: true, icon: 'inventory_2' },
   { label: 'Refunds', value: '24', trend: '-3.4%', trendUp: true, icon: 'assignment_return' },
@@ -21,10 +21,10 @@ const CHART = [
 ];
 
 const ORDERS = [
-  { initials: 'JD', name: 'Jane Doe', sub: '#GS-2041 · Just now', amount: '$124.00' },
-  { initials: 'SM', name: 'Samuel Okafor', sub: '#GS-2040 · 12 min ago', amount: '$89.50' },
-  { initials: 'AK', name: 'Aisha Bello', sub: '#GS-2039 · 1 hr ago', amount: '$349.00' },
-  { initials: 'TT', name: 'Tom Adeyemi', sub: '#GS-2038 · 2 hrs ago', amount: '$45.00' },
+  { initials: 'JD', name: 'Jane Doe', sub: '#GS-2041 · Just now', amount: '₦192,200' },
+  { initials: 'SM', name: 'Samuel Okafor', sub: '#GS-2040 · 12 min ago', amount: '₦138,725' },
+  { initials: 'AK', name: 'Aisha Bello', sub: '#GS-2039 · 1 hr ago', amount: '₦540,950' },
+  { initials: 'TT', name: 'Tom Adeyemi', sub: '#GS-2038 · 2 hrs ago', amount: '₦69,750' },
 ];
 
 /**

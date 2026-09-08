@@ -9,8 +9,9 @@
  *   VITE_API_MODE=mock   -> all services resolve to the Mock*Api implementations
  *   VITE_API_MODE=real   -> all services resolve to the HTTP-based implementations
  *
- *   VITE_API_URL        -> base URL used only by the real HTTP client
- *   VITE_MOCK_LATENCY   -> "off" disables the artificial network delay
+ *   VITE_API_URL           -> base URL used only by the real HTTP client
+ *   VITE_MOCK_LATENCY      -> "off" disables the artificial network delay
+ *   VITE_GOOGLE_CLIENT_ID  -> Google OAuth client id (real Google sign-in)
  */
 
 export type ApiMode = 'mock' | 'real';
@@ -39,12 +40,19 @@ export interface ApiConfig {
   mode: ApiMode;
   baseUrl: string;
   mockLatency: MockLatencyOptions;
+  /**
+   * Google OAuth client id (VITE_GOOGLE_CLIENT_ID). Empty string disables
+   * real Google sign-in — the "Continue with Google" button then reports the
+   * setup steps through the normal error UI instead of faking an account.
+   */
+  googleClientId: string;
 }
 
 export const apiConfig: ApiConfig = {
   mode: parseMode(import.meta.env.VITE_API_MODE as string | undefined),
   baseUrl: (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/+$/, '') ?? 'http://localhost:8000/api',
   mockLatency: parseMockLatency(import.meta.env.VITE_MOCK_LATENCY as string | undefined),
+  googleClientId: (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined)?.trim() ?? '',
 };
 
 /** True when the real HTTP client stack is active. */

@@ -24,7 +24,7 @@ export interface HttpClientOptions {
 }
 
 /** Endpoints whose own 401s must NOT trigger a refresh attempt. */
-const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/refresh'];
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/google', '/auth/refresh'];
 
 /**
  * Single-flight refresh: concurrent 401s share one refresh request so parallel

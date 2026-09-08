@@ -3,7 +3,7 @@ import '../seller-dashboard.css';
 import './public-marketplace.css';
 import { useProducts } from '../../../hooks/useProducts';
 import { useCurrentUser } from '../../../hooks/useAuth';
-import { getUserInitials, getFirstName } from '../../../lib/user';
+import { getUserInitials, getFirstName, formatMoney } from '../../../lib/user';
 
 const CATEGORIES = [
   { name: 'Supermarket', icon: 'storefront' },
@@ -182,7 +182,7 @@ function PublicMarketplace() {
                         <span className="material-symbols-outlined">star</span>
                         <span>{product.rating ?? '0.0'}</span>
                       </div>
-                      <div className="mp-price">${product.salePrice ?? product.price}</div>
+                      <div className="mp-price">{formatMoney(product.salePrice ?? product.price)}</div>
                     </div>
                   </div>
                 ))

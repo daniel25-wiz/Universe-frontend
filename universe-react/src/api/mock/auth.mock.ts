@@ -15,6 +15,7 @@
  */
 import type {
   AuthResponse,
+  GoogleLoginRequest,
   LoginRequest,
   RefreshTokenResponse,
   RegisterRequest,
@@ -24,6 +25,7 @@ import type { AuthApi } from '../services/auth';
 import { mockDb, generateId, nowIso } from './mockDatabase';
 import type { MockSession, StoredUser } from './mockDatabase';
 import { withMockLatency } from './mockLatency';
+import { assertValidGoogleClaims, decodeGoogleIdToken } from './googleIdToken';
 import { ApiError } from '../errors';
 import { logApi } from '../logger';
 import { sessionStore, type TokenPersistMode } from '../session';
@@ -119,7 +121,7 @@ export class MockAuthApi implements AuthApi {
       if (!password) fieldErrors.password = 'Password is required';
       else {
         const policy = validatePasswordStrength(password);
-        if (!policy.ok) fieldErrors.password = policy.error;
+        if (!policy.ok) fieldErrors.password = policy.error ?? 'Password does not meet the requirements';
       }
       if (!data.accountType) fieldErrors.accountType = 'Account type is required';
 
@@ -208,6 +210,107 @@ export class MockAuthApi implements AuthApi {
       // rememberMe=false scopes tokens to sessionStorage (dies with the tab).
       const tokens = await issueSession(user.id, data.rememberMe ?? true);
       return { user: toPublicUser(user), tokens };
+    })());
+  }
+
+  /**
+   * Google sign-in/sign-up — POST /auth/google.
+   *
+   * Receives the REAL Google ID token (JWT) produced by Google Identity
+   * Services. The real backend verifies its signature against Google's
+   * public keys; the mock decodes the payload and validates the standard
+   * claims (expiry, audience, issuer, verified email) exactly as
+   * google-auth-library would after verification — see googleIdToken.ts.
+   *
+   * - Email already registered → the EXISTING user is authenticated. No
+   *   duplicate account is ever created (account linking). The only field
+   *   ever backfilled is a missing avatar, adopted from the Google picture.
+   * - Email unknown → a new user row following the existing user schema is
+   *   created with `authProvider: "google"`. Because Google accounts have no
+   *   password, an UNGUESSABLE random one is hashed into `passwordHash` so
+   *   the schema invariant (always a pbkdf2$ hash) holds while email/password
+   *   login can never succeed for the account.
+   *
+   * The response is the same AuthResponse shape used by login/register, plus
+   * `isNewUser` so the UI can run signup-style redirects.
+   */
+  async googleLogin(data: GoogleLoginRequest): Promise<AuthResponse> {
+    logApi('POST', '/auth/google');
+    return withMockLatency((async () => {
+      const credential = data?.credential;
+      if (typeof credential !== 'string' || !credential.trim()) {
+        throw new ApiError({
+          message: 'A Google credential is required.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+        });
+      }
+
+      // Decode + validate the ID token claims. Real backend: signature
+      // verification against Google's JWKS happens here too.
+      const claims = decodeGoogleIdToken(credential.trim());
+      assertValidGoogleClaims(claims);
+
+      const email = typeof claims.email === 'string' ? claims.email.trim().toLowerCase() : '';
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+        throw new ApiError({
+          message: 'The Google account has no usable email address.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { credential: 'The Google account has no usable email address.' },
+        });
+      }
+      const fullName =
+        (typeof claims.name === 'string' && claims.name.trim().slice(0, 80)) ||
+        [claims.given_name, claims.family_name]
+          .filter((part): part is string => typeof part === 'string' && part.trim().length > 0)
+          .map((part) => part.trim())
+          .join(' ') ||
+        email.split('@')[0];
+      const picture = typeof claims.picture === 'string' ? claims.picture.trim() : '';
+
+      // Existing account → link & log in (never create a duplicate).
+      const existing = mockDb.query('users', (u) => u.email === email)[0];
+      if (existing) {
+        if (existing.status !== 'active') {
+          throw new ApiError({
+            message: 'This account has been suspended. Contact support for help.',
+            status: 403,
+            code: 'FORBIDDEN',
+          });
+        }
+        clearFailedLogins(existing.id);
+        let user = existing;
+        if (picture && !user.avatarUrl) {
+          // Light-touch linking: adopt the Google picture only when the
+          // account has no avatar yet. Nothing else is overwritten.
+          user = (mockDb.update('users', user.id, { avatarUrl: picture }) as StoredUser) ?? user;
+        }
+        const tokens = await issueSession(user.id, data.rememberMe ?? true);
+        return { user: toPublicUser(user), tokens, isNewUser: false };
+      }
+
+      // New Google signup → create the user following the existing schema.
+      const accountType = data.accountType === 'buyer' ? 'buyer' : 'seller';
+      const timestamp = nowIso();
+      const user = mockDb.insert('users', {
+        id: generateId(),
+        email,
+        fullName,
+        accountType,
+        avatarUrl: picture || null,
+        status: 'active',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        passwordHash: await hashPassword(generateSecureToken()),
+        failedLoginCount: 0,
+        lockedUntil: null,
+        authProvider: 'google',
+      } as never);
+
+      // A fresh Google registration is always a remembered session.
+      const tokens = await issueSession(user.id, true);
+      return { user: toPublicUser(user as StoredUser), tokens, isNewUser: true };
     })());
   }
 

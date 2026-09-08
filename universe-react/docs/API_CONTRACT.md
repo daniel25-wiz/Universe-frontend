@@ -94,6 +94,54 @@ Authenticate. Public.
 
 ---
 
+### POST /auth/google
+Authenticate OR sign up with Google. Public.
+
+The frontend sends the **Google ID token (JWT)** it obtained from Google
+Identity Services (the real "Continue with Google" button):
+
+**Request**
+```ts
+{ credential: string, rememberMe?: boolean }
+```
+
+The backend MUST verify the token server-side before trusting it:
+
+- signature against Google's public keys (JWKS at
+  `https://www.googleapis.com/oauth2/v3/certs`),
+- `aud` contains this app's OAuth client ID,
+- `iss` is `https://accounts.google.com` (or `accounts.google.com`),
+- `exp` has not passed (small clock-skew allowance),
+- `email_verified` is true.
+
+It then reads the standard claims (`email`, `name`, `given_name`,
+`family_name`, `picture`).
+
+The **mock backend** implements the exact same flow minus the signature
+check (it has no Google keys): it decodes the payload and validates the
+claims above — so switching to the real backend adds verification only.
+
+**Response 200**
+```ts
+{ user: User, tokens: { accessToken: string, refreshToken: string }, isNewUser?: boolean }
+```
+
+Behavior:
+- **Email already registered** → the *existing* user is authenticated. No
+  duplicate account is ever created (account linking); only a missing
+  `avatarUrl` may be backfilled from the Google picture.
+- **Unknown email** → a new user is created following the existing user schema
+  (`fullName` from `name`, `avatarUrl` from `picture`,
+  `authProvider: "google"`) and `isNewUser: true` is returned. Google accounts
+  have no password, so email/password login can never succeed for them.
+
+**Errors**
+- 422 `VALIDATION_ERROR` — credential missing/malformed or has no usable email
+- 401 `UNAUTHORIZED` — token expired, audience mismatch, or untrusted issuer
+- 403 `FORBIDDEN` — Google email not verified, or account suspended
+
+---
+
 ### POST /auth/logout
 Invalidate the current session. Protected.
 
@@ -149,7 +197,7 @@ Update the seller profile. Protected.
 
 **Request**
 ```ts
-{ storeName?, phone?, level?, department?, course?, school?, bio? }
+{ storeName?, phone?, level?, department?, course?, school?, bio?, logoUrl?, bannerUrl? }
 ```
 
 **Response 200**
@@ -281,7 +329,7 @@ Create a product. Protected.
 
 **Request**
 ```ts
-{ name, description?, price, salePrice?, stock?, sku?, category?, status?, imageUrl?, imageAlt? }
+{ name, description?, price, salePrice?, stock?, sku?, category?, status?, imageUrl?, imageAlt?, images? }
 ```
 
 **Response 200 / 201**
@@ -329,12 +377,14 @@ Delete a product. Protected.
 interface User {
   id: string; email: string; fullName: string;
   accountType: "buyer" | "seller"; avatarUrl?: string | null;
+  authProvider?: "password" | "google";
   status: "active" | "suspended"; createdAt: string; updatedAt: string;
 }
 
 interface SellerProfile {
   id: string; userId: string; storeName?: string; phone?: string;
   level?: string; department?: string; course?: string; school?: string; bio?: string;
+  logoUrl?: string | null; bannerUrl?: string | null;
 }
 
 interface Product {
@@ -343,6 +393,7 @@ interface Product {
   salePrice?: number | null; stock?: number | null; sku?: string;
   category?: string; status: "active" | "draft";
   imageUrl?: string | null; imageAlt?: string | null;
+  images?: string[] | null; // up to 5 gallery images; images[0] is the cover
   rating: number; reviews: number; createdAt: string; updatedAt: string;
 }
 ```

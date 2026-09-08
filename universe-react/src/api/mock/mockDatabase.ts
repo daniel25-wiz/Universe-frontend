@@ -39,6 +39,11 @@ export interface StoredUser extends User {
   /** Timestamp (ms) until which login attempts are locked out. */
   lockedUntil?: number | null;
   phone?: string | null;
+  /**
+   * How the account was created/authenticates. Google-created rows get
+   * 'google'; password rows keep the default (undefined === 'password').
+   */
+  authProvider?: 'password' | 'google';
 }
 
 export interface MockDatabaseShape {
@@ -51,7 +56,14 @@ export interface MockDatabaseShape {
   counters: Record<string, number>;
 }
 
-type CollectionName = keyof MockDatabaseShape;
+/**
+ * The record-array collections — every collection except `counters`, which is
+ * bookkeeping metadata rather than a list. The list helpers below never touch
+ * `counters`, and excluding it here keeps their generic types sound (a
+ * `Record<string, number>` cannot be `.find()`-ed or `[number]`-indexed).
+ */
+type ArrayCollections = Omit<MockDatabaseShape, 'counters'>;
+type CollectionName = keyof ArrayCollections;
 
 function clone<T>(value: T): T {
   if (typeof structuredClone === 'function') return structuredClone(value);
@@ -115,47 +127,50 @@ function nextId(db: MockDatabaseShape, collection: CollectionName): number {
 
 export const mockDb = {
   /** Return a deep copy of a full collection. */
-  getCollection<K extends CollectionName>(name: K): MockDatabaseShape[K] {
+  getCollection<K extends CollectionName>(name: K): ArrayCollections[K] {
     return clone(readDb()[name]);
   },
 
   /** Replace a full collection. */
-  setCollection<K extends CollectionName>(name: K, items: MockDatabaseShape[K]): void {
+  setCollection<K extends CollectionName>(name: K, items: ArrayCollections[K]): void {
     const db = readDb();
-    db[name] = clone(items);
+    db[name] = clone(items) as MockDatabaseShape[K];
     writeDb(db);
   },
 
-  findById<K extends CollectionName>(name: K, id: string): MockDatabaseShape[K][number] | null {
+  findById<K extends CollectionName>(name: K, id: string): ArrayCollections[K][number] | null {
     const item = readDb()[name].find((entry) => (entry as { id: string }).id === id);
     return item ? clone(item) : null;
   },
 
-  query<K extends CollectionName>(name: K, predicate: (item: MockDatabaseShape[K][number]) => boolean): MockDatabaseShape[K][number][] {
-    return readDb()[name].filter(predicate).map((item) => clone(item)) as MockDatabaseShape[K][number][];
+  query<K extends CollectionName>(name: K, predicate: (item: ArrayCollections[K][number]) => boolean): ArrayCollections[K][number][] {
+    return readDb()[name].filter(predicate).map((item) => clone(item)) as ArrayCollections[K][number][];
   },
 
   /** Insert a record; assigns id + createdAt when missing. */
-  insert<K extends CollectionName>(name: K, item: MockDatabaseShape[K][number]): MockDatabaseShape[K][number] {
+  insert<K extends CollectionName>(name: K, item: ArrayCollections[K][number]): ArrayCollections[K][number] {
     const db = readDb();
-    const entry = clone(item) as Record<string, unknown>;
+    const entry = clone(item) as unknown as Record<string, unknown>;
     if (!entry.id) entry.id = generateId();
     if (!entry.createdAt) entry.createdAt = nowIso();
     if (!entry.updatedAt) entry.updatedAt = entry.createdAt;
-    (db[name] as Array<Record<string, unknown>>).push(entry);
+    // The union of record arrays is not directly comparable to a mutable
+    // Record list (interfaces carry no index signatures), hence the bridge.
+    (db[name] as unknown as Array<Record<string, unknown>>).push(entry);
     writeDb(db);
-    return clone(entry) as MockDatabaseShape[K][number];
+    return clone(entry) as unknown as ArrayCollections[K][number];
   },
 
   /** Update a record by id; returns the updated record or null. */
-  update<K extends CollectionName>(name: K, id: string, patch: Partial<MockDatabaseShape[K][number]>): MockDatabaseShape[K][number] | null {
+  update<K extends CollectionName>(name: K, id: string, patch: Partial<ArrayCollections[K][number]>): ArrayCollections[K][number] | null {
     const db = readDb();
-    const list = db[name] as Array<Record<string, unknown>>;
+    // Same bridge as insert(): operate on the row as a plain record.
+    const list = db[name] as unknown as Array<Record<string, unknown>>;
     const index = list.findIndex((entry) => entry.id === id);
     if (index === -1) return null;
     list[index] = { ...list[index], ...clone(patch as Record<string, unknown>), updatedAt: nowIso() };
     writeDb(db);
-    return clone(list[index]) as MockDatabaseShape[K][number];
+    return clone(list[index]) as unknown as ArrayCollections[K][number];
   },
 
   /** Remove a record by id; returns true if removed. */

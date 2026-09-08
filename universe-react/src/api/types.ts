@@ -17,6 +17,8 @@ export interface User {
   email: string;
   fullName: string;
   accountType: AccountType;
+  /** How the account authenticates. Absent on rows created before Google auth existed (treated as "password"). */
+  authProvider?: 'password' | 'google';
   avatarUrl?: string | null;
   status: UserStatus;
   createdAt: string;
@@ -61,6 +63,49 @@ export interface RegisterRequest {
   accountType: AccountType;
 }
 
+/* ------------------------------- Google -------------------------------- */
+
+/**
+ * Standard claims carried by a Google ID token — the signed JWT that Google
+ * Identity Services hands back after the user picks an account in Google's
+ * own chooser. The REAL backend verifies the signature against Google's
+ * public keys (JWKS) and then reads these claims; the mock backend decodes
+ * and validates the claims without signature verification (see
+ * api/mock/googleIdToken.ts).
+ */
+export interface GoogleIdTokenPayload {
+  /** Token issuer — always accounts.google.com (with or without https://). */
+  iss?: string;
+  /** Intended audience(s) — must contain this app's OAuth client ID. */
+  aud?: string | string[];
+  /** Google's stable account id. */
+  sub?: string;
+  email?: string;
+  /** Google only issues tokens whose email is verified. */
+  email_verified?: boolean;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  /** Expiry time (seconds since epoch). */
+  exp?: number;
+  /** Issued-at time (seconds since epoch). */
+  iat?: number;
+}
+
+/** Body of POST /auth/google. */
+export interface GoogleLoginRequest {
+  /** Google ID token (JWT) obtained from Google Identity Services. */
+  credential: string;
+  rememberMe?: boolean;
+  /**
+   * Only consulted when the Google email has never signed up before (it is
+   * ignored for existing accounts). The UI omits it; the backend applies its
+   * own default.
+   */
+  accountType?: AccountType;
+}
+
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
@@ -71,6 +116,12 @@ export interface TokenPair {
 export interface AuthResponse {
   user: User;
   tokens: TokenPair;
+  /**
+   * True when this request CREATED the account (e.g. first Google sign-in for
+   * an email the backend has never seen). Lets the UI run signup-style
+   * redirects (onboarding) without a second endpoint.
+   */
+  isNewUser?: boolean;
 }
 
 export interface RefreshTokenRequest {
@@ -91,6 +142,10 @@ export interface SellerProfile {
   course?: string;
   school?: string;
   bio?: string;
+  /** Store logo shown on the private marketplace (http(s) URL or data URL). */
+  logoUrl?: string | null;
+  /** Cover picture shown as the storefront hero banner. */
+  bannerUrl?: string | null;
 }
 
 export interface UpdateSellerProfileRequest {
@@ -101,6 +156,8 @@ export interface UpdateSellerProfileRequest {
   course?: string;
   school?: string;
   bio?: string;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
 }
 
 /* ------------------------------ Products ------------------------------- */
@@ -116,8 +173,17 @@ export interface CreateProductRequest {
   sku?: string;
   category?: string;
   status?: ProductStatus;
+  /**
+   * Primary/cover image — the first entry of `images`, kept denormalized so
+   * list views (marketplace cards, storefront) never need to read the array.
+   */
   imageUrl?: string | null;
   imageAlt?: string | null;
+  /**
+   * Up to 5 gallery images (http(s) URLs or uploaded data URLs). The first
+   * entry is the cover image.
+   */
+  images?: string[] | null;
 }
 
 export type UpdateProductRequest = Partial<CreateProductRequest>;
@@ -177,4 +243,93 @@ export interface OrderQueryParams {
 /** Generic empty/success response used by endpoints that return no body. */
 export interface ApiMessageResponse {
   message: string;
+}
+
+/* ----------------------------- Storefront ------------------------------ */
+
+/**
+ * The seller's PRIVATE MARKETPLACE storefront — the page served on each
+ * seller's own domain (storename.<app-domain>). Public data only: buyers
+ * visiting a store domain are never authenticated.
+ */
+
+export type StorefrontCategory = 'tech' | 'campus' | 'lifestyle';
+
+export interface StorefrontProduct {
+  id: string;
+  name: string;
+  description: string;
+  category: StorefrontCategory;
+  categoryLabel: string;
+  price: number;
+  priceLabel: string;
+  oldPriceLabel?: string | null;
+  rating: number;
+  reviews: number;
+  popularity: number;
+  stock?: number | null;
+  badge?: 'flash' | 'bestseller' | null;
+  campusPickup?: boolean;
+  image: string;
+  imageAlt: string;
+}
+
+export interface StorefrontReview {
+  id: string;
+  initials: string;
+  name: string;
+  meta: string;
+  text: string;
+  avatarTone: 'primary' | 'secondary';
+}
+
+export interface StorefrontAssurance {
+  icon: string;
+  tone: 'primary' | 'success' | 'tertiary';
+  title: string;
+  sub: string;
+}
+
+export interface StorefrontBioBadge {
+  icon: string;
+  tone: 'success' | 'primary' | 'tertiary';
+  label: string;
+}
+
+export interface Storefront {
+  slug: string;
+  name: string;
+  owner: string;
+  school: string;
+  storeId: string;
+  rating: number;
+  reviewCount: number;
+  followers: number;
+  fulfillmentLabel: string;
+  responseTimeLabel: string;
+  memberSinceLabel: string;
+  badgeLabel: string;
+  campusTag: string;
+  stockNote: string;
+  pickupNote: string;
+  /** Pretty display domain, e.g. "globalstore.universe.market". */
+  domain: string;
+  whatsappUrl: string;
+  phone: string;
+  email: string;
+  couponCode: string;
+  announcementTitle: string;
+  announcementLead: string;
+  bannerImage: string | null;
+  bannerAlt?: string;
+  avatarImage: string | null;
+  avatarAlt?: string;
+  bioLead: string;
+  bioDetail: string;
+  bioBadges: StorefrontBioBadge[];
+  reviews: StorefrontReview[];
+  reviewsNote: string;
+  assurances: StorefrontAssurance[];
+  catalogCounts: Record<StorefrontCategory | 'all', number>;
+  products: StorefrontProduct[];
 }

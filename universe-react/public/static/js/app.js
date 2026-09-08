@@ -1112,17 +1112,6 @@ const CTA = () => {
 
 // Footer Component
 const Footer = () => {
-  const [email, setEmail] = React.useState("");
-  const [subscribed, setSubscribed] = React.useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail("");
-    }
-  };
-
   return (
     <footer className="footer" id="contact">
       <div className="container">
@@ -1184,38 +1173,6 @@ const Footer = () => {
               <li><a href="#" className="footer-link">Sellers Agreement</a></li>
               <li><a href="#" className="footer-link">GDPR Compliance</a></li>
             </ul>
-          </div>
-
-          <div className="footer-newsletter">
-            <h4 className="footer-heading">Stay Connected</h4>
-            <p className="footer-text" style={{ marginBottom: "8px" }}>
-              Subscribe to get the latest updates on growth hacks and platform enhancements.
-            </p>
-            {!subscribed ? (
-              <form className="newsletter-form" onSubmit={handleSubscribe}>
-                <input
-                  type="email"
-                  className="newsletter-input"
-                  placeholder="Enter your email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button type="submit" className="newsletter-btn" aria-label="Subscribe">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
-              </form>
-            ) : (
-              <div className="newsletter-success">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                Subscribed successfully!
-              </div>
-            )}
           </div>
         </div>
 

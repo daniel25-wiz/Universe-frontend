@@ -38,11 +38,11 @@ export function timeAgo(iso) {
   return `${months} month${months === 1 ? '' : 's'} ago`;
 }
 
-/** "$1,249.50" style formatting for money values. */
+/** "₦1,249.50" style formatting for money values (Nigerian Naira). */
 export function formatMoney(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'NGN',
     maximumFractionDigits: 2,
   }).format(value);
 }
