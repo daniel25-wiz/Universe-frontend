@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Discover - UNIVERSE Sapphire Store</title>
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sapphire: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Scrollbars and Layout Adjustments -->
+<style data-purpose="custom-scrollbars">
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style data-purpose="device-frame">
+    body {
+      background-color: #e2e8f0;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex justify-center items-start sm:py-8 select-none">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-[420px] bg-[#f8fafc] min-h-screen sm:min-h-[890px] sm:rounded-[44px] shadow-2xl overflow-hidden relative border border-slate-200 flex flex-col">
+<!-- BEGIN: iOSStatusBar -->
+<header class="pt-3 px-7 pb-2 flex justify-between items-center bg-transparent shrink-0 z-20" data-purpose="ios-status-bar">
+<!-- Left side: Time -->
+<span class="text-[15px] font-semibold text-slate-900 tracking-tight">9:41</span>
+<!-- Right side: Cellular, WiFi, Battery icons -->
+<div class="flex items-center space-x-2 text-slate-900">
+<!-- Cellular Signal Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-4h3v13h-3V8zm6-5h3v18h-3V3z"></path>
+</svg>
+<!-- Wifi Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.78 0 7.26 1.48 9.87 3.91L12 19.34 2.13 11.41C4.74 8.98 8.22 7.5 12 7.5z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="flex items-center">
+<div class="w-6 h-3 border-[1.5px] border-slate-900 rounded-[4px] p-0.5 flex items-center">
+<div class="h-full w-4 bg-slate-900 rounded-[1.5px]"></div>
+</div>
+<div class="w-0.5 h-1.5 bg-slate-900 rounded-r-sm -ml-[0.5px]"></div>
+</div>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: TopAppBar -->
+<section class="px-6 pt-2 pb-3 flex items-center justify-between shrink-0" data-purpose="top-app-bar">
+<h1 class="text-2xl font-bold tracking-tight text-slate-900">Discover</h1>
+<!-- Bell Notification with Badge Dot -->
+<button aria-label="Notifications" class="relative p-2 text-slate-700 hover:text-sapphire-600 transition-colors">
+<svg class="w-6 h-6 stroke-current stroke-[1.8] fill-none" viewbox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-sapphire-600 rounded-full ring-2 ring-white"></span>
+</button>
+</section>
+<!-- END: TopAppBar -->
+<!-- BEGIN: ScrollableContent -->
+<main class="flex-1 overflow-y-auto no-scrollbar px-5 pb-24 space-y-5" data-purpose="scrollable-content">
+<!-- BEGIN: SearchSection -->
+<section class="flex items-center space-x-3" data-purpose="search-bar-container">
+<div class="flex-1 flex items-center bg-white rounded-2xl px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100">
+<svg class="w-5 h-5 text-slate-400 stroke-[2] stroke-current fill-none mr-2.5 shrink-0" viewbox="0 0 24 24">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<input class="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 border-none p-0 focus:ring-0 focus:outline-none" placeholder="Search for mobile..." type="text"/>
+<!-- Voice Search Icon -->
+<button aria-label="Voice Search" class="text-slate-400 hover:text-slate-600 shrink-0 ml-2" type="button">
+<svg class="w-5 h-5 fill-none stroke-current stroke-[2]" viewbox="0 0 24 24">
+<path d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- Filter Sliders Button (Sapphire Blue) -->
+<button aria-label="Filter Options" class="w-12 h-12 rounded-2xl bg-sapphire-600 flex items-center justify-center text-white shadow-md shadow-sapphire-500/25 shrink-0 hover:bg-sapphire-700 active:scale-95 transition">
+<svg class="w-5 h-5 stroke-current stroke-[2.2] fill-none" viewbox="0 0 24 24">
+<path d="M3 4h18M3 12h18M3 20h18" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle class="fill-sapphire-600 stroke-[2]" cx="8" cy="4" r="2.5"></circle>
+<circle class="fill-sapphire-600 stroke-[2]" cx="16" cy="12" r="2.5"></circle>
+<circle class="fill-sapphire-600 stroke-[2]" cx="9" cy="20" r="2.5"></circle>
+</svg>
+</button>
+</section>
+<!-- END: SearchSection -->
+<!-- BEGIN: HeroPromoBanner -->
+<section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-sapphire-600 via-sapphire-600 to-sapphire-700 text-white shadow-lg shadow-sapphire-600/20 p-5 h-44 flex items-center justify-between" data-purpose="hero-promo-banner">
+<!-- Background subtle glow decoration -->
+<div class="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-sapphire-500/30 blur-2xl pointer-events-none"></div>
+<!-- Text Content -->
+<div class="z-10 max-w-[55%] flex flex-col justify-center space-y-3">
+<h2 class="text-2xl font-extrabold leading-tight tracking-tight">
+            Clearance<br/>Sales
+          </h2>
+<div>
+<span class="inline-block bg-white text-sapphire-700 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
+              Up to 50%
+            </span>
+</div>
+</div>
+<!-- Visual Hero Showcase Image Mockup -->
+<div class="relative w-40 h-full flex items-end justify-center z-10">
+<div class="relative w-36 h-36 translate-y-3 flex items-center justify-center">
+<!-- Simulated Sleek Phone Showcase -->
+<div class="w-24 h-36 bg-pink-100 rounded-2xl border-4 border-slate-900 shadow-2xl overflow-hidden relative -rotate-6 transform">
+<!-- Notch/Dynamic Island -->
+<div class="w-8 h-2 bg-slate-900 rounded-full mx-auto mt-1"></div>
+<!-- Inner Screen Mockup Content -->
+<div class="absolute inset-x-1.5 bottom-1.5 top-4 rounded-xl bg-gradient-to-tr from-rose-200 via-sky-200 to-indigo-300 flex items-center justify-center overflow-hidden">
+<span class="text-[9px] font-bold text-slate-800 uppercase tracking-tighter">Pro Max</span>
+</div>
+</div>
+<!-- Second overlapping device -->
+<div class="w-20 h-32 bg-slate-800 rounded-xl border-2 border-slate-700 shadow-xl overflow-hidden absolute right-0 top-3 rotate-12 transform">
+<div class="w-6 h-1.5 bg-black rounded-full mx-auto mt-1"></div>
+<div class="absolute inset-x-1 bottom-1 top-3 rounded-lg bg-gradient-to-b from-blue-400 to-indigo-600 flex items-center justify-center">
+<span class="text-[8px] font-bold text-white tracking-tighter">14 Pro</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HeroPromoBanner -->
+<!-- BEGIN: CategoryNavigation -->
+<section class="space-y-3" data-purpose="category-list">
+<div class="flex items-center justify-between">
+<h2 class="text-base font-bold text-slate-900">Categories</h2>
+<a class="text-xs font-semibold text-sapphire-600 hover:text-sapphire-700" href="#">See all</a>
+</div>
+<!-- Horizontal Scrollable Pills -->
+<div class="flex items-center space-x-2.5 overflow-x-auto no-scrollbar -mx-5 px-5 py-1">
+<!-- Active Pill -->
+<button class="px-5 py-2 rounded-full text-xs font-semibold bg-slate-900 text-white shadow-sm shrink-0">
+            All
+          </button>
+<!-- Category Pills -->
+<button class="px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 shadow-xs hover:border-slate-300 shrink-0">
+            AirPods
+          </button>
+<button class="px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 shadow-xs hover:border-slate-300 shrink-0">
+            Laptop
+          </button>
+<button class="px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 shadow-xs hover:border-slate-300 shrink-0">
+            Headphones
+          </button>
+<button class="px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 shadow-xs hover:border-slate-300 shrink-0">
+            Smartphones
+          </button>
+<button class="px-4 py-2 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200/80 shadow-xs hover:border-slate-300 shrink-0">
+            Watches
+          </button>
+</div>
+</section>
+<!-- END: CategoryNavigation -->
+<!-- BEGIN: ProductGrid -->
+<section class="grid grid-cols-2 gap-3.5 pt-1" data-purpose="product-grid">
+<!-- Product Card 1: AirPods Pro -->
+<article class="bg-white rounded-3xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col justify-between group">
+<div class="relative w-full h-36 bg-slate-50/80 rounded-2xl flex items-center justify-center p-2 mb-2.5 overflow-hidden">
+<!-- Favorite Heart Button -->
+<button aria-label="Add to wishlist" class="absolute top-2.5 right-2.5 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-rose-500 transition">
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Realistic Product Graphic Mockup: AirPods Case -->
+<div class="w-20 h-16 bg-white border border-slate-200 rounded-[22px] shadow-md flex flex-col items-center justify-center relative">
+<div class="w-14 h-[1px] bg-slate-200 absolute top-4"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-slate-800 truncate">AirPods Pro</h3>
+<div class="flex items-center text-[11px] font-semibold text-amber-500">
+<span>★</span>
+<span class="text-slate-700 ml-0.5">4.9</span>
+</div>
+</div>
+<p class="text-sm font-bold text-slate-900">$149.00</p>
+</div>
+</article>
+<!-- Product Card 2: iPhone 14 Pro -->
+<article class="bg-white rounded-3xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col justify-between group">
+<div class="relative w-full h-36 bg-slate-50/80 rounded-2xl flex items-center justify-center p-2 mb-2.5 overflow-hidden">
+<!-- Favorite Heart Button -->
+<button aria-label="Add to wishlist" class="absolute top-2.5 right-2.5 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-rose-500 transition">
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Realistic Product Graphic Mockup: iPhone -->
+<div class="w-14 h-24 bg-rose-100 rounded-xl border-2 border-slate-800 shadow-md flex flex-col items-center p-1 relative">
+<div class="w-4 h-1 bg-slate-900 rounded-full"></div>
+<div class="w-full h-full mt-1 bg-gradient-to-t from-sky-100 via-rose-50 to-amber-50 rounded-lg flex items-center justify-center overflow-hidden">
+<div class="w-6 h-8 rounded bg-sapphire-500/20"></div>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-slate-800 truncate">iPhone 14 Pro</h3>
+<div class="flex items-center text-[11px] font-semibold text-amber-500">
+<span>★</span>
+<span class="text-slate-700 ml-0.5">4.9</span>
+</div>
+</div>
+<p class="text-sm font-bold text-slate-900">$899.00</p>
+</div>
+</article>
+<!-- Product Card 3: MacBook Pro -->
+<article class="bg-white rounded-3xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col justify-between group">
+<div class="relative w-full h-36 bg-slate-50/80 rounded-2xl flex items-center justify-center p-2 mb-2.5 overflow-hidden">
+<!-- Favorite Heart Button -->
+<button aria-label="Add to wishlist" class="absolute top-2.5 right-2.5 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-rose-500 transition">
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Realistic Product Graphic Mockup: MacBook -->
+<div class="flex flex-col items-center">
+<div class="w-24 h-16 bg-slate-900 rounded-t-lg border-2 border-slate-700 p-0.5 shadow-sm">
+<div class="w-full h-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded flex items-center justify-center">
+<div class="w-3 h-3 bg-white/30 rounded-full blur-[1px]"></div>
+</div>
+</div>
+<div class="w-28 h-1.5 bg-slate-300 rounded-b-md shadow"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-slate-800 truncate">MacBook Pro</h3>
+<div class="flex items-center text-[11px] font-semibold text-amber-500">
+<span>★</span>
+<span class="text-slate-700 ml-0.5">4.9</span>
+</div>
+</div>
+<p class="text-sm font-bold text-slate-900">$1,299.00</p>
+</div>
+</article>
+<!-- Product Card 4: Xbox Series X -->
+<article class="bg-white rounded-3xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col justify-between group">
+<div class="relative w-full h-36 bg-slate-50/80 rounded-2xl flex items-center justify-center p-2 mb-2.5 overflow-hidden">
+<!-- Favorite Heart Button -->
+<button aria-label="Add to wishlist" class="absolute top-2.5 right-2.5 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-rose-500 transition">
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Realistic Product Graphic Mockup: Console Tower & Controller -->
+<div class="flex items-end space-x-1.5">
+<!-- Console Tower -->
+<div class="w-11 h-20 bg-slate-900 rounded-sm shadow-md flex flex-col justify-between p-1">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-700 self-end"></div>
+<div class="w-full h-0.5 bg-slate-800"></div>
+</div>
+<!-- Controller outline -->
+<div class="w-8 h-6 bg-slate-800 rounded-md shadow flex items-center justify-center">
+<div class="w-2 h-2 rounded-full border border-slate-600"></div>
+</div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-slate-800 truncate">Xbox Series X</h3>
+<div class="flex items-center text-[11px] font-semibold text-amber-500">
+<span>★</span>
+<span class="text-slate-700 ml-0.5">4.8</span>
+</div>
+</div>
+<p class="text-sm font-bold text-slate-900">$499.00</p>
+</div>
+</article>
+</section>
+<!-- END: ProductGrid -->
+</main>
+<!-- END: ScrollableContent -->
+<!-- BEGIN: BottomNavigationBar -->
+<nav class="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-6 pt-2.5 pb-6 z-30" data-purpose="bottom-tab-navigation">
+<div class="flex items-center justify-between">
+<!-- Tab 1: Home (Active - Sapphire Blue) -->
+<a class="flex flex-col items-center text-sapphire-600 space-y-1" href="#">
+<svg class="w-6 h-6 fill-none stroke-current stroke-[2.2]" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<!-- Tab 2: Search -->
+<a class="flex flex-col items-center text-slate-400 hover:text-slate-700 space-y-1 transition" href="#">
+<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium">Search</span>
+</a>
+<!-- Tab 3: Saved -->
+<a class="flex flex-col items-center text-slate-400 hover:text-slate-700 space-y-1 transition" href="#">
+<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium">Saved</span>
+</a>
+<!-- Tab 4: Cart -->
+<a class="flex flex-col items-center text-slate-400 hover:text-slate-700 space-y-1 transition relative" href="#">
+<div class="relative">
+<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<!-- Mini Notification Badge -->
+<span class="absolute -top-1 -right-1 bg-sapphire-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">3</span>
+</div>
+<span class="text-[10px] font-medium">Cart</span>
+</a>
+<!-- Tab 5: Account -->
+<a class="flex flex-col items-center text-slate-400 hover:text-slate-700 space-y-1 transition" href="#">
+<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewbox="0 0 24 24">
+<path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[10px] font-medium">Account</span>
+</a>
+</div>
+<!-- iOS Home Indicator Pill -->
+<div class="mt-4 flex justify-center">
+<div class="w-32 h-1 bg-slate-900 rounded-full"></div>
+</div>
+</nav>
+<!-- END: BottomNavigationBar -->
+</div>
+<!-- END: MobileDeviceFrame -->
+</body></html>

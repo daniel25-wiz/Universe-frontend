@@ -1,20 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProduct } from '../../hooks/useProducts';
-import { formatMoney } from '../../lib/user';
-import './marketplace-commerce.css';
+import { Icon, MobileFrame, ProductArt, formatNaira, formatProductPrice } from './MobileMarketplaceShell';
 
-function MarketplaceProductPage({ onAddToCart }) {
+function MarketplaceProductPage({ onAddToCart, savedProducts = [], onToggleSaved }) {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { data: product, isLoading, isError } = useProduct(productId);
+  const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [favorite, setFavorite] = useState(savedProducts.some((item) => item.id === productId));
   const [selectedImage, setSelectedImage] = useState(null);
 
-  if (isLoading) return <MarketplaceState title="Loading product" text="Fetching product details..." />;
-  if (isError || !product) {
-    return <MarketplaceState title="Product not found" text="This product is no longer available." action="Back to marketplace" onAction={() => navigate('/marketplace')} />;
-  }
+  if (isLoading) return <ProductState title="Opening product" text="Loading product details..." />;
+  if (isError || !product) return <ProductState title="Product not found" text="This product is no longer available." action="Back to marketplace" onAction={() => navigate('/marketplace')} />;
 
   const price = product.salePrice ?? product.price;
   const productImages = product.images?.length
@@ -25,89 +24,25 @@ function MarketplaceProductPage({ onAddToCart }) {
   const activeImage = selectedImage && productImages.includes(selectedImage)
     ? selectedImage
     : productImages[0];
-  const handleAddToCart = () => {
-    onAddToCart(product);
+  const toggleFavorite = () => {
+    setFavorite((current) => !current);
+    onToggleSaved?.(product);
+  };
+  const addProduct = () => {
+    for (let index = 0; index < quantity; index += 1) onAddToCart(product);
     setAdded(true);
   };
 
-  return (
-    <div className="mc-root">
-      <header className="mc-header">
-        <Link className="mc-brand" to="/marketplace">MarketPlace</Link>
-        <Link className="mc-cart-link" to="/cart">
-          <span className="material-symbols-outlined">shopping_cart</span>
-          View cart
-        </Link>
-      </header>
-      <main className="mc-main">
-        <Link className="mc-back" to="/marketplace">
-          <span className="material-symbols-outlined">arrow_back</span>
-          Back to marketplace
-        </Link>
-        <article className="mc-product">
-          <div className="mc-product-gallery">
-            <div className="mc-product-image-wrap">
-            {activeImage ? (
-              <img className="mc-product-image" src={activeImage} alt={product.imageAlt || product.name} />
-            ) : (
-              <div className="mc-product-placeholder">No image available</div>
-            )}
-            </div>
-            {productImages.length > 1 && (
-              <div className="mc-thumbnails" aria-label="Product images">
-                {productImages.map((image, index) => (
-                  <button
-                    type="button"
-                    key={`${image}-${index}`}
-                    className={`mc-thumbnail${activeImage === image ? ' active' : ''}`}
-                    onClick={() => setSelectedImage(image)}
-                    aria-label={`View product image ${index + 1}`}
-                    aria-pressed={activeImage === image}
-                  >
-                    <img src={image} alt="" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="mc-product-content">
-            <span className="mc-eyebrow">{product.category || 'Marketplace product'}</span>
-            <h1>{product.name}</h1>
-            <div className="mc-rating">
-              <span className="material-symbols-outlined mc-star">star</span>
-              <strong>{product.rating?.toFixed(1) || '0.0'}</strong>
-              <span>({product.reviews || 0} reviews)</span>
-            </div>
-            <p className="mc-description">{product.description || 'A quality product from a verified marketplace seller.'}</p>
-            <div className="mc-price">{formatMoney(price)}</div>
-            {product.stock != null && <p className="mc-stock">{product.stock} available</p>}
-            <div className="mc-actions">
-              <button type="button" className="mc-primary-button" onClick={handleAddToCart}>
-                <span className="material-symbols-outlined">add_shopping_cart</span>
-                {added ? 'Added to cart' : 'Add to cart'}
-              </button>
-              <Link className="mc-secondary-button" to="/cart">View cart</Link>
-            </div>
-            {added && <p className="mc-success" role="status">{product.name} is in your cart.</p>}
-            {product.seller && <p className="mc-seller">Sold by <strong>{product.seller}</strong></p>}
-          </div>
-        </article>
-      </main>
-    </div>
-  );
+  return <MobileFrame active="search" cartCount={0} className="mm-product-page" showBottomNav={false}>
+    <header className="mm-product-header"><button type="button" aria-label="Go back" onClick={() => navigate(-1)}><Icon name="arrowBack" /></button><span>{product.category || 'Audio & Tech'}</span><div><button type="button" aria-label="Share product"><Icon name="share" /></button><button type="button" aria-label="Add to wishlist" className={favorite ? 'favorite' : ''} onClick={toggleFavorite}><Icon name="heart" /></button></div></header>
+    <main className="mm-scroll mm-product-scroll">
+      <section className="mm-gallery"><div className="mm-gallery-art"><span className="mm-verified">Verified</span><span className="mm-condition">Mint Condition</span><button type="button" className="mm-zoom" aria-label="Zoom product">+</button>{activeImage ? <ProductArt product={{ ...product, imageUrl: activeImage }} variant="gallery" /> : <ProductArt product={product} variant="gallery" />}<span className="mm-image-fallback"><ProductArt product={product} variant="gallery" /></span><span className="mm-view-360">↻ 360° View</span></div>{productImages.length > 1 && <div className="mm-thumbnails" aria-label="Product images">{productImages.map((image, index) => <button type="button" key={`${image}-${index}`} className={activeImage === image ? 'active' : ''} onClick={() => setSelectedImage(image)} aria-label={`View product image ${index + 1}`}><img src={image} alt="" /></button>)}</div>}</section>
+      <section className="mm-product-info"><div className="mm-product-info-top"><span>{product.seller || 'Apple Inc.'}</span><b>✓ Campus Authorized</b><em>★ {product.rating ?? '4.9'} <small>({product.reviews ?? 1248})</small></em></div><h1>{product.name}</h1><div className="mm-price-line"><strong>{formatProductPrice(product)}</strong>{product.price && product.salePrice && <del>{formatNaira(product.price)}</del>}<span>-40% OFF</span></div><div className="mm-pickup"><div><strong>⌖ Campus Pickup: <b>Main Gate Hub</b></strong><small>Ready in 25 mins · Free locker drop</small></div><span>In Stock</span></div></section>
+      {product.description ? <section className="mm-overview"><h2>Product Overview</h2><p>{product.description}</p></section> : null}
+    </main>
+    <footer className="mm-buy-bar"><div className="mm-buy-row"><div className="mm-stepper"><button type="button" aria-label="Decrease quantity" onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button><span>{quantity}</span><button type="button" aria-label="Increase quantity" onClick={() => setQuantity(Math.min(10, quantity + 1))}>+</button></div><button type="button" className="mm-buy" onClick={addProduct}><span><Icon name="cart" />{added ? 'Added' : 'Buy Now'}</span><b>{formatNaira(price * quantity)} <i>→</i></b></button></div></footer>
+  </MobileFrame>;
 }
 
-function MarketplaceState({ title, text, action, onAction }) {
-  return (
-    <div className="mc-root">
-      <main className="mc-state">
-        <span className="material-symbols-outlined">inventory_2</span>
-        <h1>{title}</h1>
-        <p>{text}</p>
-        {action && <button type="button" className="mc-primary-button" onClick={onAction}>{action}</button>}
-      </main>
-    </div>
-  );
-}
-
+function ProductState({ title, text, action, onAction }) { return <div className="mm-state"><h1>{title}</h1><p>{text}</p>{action && <button type="button" onClick={onAction}>{action}</button>}</div>; }
 export default MarketplaceProductPage;

@@ -41,6 +41,8 @@ const MyMarketplace = lazy(() => import('./components/seller-dashboard/views/MyM
 const PublicMarketplace = lazy(() => import('./components/seller-dashboard/views/PublicMarketplace'));
 const MarketplaceProductPage = lazy(() => import('./components/marketplace/MarketplaceProductPage'));
 const CartPage = lazy(() => import('./components/marketplace/CartPage'));
+const SavedItemsPage = lazy(() => import('./components/marketplace/SavedItemsPage'));
+const MarketplaceSearchPage = lazy(() => import('./components/marketplace/MarketplaceSearchPage'));
 const SalesAnalytics = lazy(() => import('./components/seller-dashboard/views/SalesAnalytics'));
 const SellerProfile = lazy(() => import('./components/seller-dashboard/views/SellerProfile'));
 const SellerSettings = lazy(() => import('./components/seller-dashboard/views/SellerSettings'));
@@ -62,6 +64,7 @@ function HomeRoute({ cartCount, onAddToCart }) {
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
+  const [savedProducts, setSavedProducts] = useState([]);
   const [showWarning, setShowWarning] = useState(false);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -116,6 +119,12 @@ function App() {
     setCartItems((current) => current.map((item) => item.product.id === productId
       ? { ...item, quantity }
       : item));
+  };
+
+  const handleToggleSaved = (product) => {
+    setSavedProducts((current) => current.some((item) => item.id === product.id)
+      ? current.filter((item) => item.id !== product.id)
+      : [...current, product]);
   };
 
   return (
@@ -173,7 +182,7 @@ function App() {
           path="/marketplace"
           element={
             <Suspense fallback={<HomeSkeleton />}>
-              <PublicMarketplace cartItems={cartItems} onAddToCart={handleAddToCart} />
+              <PublicMarketplace cartItems={cartItems} onAddToCart={handleAddToCart} savedProducts={savedProducts} onToggleSaved={handleToggleSaved} />
             </Suspense>
           }
         />
@@ -181,7 +190,15 @@ function App() {
           path="/marketplace/product/:productId"
           element={
             <Suspense fallback={<HomeSkeleton />}>
-              <MarketplaceProductPage onAddToCart={handleAddToCart} />
+              <MarketplaceProductPage onAddToCart={handleAddToCart} savedProducts={savedProducts} onToggleSaved={handleToggleSaved} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace/search"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <MarketplaceSearchPage cartItems={cartItems} savedProducts={savedProducts} onToggleSaved={handleToggleSaved} />
             </Suspense>
           }
         />
@@ -190,6 +207,14 @@ function App() {
           element={
             <Suspense fallback={<HomeSkeleton />}>
               <CartPage cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onUpdateQuantity={handleUpdateCartQuantity} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/saved"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <SavedItemsPage savedProducts={savedProducts} onToggleSaved={handleToggleSaved} cartItems={cartItems} />
             </Suspense>
           }
         />
