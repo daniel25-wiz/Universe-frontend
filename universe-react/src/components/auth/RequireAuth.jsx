@@ -36,7 +36,7 @@ function RequireAuth({ children, accountType }) {
     );
   }
   if (accountType && user.accountType !== accountType) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={user.accountType === 'buyer' ? '/marketplace' : '/'} replace />;
   }
   return typeof children === 'function' ? children(user) : children;
 }

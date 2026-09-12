@@ -182,6 +182,20 @@ Refresh the access token. Public (uses refresh token).
 
 ## Users / Seller Profile
 
+## Public Storefront
+
+### GET /storefront/:slug
+Resolve a seller's private marketplace. This endpoint is public: visitors do
+not need an account or an authorization token to view a seller storefront.
+
+**Response 200**
+```ts
+Storefront
+```
+
+**Errors**
+- 404 `NOT_FOUND` — no seller storefront matches the slug in the real backend
+
 ### GET /users/me/seller-profile
 Get the current user's seller profile. Protected.
 

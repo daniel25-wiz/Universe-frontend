@@ -29,7 +29,7 @@ const AuthPage = () => {
   // form again — they are bounced straight to their dashboard.
   useEffect(() => {
     if (authedUser) {
-      navigate(authedUser.accountType === 'seller' ? '/seller' : '/', { replace: true });
+      navigate(authedUser.accountType === 'seller' ? '/seller' : '/marketplace', { replace: true });
     }
   }, [authedUser, navigate]);
 
@@ -228,7 +228,7 @@ const AuthPage = () => {
           By continuing, you agree to our{' '}
           <Link to="/terms" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</Link>
           {' '}and{' '}
-          <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</a>
+          <Link to="/terms" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</Link>
         </p>
       </main>
 

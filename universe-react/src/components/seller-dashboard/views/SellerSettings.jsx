@@ -169,7 +169,7 @@ function SellerSettings() {
 
   // ---- Store branding: logo + cover picture shown on the private marketplace.
   const updateProfile = useUpdateSellerProfile();
-  const [branding, setBranding] = useState({ logoUrl: '', bannerUrl: '' });
+  const [branding, setBranding] = useState({ logoUrl: '', bannerUrl: '', bannerImages: [] });
   const [brandingDirty, setBrandingDirty] = useState(false);
   const [brandingBusy, setBrandingBusy] = useState(false);
   const [brandingError, setBrandingError] = useState('');
@@ -178,7 +178,7 @@ function SellerSettings() {
   // Hydrate the editors once the profile loads (unless the user already edited).
   useEffect(() => {
     if (profile && !brandingDirty) {
-      setBranding({ logoUrl: profile.logoUrl || '', bannerUrl: profile.bannerUrl || '' });
+      setBranding({ logoUrl: profile.logoUrl || '', bannerUrl: profile.bannerUrl || '', bannerImages: profile.bannerImages || (profile.bannerUrl ? [profile.bannerUrl] : []) });
     }
   }, [profile, brandingDirty]);
 
@@ -215,8 +215,28 @@ function SellerSettings() {
     }
   };
 
+  const addBannerImages = async (files) => {
+    const selected = Array.from(files || []).slice(0, 5 - branding.bannerImages.length);
+    if (!selected.length) return;
+    setBrandingError('');
+    try {
+      const images = await Promise.all(selected.map((file) => fileToCompressedDataUrl(file, BRANDING_PARAMS.banner)));
+      setBranding((current) => ({
+        ...current,
+        bannerUrl: current.bannerUrl || images[0],
+        bannerImages: [...current.bannerImages, ...images].slice(0, 5),
+      }));
+      setBrandingDirty(true);
+      setBrandingSaved(false);
+    } catch (err) {
+      setBrandingError(err?.message || 'Could not process those images.');
+    }
+  };
+
   const clearBrandingImage = (kind) => {
-    setBranding((current) => ({ ...current, [kind === 'logo' ? 'logoUrl' : 'bannerUrl']: '' }));
+    setBranding((current) => kind === 'logo'
+      ? { ...current, logoUrl: '' }
+      : { ...current, bannerUrl: '', bannerImages: [] });
     setBrandingDirty(true);
     setBrandingSaved(false);
   };
@@ -228,6 +248,7 @@ function SellerSettings() {
       await updateProfile.mutateAsync({
         logoUrl: branding.logoUrl || null,
         bannerUrl: branding.bannerUrl || null,
+        bannerImages: branding.bannerImages.length ? branding.bannerImages : null,
       });
       setBrandingDirty(false);
       setBrandingSaved(true);
@@ -369,16 +390,18 @@ function SellerSettings() {
                     </button>
                   )}
                 </div>
-                {/* Cover picture slot */}
+                {/* Storefront gallery slot */}
                 <div className="st-brand-slot st-brand-slot-wide">
-                  <span className="st-brand-label">Cover Picture</span>
-                  <label className="st-brand-upload st-brand-upload-wide" htmlFor="brand-cover-input" title="Upload cover picture">
-                    {branding.bannerUrl ? (
-                      <img className="st-brand-preview" src={branding.bannerUrl} alt="Cover picture preview" />
+                  <span className="st-brand-label">Storefront Gallery <small>(up to 5 images)</small></span>
+                  <label className="st-brand-upload st-brand-upload-wide" htmlFor="brand-cover-input" title="Upload storefront gallery images">
+                    {branding.bannerImages.length ? (
+                      <div className="st-brand-gallery-preview">
+                        {branding.bannerImages.map((image, index) => <img className="st-brand-preview" src={image} alt={`Storefront gallery preview ${index + 1}`} key={image} />)}
+                      </div>
                     ) : (
                       <>
                         <span className="material-symbols-outlined">panorama</span>
-                        <span className="st-brand-upload-hint">Upload cover picture</span>
+                        <span className="st-brand-upload-hint">Upload gallery images</span>
                       </>
                     )}
                   </label>
@@ -386,13 +409,14 @@ function SellerSettings() {
                     id="brand-cover-input"
                     type="file"
                     accept="image/*"
+                    multiple
                     style={{ display: 'none' }}
                     onChange={(event) => {
-                      setBrandingImage('banner', event.target.files?.[0]);
+                      addBannerImages(event.target.files);
                       event.target.value = '';
                     }}
                   />
-                  {branding.bannerUrl && (
+                  {branding.bannerImages.length > 0 && (
                     <button type="button" className="st-brand-remove" onClick={() => clearBrandingImage('banner')}>
                       Remove
                     </button>

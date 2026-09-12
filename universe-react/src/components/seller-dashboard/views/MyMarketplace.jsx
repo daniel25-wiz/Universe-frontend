@@ -4,10 +4,12 @@ import Sidebar from '../Sidebar';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import '../seller-dashboard.css';
 import './my-marketplace.css';
+import './my-workshop.css';
 import '../ui/widgets.css';
 import { useCurrentUser } from '../../../hooks/useAuth';
+import { useSellerProfile, useUpdateSellerProfile } from '../../../hooks/useUser';
 import { useDeleteProduct, useProducts, useUpdateProduct } from '../../../hooks/useProducts';
-import { getUserInitials, getFirstName, formatMoney } from '../../../lib/user';
+import { getUserInitials, getFirstName, formatMoney, getStoreDisplayName } from '../../../lib/user';
 
 const FILTERS = [
   { key: 'all', label: 'All products' },
@@ -22,6 +24,24 @@ const SORTS = [
   { key: 'price_desc', label: 'Price: high to low' },
   { key: 'name', label: 'Name A–Z' },
 ];
+
+/** Inline SVG paths for the three template cards (ported from the mockup). */
+const TEMPLATE_ICONS = {
+  'modern-boutique': 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+  'campus-quick-mart': 'M13 10V3L4 14h7v7l9-11h-7z',
+  'tech-essentials-pro':
+    'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+};
+
+/** Badge chip shown on each template card in the picker. */
+const TEMPLATE_BADGES = {
+  'modern-boutique': { label: 'Active', tone: 'blue' },
+  'campus-quick-mart': { label: 'Fast Deals', tone: 'emerald' },
+  'tech-essentials-pro': { label: 'Gadgets', tone: 'purple' },
+};
+
+/** "PNG, JPG or SVG. Max size 2MB" — enforced before base64-encoding. */
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
 function WorkshopCard({ product, currentUser, onEdit, onDelete, onToggleStatus, menuOpenId, setMenuOpenId, actionPending }) {
   const isOwner = currentUser && product.sellerId === currentUser.id;
@@ -130,11 +150,29 @@ function MyMarketplace() {
   const navigate = useNavigate();
 
   const { data: user } = useCurrentUser();
+  const { data: profile } = useSellerProfile();
   const { data: products, isLoading } = useProducts(
     user?.id ? { sellerId: user.id, pageSize: 200 } : { sellerId: '__loading__' },
   );
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
+  const updateProfile = useUpdateSellerProfile();
+
+  // Logo column preview — the persisted profile logo (http(s) or data URL).
+  const logoPreview = profile?.logoUrl ?? '';
+
+  // Logo column — hidden file input behind the dashed upload box.
+  const logoInputRef = useRef(null);
+  const [logoError, setLogoError] = useState('');
+
+  // Contact column — local drafts synced from the profile, saved on blur/Enter.
+  const [phoneDraft, setPhoneDraft] = useState('');
+  const [emailDraft, setEmailDraft] = useState('');
+  const [contactSaved, setContactSaved] = useState(false);
+  useEffect(() => {
+    setPhoneDraft(profile?.phone ?? '');
+    setEmailDraft(profile?.supportEmail ?? '');
+  }, [profile?.phone, profile?.supportEmail]);
 
   // Close toolbar dropdowns on outside click / Escape.
   useEffect(() => {
@@ -182,6 +220,39 @@ function MyMarketplace() {
     });
   };
 
+  /** Logo column — validate (2MB cap), base64 and persist as logoUrl. */
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError('Logo must be 2MB or smaller.');
+      return;
+    }
+    setLogoError('');
+    const reader = new FileReader();
+    reader.onload = () => updateProfile.mutate({ logoUrl: String(reader.result) });
+    reader.onerror = () => setLogoError('Could not read that file. Try again.');
+    reader.readAsDataURL(file);
+  };
+
+  /** Contact column — saves WhatsApp/phone + support email on blur/Enter. */
+  const saveContact = () => {
+    if (updateProfile.isPending) return;
+    const phone = phoneDraft.trim();
+    const email = emailDraft.trim();
+    if (phone === (profile?.phone ?? '') && email === (profile?.supportEmail ?? '')) return;
+    updateProfile.mutate(
+      { phone, supportEmail: email },
+      {
+        onSuccess: () => {
+          setContactSaved(true);
+          window.setTimeout(() => setContactSaved(false), 2200);
+        },
+      },
+    );
+  };
+
   const handleConfirmDelete = () => {
     if (!pendingDelete) return;
     deleteProduct.mutate(pendingDelete.id, {
@@ -227,7 +298,26 @@ function MyMarketplace() {
         </header>
 
         {/* Page Content */}
-        <div className="sd-page">
+        <div className="sd-page ws-page">
+
+          {/* ===== Workspace hero (my_workshop_template_selector_workspace.html) ===== */}
+          <section className="ws-hero">
+            <span className="ws-hero-glow ws-hero-glow-tl" aria-hidden="true" />
+            <span className="ws-hero-glow ws-hero-glow-br" aria-hidden="true" />
+            <div className="ws-hero-inner">
+              <div className="ws-hero-badge">
+                <span className="material-symbols-outlined">storefront</span>
+                <span>My Workshop</span>
+              </div>
+              <h1 className="ws-hero-title">
+                Manage Your Workshop
+                <br />
+                Grow Your Business
+              </h1>
+              <p className="ws-hero-sub">Everything you need to run your shop in one simple place.</p>
+            </div>
+          </section>
+
           <div className="ws-header">
             <div>
               <h2 className="sd-page-title">My Workshop</h2>
@@ -295,6 +385,118 @@ function MyMarketplace() {
             </div>
           </div>
 
+          {/* ===== Storefront config card (templates / logo / location / contact) ===== */}
+          <section className="ws-config-card">
+            <div className="ws-config-head">
+              <div className="ws-config-namewrap">
+                <span className="ws-config-shopname">
+                  {getStoreDisplayName(profile?.storeName, user?.fullName)}
+                </span>
+                <button
+                  type="button"
+                  className="ws-config-editname"
+                  title="Edit Store Name"
+                  onClick={() => navigate('/seller/profile')}
+                >
+                  <span className="material-symbols-outlined">edit</span>
+                </button>
+              </div>
+              <p className="ws-config-namesub">Click to customize your public storefront branding</p>
+            </div>
+
+            <div className="ws-config-grid">
+              {/* Column 2: Logo */}
+              <div className="ws-col ws-col-logo" data-purpose="logo-upload">
+                <h2 className="ws-col-title">Logo</h2>
+                <label className="ws-logo-box" title="Upload shop logo">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/svg+xml"
+                    onChange={handleLogoChange}
+                    disabled={updateProfile.isPending}
+                  />
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Shop logo" className="ws-logo-img" />
+                  ) : (
+                    <span className="ws-logo-plus">
+                      <span className="material-symbols-outlined">add</span>
+                    </span>
+                  )}
+                </label>
+                <div className="ws-logo-meta">
+                  <h3>{logoPreview ? 'Change Logo' : 'Add Logo'}</h3>
+                  <p>PNG, JPG or SVG. Max size 2MB</p>
+                  {logoError && <p className="ws-field-error">{logoError}</p>}
+                </div>
+              </div>
+
+              {/* Column 3: Location */}
+              <div className="ws-col ws-col-location" data-purpose="location-picker">
+                <div>
+                  <Link to="/seller/add-product" className="ws-add-card ws-loc-add-card">
+                    <div className="ws-add-icon">
+                      <span className="material-symbols-outlined">add</span>
+                    </div>
+                    <h3 className="ws-add-title">Create New Product</h3>
+                    <p className="ws-add-sub">Start a new draft or publish directly to your store.</p>
+                  </Link>
+                </div>
+              </div>
+              {/* Column 4: Contact */}
+              <div className="ws-col ws-col-contact" data-purpose="contact-us">
+                <h2 className="ws-col-title">Contact Us</h2>
+                <div className="ws-contact-fields">
+                  <label>
+                    <span className="ws-field-label">WhatsApp / Hotline</span>
+                    <div className="ws-phone-wrap">
+                      <span className="ws-phone-prefix">🇳🇬 +234</span>
+                      <input
+                        type="tel"
+                        value={phoneDraft}
+                        placeholder="705 191 7468"
+                        onChange={(e) => setPhoneDraft(e.target.value)}
+                        onBlur={saveContact}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                      />
+                    </div>
+                  </label>
+                  <label>
+                    <span className="ws-field-label">Support Email</span>
+                    <input
+                      type="email"
+                      value={emailDraft}
+                      placeholder="store@example.com"
+                      onChange={(e) => setEmailDraft(e.target.value)}
+                      onBlur={saveContact}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                    />
+                  </label>
+                  {updateProfile.isPending && <p className="ws-save-pending">Saving…</p>}
+                  {contactSaved && (
+                    <p className="ws-save-note">
+                      <span className="material-symbols-outlined">check_circle</span> Saved
+                    </p>
+                  )}
+                </div>
+              </div>
+                <div className="ws-contact-note">
+                  Buyers will see these details directly on your shop profile.
+                </div>
+            </div>
+
+            {/* Bottom action bar — Add New Product */}
+            <div className="ws-card-footer-bar">
+              <button
+                type="button"
+                className="ws-add-product-btn"
+                onClick={() => navigate('/seller/add-product')}
+              >
+                <span className="material-symbols-outlined">add</span>
+                <span>Add New Product</span>
+              </button>
+            </div>
+          </section>
+
           <div className="ws-grid">
             {isLoading ? (
               <div className="ws-loading">Loading products...</div>
@@ -331,6 +533,37 @@ function MyMarketplace() {
               <h3 className="ws-add-title">Create New Product</h3>
               <p className="ws-add-sub">Start a new draft or publish directly to your store.</p>
             </Link>
+          </div>
+
+          {/* ===== Quick stats overview ===== */}
+          <div className="ws-stats">
+            <div className="ws-stat">
+              <span className="ws-stat-icon ws-stat-icon-blue">
+                <span className="material-symbols-outlined">inventory_2</span>
+              </span>
+              <div>
+                <p className="ws-stat-label">Total Products</p>
+                <p className="ws-stat-value">{products ? `${products.length} Item${products.length === 1 ? '' : 's'}` : '--'}</p>
+              </div>
+            </div>
+            <div className="ws-stat">
+              <span className="ws-stat-icon ws-stat-icon-green">
+                <span className="material-symbols-outlined">check_circle</span>
+              </span>
+              <div>
+                <p className="ws-stat-label">Store Status</p>
+                <p className="ws-stat-value">Verified Seller</p>
+              </div>
+            </div>
+            <div className="ws-stat">
+              <span className="ws-stat-icon ws-stat-icon-purple">
+                <span className="material-symbols-outlined">visibility</span>
+              </span>
+              <div>
+                <p className="ws-stat-label">Shop Views this Week</p>
+                <p className="ws-stat-value">1,482</p>
+              </div>
+            </div>
           </div>
         </div>
       </main>

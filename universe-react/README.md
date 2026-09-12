@@ -15,6 +15,14 @@ npm run dev
 The app starts in **mock mode** by default (no backend required). Demo
 credentials: `demo@universe.app` / `password123`.
 
+## V2 storefront features
+
+The seller private storefront and workshop template selector are temporarily
+hidden from the current app while the public marketplace is being finalized.
+All products posted by sellers are shown in the public marketplace. When V2 is
+ready to launch, the private storefront, storefront templates, and related
+customization controls will become visible again.
+
 ## Switching to the real backend
 
 ```env

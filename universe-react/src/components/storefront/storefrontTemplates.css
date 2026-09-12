@@ -1,0 +1,137 @@
+/* ==========================================================================
+   STOREFRONT TEMPLATE VARIANTS — reskins driven by Storefront.template.
+   StorefrontPage adds `sf-tpl-<key>` on the .sf-page root element; the
+   classic "Modern Boutique" look is the default and needs no rules here.
+   Template registry: src/lib/storeTemplates.js
+   ========================================================================== */
+
+/* Shared template presentation primitives. */
+.sf-template-gallery { display: grid; grid-template-columns: minmax(250px, .82fr) minmax(0, 1.8fr); gap: 28px; align-items: stretch; margin-bottom: 28px; padding: 28px; overflow: hidden; border: 1px solid var(--sf-border); border-radius: 18px; background: var(--sf-surface-container-lowest); box-shadow: var(--sf-shadow-sm); }
+.sf-template-gallery-copy { display: flex; flex-direction: column; justify-content: center; padding: 12px 0; }
+.sf-template-gallery-copy h1 { max-width: 440px; margin: 10px 0 12px; color: var(--sf-on-surface); font-family: var(--sf-font-headline); font-size: clamp(30px, 4vw, 52px); line-height: 1.06; }
+.sf-template-gallery-copy p { max-width: 440px; margin: 0; color: var(--sf-on-surface-variant); font-size: 16px; line-height: 1.65; }
+.sf-template-gallery-media { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 12px; }
+.sf-template-gallery-rail { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.sf-template-gallery-card { position: relative; width: 100%; height: 100%; margin: 0; overflow: hidden; border-radius: 12px; background: var(--sf-surface-container-low); }
+.sf-template-gallery-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.sf-template-gallery-card figcaption { position: absolute; right: 12px; bottom: 12px; left: 12px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 8px; background: rgba(15,23,42,.72); color: #fff; font-family: var(--sf-font-label); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; backdrop-filter: blur(10px); }
+.sf-template-gallery-dots { display: flex; justify-content: center; gap: 7px; }
+.sf-template-gallery-dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; background: var(--sf-border); cursor: pointer; }
+.sf-template-gallery-dots button.active { background: var(--sf-primary); transform: scale(1.25); }
+.sf-template-gallery-empty { display: grid; place-items: center; min-width: 100%; min-height: 240px; border: 1px dashed var(--sf-border); border-radius: 12px; color: var(--sf-on-surface-variant); font-size: 14px; }
+.sf-template-strip {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  color: var(--sf-on-surface-variant);
+  font-family: var(--sf-font-label);
+  font-size: 11px;
+  line-height: 16px;
+}
+.sf-template-strip-label { display: inline-flex; align-items: center; gap: 6px; color: var(--sf-primary); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.sf-template-strip-copy { flex: 1; }
+.sf-template-strip-status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sf-template-strip-status .sf-pulse-dot { width: 7px; height: 7px; }
+.sf-template-hero { width: 100%; margin-bottom: 24px; overflow: hidden; border: 1px solid var(--sf-border); background: var(--sf-surface-container-lowest); box-shadow: var(--sf-shadow-sm); }
+.sf-template-hero h1 { margin: 0; color: var(--sf-on-surface); font-family: var(--sf-font-headline); font-size: clamp(28px, 4vw, 56px); line-height: 1.08; font-weight: 700; letter-spacing: -.025em; }
+.sf-template-hero p { color: var(--sf-on-surface-variant); font-size: 16px; line-height: 1.65; }
+.sf-template-hero-copy { position: relative; z-index: 1; }
+.sf-template-hero-image { position: relative; min-height: 360px; background-color: var(--sf-surface-container-low); background-position: center; background-size: cover; }
+.sf-template-image-caption { position: absolute; right: 24px; bottom: 24px; left: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 12px; background: rgba(15,23,42,.78); color: #fff; backdrop-filter: blur(12px); }
+.sf-template-image-caption span { color: #bfdbfe; font-family: var(--sf-font-label); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.sf-template-image-caption strong { font-size: 13px; }
+.sf-template-eyebrow, .sf-template-label { color: var(--sf-primary); font-family: var(--sf-font-label); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.sf-template-primary-action { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 20px; border: 0; border-radius: 999px; background: var(--sf-primary-container); color: #fff; font-weight: 600; cursor: pointer; }
+.sf-template-merchant { display: flex; align-items: center; gap: 10px; margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--sf-border); color: var(--sf-on-surface); }
+.sf-template-merchant .sf-avatar-circle { width: 44px; height: 44px; }
+.sf-template-merchant span:not(.sf-avatar-circle) { display: flex; flex-direction: column; }
+.sf-template-merchant small { color: var(--sf-on-surface-variant); font-size: 11px; font-weight: 400; }
+.sf-template-merchant b { margin-left: auto; color: var(--sf-tertiary-container); font-size: 14px; }
+.sf-template-merchant b small { display: block; }
+
+/* --------------- Template 2: Campus Quick-Mart (fast deals) --------------- */
+.sf-tpl-campus-quick-mart {
+  --sf-primary: #004ac6;
+  --sf-primary-container: #2563eb;
+  --sf-on-primary-container: #eeefff;
+}
+.sf-template-hero-campus { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 24px; padding: 28px; border: 0; border-radius: 16px; background: linear-gradient(110deg, #1d4ed8, #2563eb 58%, #172554); color: #fff; }
+.sf-template-hero-campus h1, .sf-template-hero-campus p { color: #fff; }
+.sf-template-hero-campus p { max-width: 720px; color: #dbeafe; }
+.sf-template-kicker, .sf-template-chip { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 5px 10px; border-radius: 999px; background: #fbbf24; color: #172033; font-family: var(--sf-font-label); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.sf-template-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; }
+.sf-template-countdown, .sf-template-coupon { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 10px; background: rgba(0,0,0,.28); color: #fff; font-size: 12px; }
+.sf-template-coupon { border: 0; background: #fff; color: #1e3a8a; cursor: pointer; }
+.sf-template-coupon span:last-child { padding: 3px 7px; border-radius: 4px; background: #2563eb; color: #fff; }
+.sf-template-confidence { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 5px 14px; padding: 18px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; background: rgba(15,23,42,.2); color: #fff; }
+.sf-template-confidence .sf-template-label { grid-column: 1 / -1; color: #bfdbfe; }
+.sf-template-confidence strong { font-family: var(--sf-font-headline); font-size: 20px; }
+.sf-template-confidence span:not(.sf-template-label) { color: #bfdbfe; font-size: 11px; }
+.sf-tpl-campus-quick-mart .sf-grid { gap: 14px; }
+.sf-tpl-campus-quick-mart .sf-card {
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  box-shadow: 0 1px 2px rgba(30, 64, 175, 0.08);
+}
+@media (min-width: 768px) {
+  .sf-tpl-campus-quick-mart .sf-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  .sf-tpl-campus-quick-mart .sf-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ------------- Template 3: Tech & Essentials Pro (specs-driven) ----------- */
+.sf-tpl-tech-essentials-pro {
+  --sf-primary: #2563eb;
+  --sf-primary-container: #2563eb;
+  --sf-on-primary-container: #eeefff;
+}
+.sf-header-tpl-tech-essentials-pro { background: rgba(255,255,255,.96); }
+.sf-header-tpl-tech-essentials-pro .sf-template-strip { margin-inline: 16px; color: #cbd5e1; }
+.sf-header-tpl-tech-essentials-pro .sf-template-strip:before { content: ''; position: absolute; inset: 0 0 auto; height: 34px; background: #0f172a; z-index: -1; }
+.sf-header-tpl-tech-essentials-pro .sf-template-strip-label { color: #93c5fd; }
+.sf-template-hero-tech { display: grid; grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); align-items: start; padding: 0; }
+.sf-template-hero-tech .sf-template-hero-copy { display: flex; flex-direction: column; justify-content: flex-start; gap: 18px; padding: 28px; align-self: start; }
+.sf-template-chip { border-radius: 5px; background: #dbeafe; color: #1e40af; }
+.sf-template-chip-success { background: #d1fae5; color: #047857; }
+.sf-template-chiprow { display: flex; flex-wrap: wrap; gap: 8px; }
+.sf-template-hero-tech h1 { font-size: clamp(28px, 3vw, 44px); }
+.sf-template-specs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.sf-template-specs span { display: flex; flex-direction: column; gap: 4px; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #0f172a; font-family: var(--sf-font-label); font-size: 11px; }
+.sf-template-specs b { color: #64748b; font-weight: 500; text-transform: uppercase; }
+.sf-template-hero-tech .sf-template-hero-image { min-height: 300px; background-color: #0f172a; }
+.sf-tpl-tech-essentials-pro .sf-card { border: 1px solid rgba(37, 99, 235, 0.18); box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08); }
+.sf-tpl-tech-essentials-pro .sf-grid { gap: 20px; }
+.sf-tpl-tech-essentials-pro .sf-eyebrow { letter-spacing: 0.14em; }
+
+/* --------------- Template 1: Modern Boutique (editorial) ----------------- */
+.sf-template-hero-boutique { display: grid; grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); border-radius: 24px; padding: 0; }
+.sf-template-hero-boutique .sf-template-hero-copy { display: flex; flex-direction: column; justify-content: center; padding: 52px; }
+.sf-template-hero-boutique h1 em { color: var(--sf-primary); font-family: Georgia, serif; font-weight: 400; }
+.sf-template-hero-boutique .sf-template-hero-image { min-height: 560px; }
+.sf-tpl-modern-boutique .sf-card { border-radius: 16px; }
+.sf-tpl-modern-boutique .sf-card-media { height: 260px; }
+
+/* The template heroes replace the classic marketplace masthead and promo bar. */
+.sf-page[class*="sf-tpl-"] > .sf-hero,
+.sf-page[class*="sf-tpl-"] > .sf-assurances,
+.sf-page[class*="sf-tpl-"] > .sf-announce { display: none; }
+
+@media (max-width: 760px) {
+  .sf-template-gallery { display: block; padding: 20px; }
+  .sf-template-gallery-media { width: 100%; }
+  .sf-template-gallery-rail { flex: none; }
+  .sf-template-gallery-copy { padding: 4px 0 20px; }
+  .sf-template-gallery-copy h1 { font-size: 34px; }
+  .sf-template-gallery-card { height: auto; aspect-ratio: 1.25; }
+  .sf-template-strip-copy, .sf-template-strip-status { display: none; }
+  .sf-template-hero-campus, .sf-template-hero-tech, .sf-template-hero-boutique { display: block; }
+  .sf-template-hero-campus { padding: 22px; }
+  .sf-template-confidence { margin-top: 18px; }
+  .sf-template-hero-tech .sf-template-hero-copy, .sf-template-hero-boutique .sf-template-hero-copy { padding: 28px 22px; }
+  .sf-template-hero-tech .sf-template-hero-image, .sf-template-hero-boutique .sf-template-hero-image { min-height: 300px; }
+  .sf-template-specs { grid-template-columns: repeat(2, 1fr); }
+  .sf-template-image-caption { right: 14px; bottom: 14px; left: 14px; }
+}

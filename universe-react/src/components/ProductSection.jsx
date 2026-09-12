@@ -97,7 +97,7 @@ const ProductSection = ({ onAddToCart }) => {
                   </div>
                   <div className="product-footer">
                     <span className="product-price">{formatMoney(product.salePrice ?? product.price)}</span>
-                    <button className="add-cart-btn" onClick={onAddToCart} aria-label="Add to cart">
+                    <button className="add-cart-btn" onClick={() => onAddToCart(product)} aria-label="Add to cart">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="9" cy="21" r="1" />
                         <circle cx="20" cy="21" r="1" />

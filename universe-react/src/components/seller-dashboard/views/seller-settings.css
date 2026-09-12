@@ -358,6 +358,8 @@
 .st-brand-upload-wide { width: 100%; height: 132px; }
 .st-brand-upload-hint { font-size: 12px; font-weight: 600; color: var(--st-on-surface-variant); padding: 0 10px; text-align: center; }
 .st-brand-preview { width: 100%; height: 100%; object-fit: cover; display: block; }
+.st-brand-gallery-preview { display: flex; width: 100%; height: 100%; gap: 6px; overflow-x: auto; }
+.st-brand-gallery-preview .st-brand-preview { flex: 0 0 48%; }
 .st-brand-remove {
   align-self: flex-start;
   border: 0;

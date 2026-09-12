@@ -12,10 +12,12 @@
  * wishlist, follow, coupon + share copying and the toast notifications.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useStorefront } from '../../hooks/useStorefront';
 import { getUserInitials } from '../../lib/user';
+import { slugifyStoreName } from '../../lib/storeDomain';
 import './storefront.css';
+import './storefrontTemplates.css';
 
 const CATEGORY_TABS = [
   { key: 'all', label: 'All Products' },
@@ -34,6 +36,7 @@ const PAGE_TABS = [
 
 function StorefrontPage() {
   const { storeSlug } = useParams();
+  const navigate = useNavigate();
   const { data: store, isLoading, isError, error, refetch } = useStorefront(storeSlug);
 
   const [activePageTab, setActivePageTab] = useState('all-products');
@@ -181,6 +184,9 @@ function StorefrontPage() {
 
   const followerCount = store.followers + (following ? 1 : 0);
   const followerLabel = `${(followerCount / 1000).toFixed(1)}k`;
+  const pageTabs = store.template
+    ? PAGE_TABS.filter((tab) => tab.key === 'all-products')
+    : PAGE_TABS;
 
   return (
     <div className="sf-root">
@@ -190,9 +196,11 @@ function StorefrontPage() {
         cartCount={cartCount}
         activePageTab={activePageTab}
         onGoToSection={goToSection}
+        pageTabs={pageTabs}
       />
       <main className="sf-main">
-        <div className="sf-page">
+        <div className={`sf-page${store?.template ? ` sf-tpl-${store.template}` : ''}`}>
+          {store.template && <TemplateGallery store={store} onExplore={() => document.getElementById('sf-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />}
           {/* Hero Banner with Layered Profile Mosaic */}
           <div className="sf-hero">
             <div
@@ -439,6 +447,7 @@ function StorefrontPage() {
                   onToggleWishlist={toggleWishlist}
                   onAddToCart={handleAddToCart}
                   onInstantBuy={handleInstantBuy}
+                  onOpen={() => navigate(`/store/${store.slug}/${slugifyStoreName(product.name)}`)}
                 />
               ))}
             </div>
@@ -456,8 +465,8 @@ function StorefrontPage() {
               </div>
             )}
           </div>
-          {/* Merchant Bio, Verified Student Reviews & Contact Section (Bento Grid) */}
-          <div className="sf-bento">
+          {/* Secondary seller details stay off template storefronts so products remain the focus. */}
+          {!store.template && <div className="sf-bento">
             {/* Bio & Verification Card (5 Cols) */}
             <div className="sf-bio" id="sf-about">
               <div className="sf-bio-inner">
@@ -549,7 +558,7 @@ function StorefrontPage() {
                 </a>
               </div>
             </div>
-          </div>
+          </div>}
         </div>
       </main>
 
@@ -565,9 +574,9 @@ function StorefrontPage() {
  * actions and the secondary page-tabs row with the campus pickup note.
  * Structure and iconography match the mockup's <header> 1:1.
  */
-function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSection }) {
+function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSection, pageTabs }) {
   return (
-    <header className="sf-header">
+    <header className={`sf-header${store.template ? ` sf-header-tpl-${store.template}` : ''}`}>
       <div className="sf-header-inner">
         <div className="sf-header-row">
           <div className="sf-brand">
@@ -631,7 +640,7 @@ function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSe
         </div>
         <div className="sf-header-navrow">
           <nav className="sf-page-tabs" aria-label="Store sections">
-            {PAGE_TABS.map((tab) => (
+            {pageTabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
@@ -652,15 +661,95 @@ function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSe
     </header>
   );
 }
+
+function TemplateGallery({ store, onExplore }) {
+  const copy = store.template === 'tech-essentials-pro'
+    ? { eyebrow: 'Verified hardware', title: 'Tools for serious study and work.', text: 'Certified tech, practical accessories, and reliable gear selected for campus life.' }
+    : store.template === 'campus-quick-mart'
+      ? { eyebrow: 'Fast campus essentials', title: 'Good deals, ready when you are.', text: 'Everyday essentials stocked close by, packed quickly, and ready for pickup or delivery.' }
+      : { eyebrow: 'Curated campus living', title: 'Useful things, beautifully chosen.', text: 'A considered edit of accessories, study pieces, and lifestyle essentials from a trusted local seller.' };
+  const images = store.bannerImages?.length ? store.bannerImages : (store.bannerImage ? [store.bannerImage] : []);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const galleryRef = useRef(null);
+  const galleryPaused = useRef(false);
+
+  useEffect(() => {
+    setActiveImageIndex((current) => Math.min(current, Math.max(images.length - 1, 0)));
+  }, [images.length]);
+
+  useEffect(() => {
+    if (images.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const timer = window.setInterval(() => {
+      if (galleryPaused.current) return;
+      setActiveImageIndex((current) => (current + 1) % images.length);
+    }, 3200);
+
+    return () => window.clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <section className="sf-template-gallery" aria-labelledby="sf-template-gallery-title">
+      <div className="sf-template-gallery-copy">
+        <span className="sf-template-eyebrow">{copy.eyebrow}</span>
+        <h1 id="sf-template-gallery-title">{copy.title}</h1>
+        <p>{copy.text} {`Curated by ${store.owner}.`}</p>
+        <button type="button" className="sf-template-primary-action" onClick={onExplore}>Shop the collection <span className="material-symbols-outlined sf-i18">arrow_downward</span></button>
+      </div>
+      <div className="sf-template-gallery-media">
+        <div
+          ref={galleryRef}
+          className="sf-template-gallery-rail"
+          aria-label={`${store.name} storefront images`}
+          onMouseEnter={() => { galleryPaused.current = true; }}
+          onMouseLeave={() => { galleryPaused.current = false; }}
+          onFocus={() => { galleryPaused.current = true; }}
+          onBlur={() => { galleryPaused.current = false; }}
+        >
+          {images.length ? (
+            <figure className="sf-template-gallery-card" key={images[activeImageIndex]}>
+              <img src={images[activeImageIndex]} alt={`${store.name} storefront view ${activeImageIndex + 1}`} />
+              <figcaption>{activeImageIndex === 0 ? 'Storefront collection' : `Collection view ${activeImageIndex + 1}`}</figcaption>
+            </figure>
+          ) : <div className="sf-template-gallery-empty">Seller images will appear here.</div>}
+        </div>
+        {images.length > 1 && (
+          <div className="sf-template-gallery-dots" aria-label="Choose storefront image">
+            {images.map((image, index) => (
+              <button
+                type="button"
+                key={image}
+                className={index === activeImageIndex ? 'active' : ''}
+                aria-label={`Show storefront image ${index + 1}`}
+                aria-current={index === activeImageIndex ? 'true' : undefined}
+                onClick={() => setActiveImageIndex(index)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
 /**
  * One product card — image with hover zoom, stock/campus/badge pills,
  * wishlist heart, category + rating meta, Naira price and the
  * Add / Buy Now action pair. Exactly the mockup's .product-card markup.
  */
-function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onInstantBuy }) {
+function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onInstantBuy, onOpen }) {
   const categoryTone = product.category === 'tech' ? 'tone-primary' : 'tone-secondary';
   return (
-    <div className="sf-card">
+    <article
+      className="sf-card sf-card-clickable"
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
+      role="link"
+      tabIndex={0}
+    >
       <div className="sf-card-media">
         <div
           className="sf-card-img"
@@ -691,7 +780,7 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
         <button
           type="button"
           className={wishlisted ? 'sf-wish active' : 'sf-wish'}
-          onClick={() => onToggleWishlist(product)}
+          onClick={(event) => { event.stopPropagation(); onToggleWishlist(product); }}
           title="Save to wishlist"
           aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
         >
@@ -721,18 +810,18 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
             {product.oldPriceLabel && <span className="sf-oldprice">{product.oldPriceLabel}</span>}
           </div>
           <div className="sf-card-actions">
-            <button type="button" className="sf-btn-add" onClick={() => onAddToCart(product)}>
+            <button type="button" className="sf-btn-add" onClick={(event) => { event.stopPropagation(); onAddToCart(product); }}>
               <span className="material-symbols-outlined sf-i18">shopping_bag</span>
               <span>Add</span>
             </button>
-            <button type="button" className="sf-btn-buy" onClick={() => onInstantBuy(product)}>
+            <button type="button" className="sf-btn-buy" onClick={(event) => { event.stopPropagation(); onInstantBuy(product); }}>
               <span>Buy Now</span>
               <span className="material-symbols-outlined sf-i16">arrow_forward</span>
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

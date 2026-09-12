@@ -63,6 +63,9 @@ const sellerProfiles: SellerProfile[] = [
     course: 'B.Sc. Computer Science',
     school: 'Olabisi Onabanjo University',
     bio: 'Selling premium tech and lifestyle products.',
+    storeTemplate: 'modern-boutique',
+    pickupLocation: 'Ago-Iwoye Main Campus Gate',
+    supportEmail: 'store.support@universe.com',
   },
 ];
 

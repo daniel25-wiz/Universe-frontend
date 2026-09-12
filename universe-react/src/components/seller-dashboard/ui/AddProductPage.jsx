@@ -38,17 +38,31 @@ function AddProductPage() {
     sku: '',
     description: '',
     price: '',
-    salePrice: '',
+    discount: '',
+    location: '',
+    length: '',
     stock: '',
     category: '',
     status: 'active',
+    soldOut: false,
+    negotiable: false,
+    brand: 'Brand New',
     images: [],
   });
 
   const goBack = () => navigate('/seller/marketplace');
+  const imageSlots = Array.from({ length: MAX_IMAGES }, (_, index) => form.images[index] ?? null);
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.id]: e.target.value }));
+  };
+
+  const toggleField = (field) => {
+    setForm((f) => ({ ...f, [field]: !f[field] }));
+  };
+
+  const selectBrand = (brand) => {
+    setForm((f) => ({ ...f, brand }));
   };
 
   /** Append raw image sources (data URLs from uploads, or pasted URLs). */
@@ -107,13 +121,17 @@ function AddProductPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setServerError(null);
+
+    const resolvedName = (form.name || form.category || 'New Product').trim() || 'New Product';
+    const resolvedPrice = Number.parseFloat(form.price || '0');
+
     createProduct.mutate(
       {
-        name: form.name,
+        name: resolvedName,
         sku: form.sku || undefined,
         description: form.description || undefined,
-        price: parseFloat(form.price),
-        salePrice: form.salePrice ? parseFloat(form.salePrice) : null,
+        price: Number.isFinite(resolvedPrice) ? resolvedPrice : 0,
+        salePrice: form.discount ? parseFloat(form.discount) : null,
         stock: form.stock ? parseInt(form.stock, 10) : null,
         category: form.category || undefined,
         status: form.status,
@@ -134,224 +152,201 @@ function AddProductPage() {
   };
 
   return (
-    <main className="ap-backdrop">
-      <div className="ap-modal">
-        {/* Modal Header */}
+    <main className="ap-page-shell">
+      <div className="ap-card">
         <header className="ap-header">
-          <div className="ap-header-brand">
-            <img src="/logo.png" alt="Global Store" className="ap-brand-logo" />
-            <div>
-              <h1 className="ap-title">Add New Product</h1>
-              <p className="ap-sub">Fill in the details to list a new item in your Global Store.</p>
-            </div>
-          </div>
-          <button className="ap-close" aria-label="Close modal" onClick={goBack}>
-            <span className="material-symbols-outlined">close</span>
-          </button>
+          <h1 className="ap-title">Add New Product</h1>
+          <p className="ap-subtitle">
+            Fill in the details below to add a new product
+            <br />
+            to your store.
+          </p>
         </header>
 
-        {/* Modal Body (Form) */}
-        <div className="ap-body">
-          <form className="ap-form" id="ap-form" onSubmit={handleSubmit}>
-            {/* Server error */}
-            {serverError && (
-              <div className="ap-error">{serverError}</div>
-            )}
-            {/* Basic Info Section */}
-            <section className="ap-section">
-              <h2 className="ap-section-title">Basic Information</h2>
-              <div className="ap-grid-2">
-                <div className="ap-field">
-                  <label className="ap-label" htmlFor="productName">
-                    Product Name <span className="ap-required">*</span>
-                  </label>
-                  <input
-                    className="ap-input"
-                    id="productName"
-                    type="text"
-                    placeholder="e.g. Minimalist Ceramic Vase"
-                    value={form.name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="ap-field">
-                  <label className="ap-label" htmlFor="sku">
-                    SKU (Stock Keeping Unit)
-                  </label>
-                  <input
-                    className="ap-input"
-                    id="sku"
-                    type="text"
-                    placeholder="e.g. VASE-CER-001"
-                    value={form.sku}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="ap-field">
-                <label className="ap-label" htmlFor="category">Category</label>
-                <select className="ap-input" id="category" value={form.category} onChange={handleChange}>
-                  <option value="">Uncategorized</option>
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="ap-field">
-                <label className="ap-label" htmlFor="description">
-                  Description
-                </label>
-                <textarea
-                  className="ap-textarea"
-                  id="description"
-                  rows="4"
-                  placeholder="Describe the product features, materials, and care instructions..."
-                  value={form.description}
-                  onChange={handleChange}
-                ></textarea>
-              </div>
-            </section>
+        <form className="ap-form" id="ap-form" onSubmit={handleSubmit}>
+          {serverError && <div className="ap-error">{serverError}</div>}
 
-            {/* Pricing & Inventory Section */}
-            <section className="ap-section">
-              <h2 className="ap-section-title">Pricing &amp; Inventory</h2>
-              <div className="ap-grid-3">
-                <div className="ap-field">
-                  <label className="ap-label" htmlFor="price">
-                    Regular Price <span className="ap-required">*</span>
-                  </label>
-                  <div className="ap-price-wrap">
-                    <span className="ap-prefix">₦</span>
-                    <input className="ap-input" id="price" type="number" placeholder="0.00" value={form.price} onChange={handleChange} />
-                  </div>
-                </div>
-                <div className="ap-field">
-                  <label className="ap-label" htmlFor="salePrice">
-                    Sale Price
-                  </label>
-                  <div className="ap-price-wrap">
-                    <span className="ap-prefix">₦</span>
-                    <input className="ap-input" id="salePrice" type="number" placeholder="0.00" value={form.salePrice} onChange={handleChange} />
-                  </div>
-                </div>
-                <div className="ap-field">
-                  <label className="ap-label" htmlFor="stock">
-                    Initial Stock <span className="ap-required">*</span>
-                  </label>
-                  <input className="ap-input" id="stock" type="number" placeholder="0" value={form.stock} onChange={handleChange} />
-                </div>
+          <section className="ap-section">
+            <div className="ap-section-header">
+              <h2>Product Images</h2>
+              <p>Select 5 images of the product</p>
+            </div>
+
+            <div className="ap-upload-grid">
+              {imageSlots.map((image, index) => (
+                <button
+                  key={`slot-${index}`}
+                  type="button"
+                  className={`ap-upload-box ${image ? 'has-image' : ''}`}
+                  aria-label={image ? `Product image ${index + 1}` : 'Add product image'}
+                  onClick={() => document.getElementById('ap-image-input')?.click()}
+                >
+                  {image ? (
+                    <img src={image} alt={`Product ${index + 1}`} className="ap-upload-preview" />
+                  ) : (
+                    <span className="material-symbols-outlined">add</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <input
+              id="ap-image-input"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageFiles}
+              className="ap-hidden-input"
+            />
+          </section>
+
+          <label className="ap-field ap-field-full ap-product-name-field">
+            <span>Product Name</span>
+            <input
+              id="name"
+              type="text"
+              placeholder="Enter product name"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+
+          <div className="ap-row ap-row-3">
+            <label className="ap-field">
+              <span>Price</span>
+              <div className="ap-input-wrap">
+                <span className="ap-prefix">₦</span>
+                <input id="price" type="number" placeholder="Enter price" value={form.price} onChange={handleChange} />
               </div>
-            </section>
+            </label>
 
-            {/* Visibility Section */}
-            <section className="ap-section">
-              <h2 className="ap-section-title">Visibility</h2>
-              <div className="ap-grid-2">
-                <label className="ap-field" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 0 }}>
-                  <input type="radio" name="status" value="active" checked={form.status === 'active'} onChange={handleChange} />
-                  <span className="ap-label" style={{ marginBottom: 0 }}>Publish now (visible in marketplace)</span>
-                </label>
-                <label className="ap-field" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 0 }}>
-                  <input type="radio" name="status" value="draft" checked={form.status === 'draft'} onChange={handleChange} />
-                  <span className="ap-label" style={{ marginBottom: 0 }}>Save as draft (only you can see it)</span>
-                </label>
+            <label className="ap-field">
+              <span>Discount Price (Optional)</span>
+              <div className="ap-input-wrap">
+                <span className="ap-prefix">₦</span>
+                <input id="discount" type="number" placeholder="Enter discount price" value={form.discount} onChange={handleChange} />
               </div>
-            </section>
+            </label>
 
-            {/* Media Section */}
-            <section className="ap-section">
-              <div className="ap-media-head">
-                <h2 className="ap-section-title">Product Images</h2>
-                <span className="ap-media-hint">
-                  Up to {MAX_IMAGES} images · first image is the cover
-                </span>
+            <label className="ap-field">
+              <span>Location</span>
+              <div className="ap-input-wrap location-wrap">
+                <span className="material-symbols-outlined ap-loc-icon">location_on</span>
+                <input id="location" type="text" placeholder="Enter location" value={form.location} onChange={handleChange} />
               </div>
+            </label>
+          </div>
 
-              {/* Upload Area (multi-file, wired to a real file input, compressed in-browser) */}
-              <label className="ap-upload" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
-                <div className="ap-upload-icon">
-                  <span className="material-symbols-outlined">cloud_upload</span>
-                </div>
-                <p className="ap-upload-text">
-                  <strong>Click to upload</strong> or drag and drop
-                </p>
-                <p className="ap-upload-hint">
-                  PNG or JPG — compressed automatically in your browser ({form.images.length}/{MAX_IMAGES} added)
-                </p>
-                <input
-                  id="ap-image-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  style={{ display: 'none' }}
-                  onChange={handleImageFiles}
-                />
-              </label>
-              {imageError && <p className="sd-field-error" style={{ marginTop: 8 }}>{imageError}</p>}
-
-              <div className="ap-image-url-row">
-                <input
-                  className="ap-input"
-                  type="text"
-                  placeholder="Paste an image URL and press Enter to add"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  onKeyDown={handleImageUrlKeyDown}
-                />
+          <div className="ap-toggle-row">
+            <div className="ap-toggle-block">
+              <div className="ap-toggle-line">
+                <span className="ap-toggle-label">Sold Out</span>
                 <button
                   type="button"
-                  className="ap-btn-add-url"
-                  onClick={handleImageUrlAdd}
-                  disabled={!imageUrl.trim()}
+                  className={`ap-switch ${form.soldOut ? 'on' : ''}`}
+                  aria-label="Toggle sold out"
+                  onClick={() => toggleField('soldOut')}
                 >
-                  Add
+                  <span className="ap-switch-thumb" />
                 </button>
               </div>
+              <p>Do you want your product unavailable</p>
+            </div>
 
-              {/* Image Thumbnails (live previews, remove + cover badge) */}
-              {form.images.length > 0 ? (
-                <div className="ap-thumbs">
-                  {form.images.map((src, i) => (
-                    <div className="ap-preview" key={`${i}-${src.slice(0, 24)}`}>
-                      <img src={src} alt={`Product image ${i + 1}`} />
-                      {i === 0 && <span className="ap-cover-badge">Cover</span>}
-                      <button
-                        type="button"
-                        className="ap-preview-remove"
-                        aria-label={`Remove image ${i + 1}`}
-                        onClick={() => removeImage(i)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                  {form.images.length < MAX_IMAGES && (
-                    <label className="ap-thumb-add" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
-                      <span className="material-symbols-outlined">add</span>
-                    </label>
-                  )}
-                </div>
-              ) : (
-                <div className="ap-thumbs">
-                  <div className="ap-thumb">
-                    <span className="material-symbols-outlined">image</span>
-                  </div>
-                </div>
-              )}
-            </section>
-          </form>
+            <div className="ap-toggle-block">
+              <div className="ap-toggle-line">
+                <span className="ap-toggle-label">Negotiate</span>
+                <button
+                  type="button"
+                  className={`ap-switch ${form.negotiable ? 'on' : ''}`}
+                  aria-label="Toggle negotiate"
+                  onClick={() => toggleField('negotiable')}
+                >
+                  <span className="ap-switch-thumb" />
+                </button>
+              </div>
+              <p>Do you want your product negotiable</p>
+            </div>
+          </div>
+
+          <div className="ap-row ap-row-2 ap-brand-row">
+            <button
+              type="button"
+              className={`ap-brand-option ${form.brand === 'Brand New' ? 'selected' : ''}`}
+              onClick={() => selectBrand('Brand New')}
+            >
+              <span className="ap-option-box" aria-hidden="true" />
+              <span>Brand New</span>
+            </button>
+
+            <button
+              type="button"
+              className={`ap-brand-option ${form.brand === 'Fairly Used' ? 'selected' : ''}`}
+              onClick={() => selectBrand('Fairly Used')}
+            >
+              <span className="ap-option-box" aria-hidden="true" />
+              <span>Fairly Used</span>
+            </button>
+          </div>
+
+          <label className="ap-field ap-field-full">
+            <span>Description</span>
+            <textarea
+              id="description"
+              rows="4"
+              placeholder="Write a detailed description..."
+              value={form.description}
+              onChange={handleChange}
+            />
+          </label>
+
+          <label className="ap-field ap-field-full">
+            <span>Length of roll / Use</span>
+            <input
+              id="length"
+              type="text"
+              placeholder="Enter length of roll or use"
+              value={form.length}
+              onChange={handleChange}
+            />
+          </label>
+
+          <div className="ap-location-box ap-field-full">
+            <span className="material-symbols-outlined">location_on</span>
+            <span>Motion Ground At DHL Building</span>
+            <span className="material-symbols-outlined ap-lock-icon">lock</span>
+          </div>
+
+          <label className="ap-field ap-field-full">
+            <span>Category</span>
+            <div className="ap-select-wrap">
+              <span className="material-symbols-outlined ap-category-icon">category</span>
+              <select id="category" value={form.category} onChange={handleChange}>
+                <option value="">Select category</option>
+                {CATEGORIES.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined ap-caret">expand_more</span>
+            </div>
+          </label>
+
+          <button type="button" className="ap-add-variant">
+            <span className="material-symbols-outlined">add</span>
+            Add Variant
+          </button>
+        </form>
+
+        <div className="ap-action-bar">
+          <button type="button" className="ap-clear-btn" onClick={goBack}>
+            <span className="material-symbols-outlined">delete</span>
+            Clear Product
+          </button>
+          <button type="submit" form="ap-form" className="ap-submit-btn">
+            SET UP
+          </button>
         </div>
-
-        {/* Modal Footer (Actions) */}
-        <footer className="ap-footer">
-          <button className="ap-btn-cancel" type="button" onClick={goBack} disabled={createProduct.isPending}>
-            Cancel
-          </button>
-          <button className="ap-btn-save" type="submit" form="ap-form" disabled={createProduct.isPending}>
-            <span className="material-symbols-outlined">save</span>
-            {createProduct.isPending ? 'Saving...' : 'Save Product'}
-          </button>
-        </footer>
       </div>
     </main>
   );

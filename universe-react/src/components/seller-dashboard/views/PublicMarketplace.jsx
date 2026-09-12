@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../seller-dashboard.css';
 import './public-marketplace.css';
 import { useProducts } from '../../../hooks/useProducts';
 import { useCurrentUser } from '../../../hooks/useAuth';
-import { getUserInitials, getFirstName, formatMoney } from '../../../lib/user';
+import { getFirstName, formatMoney } from '../../../lib/user';
 
 const CATEGORIES = [
   { name: 'Supermarket', icon: 'storefront' },
@@ -23,14 +24,15 @@ const HERO_ALT =
 /**
  * Public Marketplace homepage — port of marketplace_jumia_style_blue.html
  */
-function PublicMarketplace() {
+function PublicMarketplace({ cartItems = [], onAddToCart }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('Electronics');
   const { data: user } = useCurrentUser();
-  const { data: products, isLoading } = useProducts({ category: activeCategory });
+  const { data: catalogProducts, isLoading } = useProducts({ status: 'active', pageSize: 200 });
+  const products = catalogProducts ?? [];
 
   return (
-    <div className="mp-root">
+    <div className="sd-root mp-root">
       {/* TopNavBar */}
       <header className="mp-topnav">
         <div className="mp-topnav-inner">
@@ -50,10 +52,11 @@ function PublicMarketplace() {
               <span className="material-symbols-outlined">person</span>
               <span className="mp-action-label">Hi, {getFirstName(user?.fullName)}</span>
             </div>
-            <div className="mp-top-action">
+            <Link to="/cart" className="mp-top-action mp-cart-action">
               <span className="material-symbols-outlined">shopping_cart</span>
-              <span className="mp-action-label">Cart</span>
-            </div>
+              <span className="mp-action-label">Cart ({cartItems.reduce((total, item) => total + item.quantity, 0)})</span>
+              {cartItems.length > 0 && <span className="mp-cart-count">{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>}
+            </Link>
           </div>
         </div>
         <div className="mp-subnav">
@@ -171,18 +174,32 @@ function PublicMarketplace() {
               {isLoading ? (
                 <div className="mp-loading">Loading products...</div>
               ) : (
-                products?.map((product) => (
+                products?.map((product, index) => (
                   <div key={product.id} className="mp-card">
-                    <div className="mp-card-img">
-                      <img src={product.imageUrl} alt="" data-alt={product.imageAlt} loading="lazy" decoding="async" />
-                    </div>
+                    {index === 0 && <div className="mp-card-badge">-20%</div>}
+                    <Link className="mp-card-link" to={`/marketplace/product/${product.id}`} aria-label={`View ${product.name}`}>
+                      <div className="mp-card-media">
+                        <img src={product.imageUrl} alt={product.imageAlt || product.name} data-alt={product.imageAlt} loading="lazy" decoding="async" />
+                      </div>
+                    </Link>
                     <div className="mp-card-body">
-                      <h3 className="mp-card-title">{product.name}</h3>
-                      <div className="mp-rating">
-                        <span className="material-symbols-outlined">star</span>
+                      <div className={`mp-tag ${index % 2 === 0 ? 'mp-tag-official' : 'mp-tag-primary'}`}>
+                        <span className="material-symbols-outlined">{index % 2 === 0 ? 'verified' : 'local_shipping'}</span>
+                        {index % 2 === 0 ? 'Official Store' : 'Free Delivery'}
+                      </div>
+                      <Link className="mp-card-title mp-card-title-link" to={`/marketplace/product/${product.id}`}>{product.name}</Link>
+                      <div className="mp-price">{formatMoney(product.salePrice ?? product.price)}</div>
+                      <div className="mp-rating-row">
+                        <div className="mp-stars">
+                          <span className="material-symbols-outlined filled-icon">star</span>
+                          <span className="material-symbols-outlined filled-icon">star</span>
+                          <span className="material-symbols-outlined filled-icon">star</span>
+                          <span className="material-symbols-outlined filled-icon">star</span>
+                          <span className="material-symbols-outlined">star_half</span>
+                        </div>
                         <span>{product.rating ?? '0.0'}</span>
                       </div>
-                      <div className="mp-price">{formatMoney(product.salePrice ?? product.price)}</div>
+                      <button type="button" className="mp-add-btn" onClick={() => onAddToCart?.(product)}>ADD TO CART</button>
                     </div>
                   </div>
                 ))
@@ -194,16 +211,14 @@ function PublicMarketplace() {
 
       {/* Footer */}
       <footer className="mp-footer">
-        <div className="mp-footer-brand">
-          <img src="/logo.png" alt="MarketPlace" className="mp-footer-brand-img" />
-        </div>
+        <div className="mp-footer-brand">MarketPlace</div>
         <div className="mp-footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
+          <Link to="/terms">Privacy Policy</Link>
+          <Link to="/terms">Terms of Service</Link>
           <a href="#">Shipping Info</a>
-          <a href="#">Contact Us</a>
+          <a href="https://wa.me/2347051917468" target="_blank" rel="noopener noreferrer">Contact Us</a>
         </div>
-        <p className="mp-footer-copy">© 2024 MarketPlace. All rights reserved.</p>
+        <p className="mp-footer-copy">© 2026 MarketPlace. All rights reserved.</p>
       </footer>
     </div>
   );

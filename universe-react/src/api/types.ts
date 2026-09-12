@@ -100,8 +100,7 @@ export interface GoogleLoginRequest {
   rememberMe?: boolean;
   /**
    * Only consulted when the Google email has never signed up before (it is
-   * ignored for existing accounts). The UI omits it; the backend applies its
-   * own default.
+    * ignored for existing accounts).
    */
   accountType?: AccountType;
 }
@@ -146,6 +145,14 @@ export interface SellerProfile {
   logoUrl?: string | null;
   /** Cover picture shown as the storefront hero banner. */
   bannerUrl?: string | null;
+  /** Seller-managed storefront gallery, shown as a scrollable image rail. */
+  bannerImages?: string[] | null;
+  /** Storefront template key — see src/lib/storeTemplates. Null = classic look. */
+  storeTemplate?: string | null;
+  /** Campus pickup hub selected in the workspace (shown on the storefront). */
+  pickupLocation?: string | null;
+  /** Support email shown to buyers on the storefront contact strip. */
+  supportEmail?: string | null;
 }
 
 export interface UpdateSellerProfileRequest {
@@ -158,6 +165,10 @@ export interface UpdateSellerProfileRequest {
   bio?: string;
   logoUrl?: string | null;
   bannerUrl?: string | null;
+  bannerImages?: string[] | null;
+  storeTemplate?: string | null;
+  pickupLocation?: string | null;
+  supportEmail?: string | null;
 }
 
 /* ------------------------------ Products ------------------------------- */
@@ -272,6 +283,8 @@ export interface StorefrontProduct {
   campusPickup?: boolean;
   image: string;
   imageAlt: string;
+  /** Gallery images, with `image` as the first/cover image. */
+  images?: string[];
 }
 
 export interface StorefrontReview {
@@ -312,6 +325,10 @@ export interface Storefront {
   campusTag: string;
   stockNote: string;
   pickupNote: string;
+  /** Active storefront template key — see src/lib/storeTemplates. Null = classic boutique look. */
+  template: string | null;
+  /** Seller's chosen campus pickup hub (rendered in delivery/contact strips). */
+  pickupLocation: string | null;
   /** Pretty display domain, e.g. "globalstore.universe.market". */
   domain: string;
   whatsappUrl: string;
@@ -321,6 +338,7 @@ export interface Storefront {
   announcementTitle: string;
   announcementLead: string;
   bannerImage: string | null;
+  bannerImages: string[];
   bannerAlt?: string;
   avatarImage: string | null;
   avatarAlt?: string;

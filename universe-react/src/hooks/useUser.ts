@@ -37,6 +37,9 @@ export function useUpdateSellerProfile() {
     mutationFn: (data) => usersApi.updateSellerProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SELLER_PROFILE_KEY });
+      // The public storefront derives from the profile (template, pickup hub,
+      // support email, logo...) — bust its cache so changes show up at once.
+      queryClient.invalidateQueries({ queryKey: ['storefront'] });
     },
   });
 }

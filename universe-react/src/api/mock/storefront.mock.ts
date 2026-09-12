@@ -5,12 +5,15 @@
  * every string, image, badge and metric below is ported 1:1 from that mockup.
  *
  * Store resolution (public — no session required):
- * - The slug "globalstore" (or any unknown slug) resolves to the DEMO store
- *   so the mockup experience is always available.
+ * - The slug "globalstore" (or "demo"/"store") resolves to the DEMO store so
+ *   the mockup experience is always available.
  * - A slug that matches a registered seller's store name (slugified) resolves
  *   to that seller: their identity, contact channels and active products are
- *   used, with the demo catalog as fallback imagery. This is what makes
- *   "every seller gets storename.theappurl at registration" real in mock mode.
+ *   used, with the demo catalog as fallback imagery. Sellers who never set a
+ *   store name get their domain from their full name (see getStoreDisplayName
+ *   in src/lib/user.js), so the owner's full name is matched as a fallback.
+ * - Any other slug still resolves to a public storefront fallback in mock
+ *   mode, so visitors never get blocked by authentication or local mock data.
  */
 import type {
   Storefront,
@@ -174,6 +177,8 @@ function buildDemoStore(): Storefront {
     campusTag: 'OOU Campus Merchant',
     stockNote: 'All listings physically stocked on Ago-Iwoye campus',
     pickupNote: 'Campus Pickup: Ago-Iwoye Main Gate',
+    template: 'modern-boutique',
+    pickupLocation: 'Ago-Iwoye Main Gate',
     domain: getPrettyStoreDomain('globalstore'),
     whatsappUrl: 'https://wa.me/2347051917468',
     phone: '07051917468',
@@ -182,6 +187,7 @@ function buildDemoStore(): Storefront {
     announcementTitle: 'Semester Clearance & New Tech Arrivals',
     announcementLead: 'Get an instant 10% discount on all checkout totals using student code:',
     bannerImage: IMG_BANNER,
+    bannerImages: [IMG_BANNER],
     bannerAlt:
       'A clean, stylish campus entrepreneur workstation with laptop, sleek stationery, minimalist desk accessories, natural daylight streaming through loft windows, calm modern aesthetic featuring slate blue and neutral white tones.',
     avatarImage: IMG_AVATAR,
@@ -265,13 +271,14 @@ function buildPersonalizedStore(
   profile: {
     storeName?: string | null; school?: string | null; phone?: string | null;
     logoUrl?: string | null; bannerUrl?: string | null; userId: string; id: string;
+    storeTemplate?: string | null; bannerImages?: string[] | null; pickupLocation?: string | null; supportEmail?: string | null;
   },
   ownerName: string,
   ownerEmail: string,
   memberSinceIso?: string | null,
   ownerProducts?: Array<{
     id: string; name: string; description?: string | null; price: number; salePrice?: number | null;
-    stock?: number | null; category?: string | null; imageUrl?: string | null; imageAlt?: string | null;
+    stock?: number | null; category?: string | null; imageUrl?: string | null; imageAlt?: string | null; images?: string[] | null;
     rating: number; reviews: number;
   }>,
 ): Storefront {
@@ -279,6 +286,7 @@ function buildPersonalizedStore(
   const products = (ownerProducts ?? []).map((p, index) => {
     const bucket = toBucket(p.category);
     const onSale = p.salePrice != null && p.salePrice < p.price;
+    const images = p.images?.length ? p.images : (p.imageUrl ? [p.imageUrl] : [FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]]);
     return {
       id: `sf-${p.id}`,
       name: p.name,
@@ -294,8 +302,9 @@ function buildPersonalizedStore(
       stock: p.stock ?? null,
       badge: onSale ? ('flash' as const) : null,
       campusPickup: bucket === 'campus',
-      image: p.imageUrl || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+      image: images[0],
       imageAlt: p.imageAlt || p.name,
+      images,
     } satisfies StorefrontProduct;
   });
 
@@ -313,6 +322,7 @@ function buildPersonalizedStore(
   // store NAME as its logo and cover until the seller uploads real artwork.
   const logoImage = profile.logoUrl || null;
   const bannerImage = profile.bannerUrl || null;
+  const bannerImages = profile.bannerImages?.length ? profile.bannerImages : (bannerImage ? [bannerImage] : []);
 
   return {
     ...buildDemoStore(),
@@ -326,12 +336,15 @@ function buildPersonalizedStore(
     domain: getPrettyStoreDomain(slug),
     whatsappUrl: toWhatsappUrl(profile.phone),
     phone: profile.phone || '07051917468',
-    email: ownerEmail,
+    email: profile.supportEmail || ownerEmail,
+    template: profile.storeTemplate ?? null,
+    pickupLocation: profile.pickupLocation ?? null,
     memberSinceLabel: `Since ${year}`,
     bioLead: `Run by ${ownerName || 'an independent seller'}, a student merchant at ${profile.school || 'Olabisi Onabanjo University'}. ${name} was launched to eliminate the hassle of waiting days for Lagos deliveries.`,
     bioDetail:
       'Every product is hand-tested, stocked directly on campus, and backed with peer escrow verification. We prioritize verified campus distribution points for zero shipping stress.',
     bannerImage,
+    bannerImages,
     bannerAlt: profile.bannerUrl ? `${name} storefront cover` : undefined,
     avatarImage: logoImage,
     avatarAlt: profile.logoUrl ? `${name} logo` : undefined,
@@ -351,11 +364,25 @@ export class MockStorefrontApi implements StorefrontApi {
         return buildDemoStore();
       }
 
-      // Find a registered seller whose store name slugifies to this domain.
-      const profiles = mockDb.query('sellerProfiles', (p) => slugifyStoreName(p.storeName ?? '') === slug);
+      // Find a registered seller whose domain slugifies to this slug. The
+      // dashboard derives the domain from storeName when set, else the owner's
+      // full name (getStoreDisplayName), so both are matched here.
+      const byStoreName = mockDb.query('sellerProfiles', (p) => slugifyStoreName(p.storeName ?? '') === slug);
+      const byOwnerName = mockDb.query('sellerProfiles', (p) => {
+        if (p.storeName && p.storeName.trim()) return false; // storeName takes priority
+        const owners = mockDb.query('users', (u) => u.id === p.userId);
+        return slugifyStoreName(owners[0]?.fullName ?? '') === slug;
+      });
+      const profiles = [...byStoreName, ...byOwnerName];
       if (profiles.length === 0) {
-        // Unknown domain → the demo storefront keeps the experience intact.
-        return buildDemoStore();
+        // Public mock mode must remain viewable even when a seller was created
+        // outside this browser's local mock database.
+        const fallback = buildDemoStore();
+        return {
+          ...fallback,
+          slug,
+          domain: getPrettyStoreDomain(slug),
+        };
       }
 
       const profile = profiles[0];

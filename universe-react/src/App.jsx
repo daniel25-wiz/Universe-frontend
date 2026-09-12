@@ -1,10 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomeSkeleton from './components/skeletons/HomeSkeleton';
 import AuthSkeleton from './components/skeletons/AuthSkeleton';
 import DashboardSkeleton from './components/skeletons/DashboardSkeleton';
 import TermsSkeleton from './components/skeletons/TermsSkeleton';
-import { parseStoreSubdomain } from './lib/storeDomain';
+import { useCurrentUser } from './hooks/useAuth';
+import { sessionStore } from './api/session';
 
 /**
  * Route-level code splitting.
@@ -38,35 +39,32 @@ const DashboardView = lazy(() => import('./components/seller-dashboard/Dashboard
 const DashboardOverview = lazy(() => import('./components/seller-dashboard/views/DashboardOverview'));
 const MyMarketplace = lazy(() => import('./components/seller-dashboard/views/MyMarketplace'));
 const PublicMarketplace = lazy(() => import('./components/seller-dashboard/views/PublicMarketplace'));
+const MarketplaceProductPage = lazy(() => import('./components/marketplace/MarketplaceProductPage'));
+const CartPage = lazy(() => import('./components/marketplace/CartPage'));
 const SalesAnalytics = lazy(() => import('./components/seller-dashboard/views/SalesAnalytics'));
 const SellerProfile = lazy(() => import('./components/seller-dashboard/views/SellerProfile'));
 const SellerSettings = lazy(() => import('./components/seller-dashboard/views/SellerSettings'));
 const AddProductPage = lazy(() => import('./components/seller-dashboard/ui/AddProductPage'));
 const EditProductPage = lazy(() => import('./components/seller-dashboard/ui/EditProductPage'));
-const StorefrontPage = lazy(() => import('./components/storefront/StorefrontPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 
-/**
- * Store-domain gateway.
- *
- * When the app is served on a store domain (storename.localhost in dev,
- * storename.<app-domain> in production with wildcard DNS), the visitor lands
- * on the seller's PRIVATE MARKETPLACE instead of the platform home page.
- * Hosts without wildcard subdomain support keep using the canonical
- * /store/:storeSlug path form below.
- */
-function SubdomainGateway() {
-  const location = useLocation();
-  const [storeSlug] = useState(() => parseStoreSubdomain(window.location.hostname));
-  if (storeSlug && (location.pathname === '/' || location.pathname === '')) {
-    return <Navigate to={`/store/${storeSlug}`} replace />;
+function HomeRoute({ cartCount, onAddToCart }) {
+  const { data: user, isLoading } = useCurrentUser();
+
+  if (sessionStore.hasTokens() && isLoading) {
+    return <HomeSkeleton />;
   }
-  return null;
+  if (user?.accountType === 'buyer') {
+    return <Navigate to="/marketplace" replace />;
+  }
+  return <HomePage cartCount={cartCount} onAddToCart={onAddToCart} />;
 }
 
 function App() {
-  const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
   const [showWarning, setShowWarning] = useState(false);
+
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
     // Detect if we are on file:// protocol
@@ -93,8 +91,31 @@ function App() {
     return () => window.removeEventListener("scroll", handleScrollReveal);
   }, []);
 
-  const handleAddToCart = () => {
-    setCartCount(prev => prev + 1);
+  const handleAddToCart = (product) => {
+    if (!product) return;
+    setCartItems((current) => {
+      const existing = current.find((item) => item.product.id === product.id);
+      if (existing) {
+        return current.map((item) => item.product.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item);
+      }
+      return [...current, { product, quantity: 1 }];
+    });
+  };
+
+  const handleRemoveFromCart = (productId) => {
+    setCartItems((current) => current.filter((item) => item.product.id !== productId));
+  };
+
+  const handleUpdateCartQuantity = (productId, quantity) => {
+    if (quantity < 1) {
+      handleRemoveFromCart(productId);
+      return;
+    }
+    setCartItems((current) => current.map((item) => item.product.id === productId
+      ? { ...item, quantity }
+      : item));
   };
 
   return (
@@ -123,39 +144,12 @@ function App() {
         </div>
       )}
 
-      <SubdomainGateway />
       <Routes>
         <Route
           path="/"
           element={
             <Suspense fallback={<HomeSkeleton />}>
-              <HomePage cartCount={cartCount} onAddToCart={handleAddToCart} />
-            </Suspense>
-          }
-        />
-        {/* Seller PRIVATE MARKETPLACE — served on their own domain
-            (storename.<app-domain>) or via this canonical path alias. */}
-        <Route
-          path="/store/:storeSlug"
-          element={
-            <Suspense
-              fallback={
-                <div
-                  style={{
-                    minHeight: '100vh',
-                    display: 'grid',
-                    placeItems: 'center',
-                    background: '#faf8ff',
-                    color: '#434655',
-                    fontFamily: 'system-ui, sans-serif',
-                    fontSize: 14,
-                  }}
-                >
-                  Opening storefront…
-                </div>
-              }
-            >
-              <StorefrontPage />
+              <HomeRoute cartCount={cartCount} onAddToCart={handleAddToCart} />
             </Suspense>
           }
         />
@@ -172,6 +166,30 @@ function App() {
           element={
             <Suspense fallback={<AuthSkeleton />}>
               <AuthPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <PublicMarketplace cartItems={cartItems} onAddToCart={handleAddToCart} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace/product/:productId"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <MarketplaceProductPage onAddToCart={handleAddToCart} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <CartPage cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onUpdateQuantity={handleUpdateCartQuantity} />
             </Suspense>
           }
         />
@@ -215,7 +233,7 @@ function App() {
             path="public-marketplace"
             element={
               <DashboardView>
-                <PublicMarketplace />
+                <PublicMarketplace cartItems={cartItems} onAddToCart={handleAddToCart} />
               </DashboardView>
             }
           />

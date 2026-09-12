@@ -57,7 +57,7 @@ const Footer = () => {
           <div>
             <h4 className="footer-heading">Legal</h4>
             <ul className="footer-links">
-              <li><a href="#" className="footer-link">Privacy Policy</a></li>
+              <li><Link to="/terms" className="footer-link" {...prefetchPropsForPath('/terms')}>Privacy Policy</Link></li>
               <li>
                 <Link to="/terms" className="footer-link" {...prefetchPropsForPath('/terms')}>
                   Terms of Service

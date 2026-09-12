@@ -183,6 +183,8 @@ export class MockProductsApi implements ProductsApi {
       } else {
         // Public catalog — drafts of ANY seller never leak.
         items = items.filter((p) => p.status === 'active');
+        const sellerProducts = items.filter((p) => !p.id.startsWith('seed-'));
+        if (sellerProducts.length > 0) items = sellerProducts;
       }
       if (params.status) items = items.filter((p) => p.status === params.status);
       if (params.category) items = items.filter((p) => p.category === params.category);

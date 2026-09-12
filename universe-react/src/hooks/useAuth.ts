@@ -21,6 +21,7 @@ import { sessionStore } from '../api/session';
 import type { GoogleLoginRequest, LoginRequest, RegisterRequest, User } from '../api/types';
 
 const CURRENT_USER_KEY = ['currentUser'];
+const BUYER_LANDING_PATH = '/marketplace';
 
 /** Fetch the currently authenticated user (skipped when no token exists). */
 export function useCurrentUser() {
@@ -66,7 +67,7 @@ export function useLogin() {
       // Clear any data cached under the previous account, then seed this one.
       queryClient.clear();
       queryClient.setQueryData(CURRENT_USER_KEY, user);
-      const fallback = user.accountType === 'seller' ? '/seller' : '/';
+      const fallback = user.accountType === 'seller' ? '/seller' : BUYER_LANDING_PATH;
       const returnTo = from?.pathname && from.pathname !== '/auth' ? from : null;
       navigate(returnTo ? `${returnTo.pathname}${location.state?.from?.search ?? ''}` : fallback);
     },
@@ -86,7 +87,7 @@ export function useRegister() {
     onSuccess: (user) => {
       queryClient.clear();
       queryClient.setQueryData(CURRENT_USER_KEY, user);
-      navigate(user.accountType === 'seller' ? '/seller/onboarding' : '/');
+      navigate(user.accountType === 'seller' ? '/seller/onboarding' : BUYER_LANDING_PATH);
     },
   });
 }
@@ -128,10 +129,10 @@ export function useGoogleLogin() {
       queryClient.setQueryData(CURRENT_USER_KEY, user);
       if (isNewUser) {
         // Fresh Google signup — same destination as email registration.
-        navigate(user.accountType === 'seller' ? '/seller/onboarding' : '/');
+        navigate(user.accountType === 'seller' ? '/seller/onboarding' : BUYER_LANDING_PATH);
         return;
       }
-      const fallback = user.accountType === 'seller' ? '/seller' : '/';
+      const fallback = user.accountType === 'seller' ? '/seller' : BUYER_LANDING_PATH;
       const returnTo = from?.pathname && from.pathname !== '/auth' ? from : null;
       navigate(returnTo ? `${returnTo.pathname}${location.state?.from?.search ?? ''}` : fallback);
     },

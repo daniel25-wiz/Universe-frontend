@@ -30,6 +30,7 @@ import { logApi } from '../logger';
 import { sessionStore } from '../session';
 import { requireSession } from './sessionGuard';
 import { hashPassword, validatePasswordStrength, verifyPassword } from './security';
+import { isKnownStoreTemplate } from '../../lib/storeTemplates';
 
 function toPublicUser(stored: StoredUser): User {
   const { passwordHash: _p, failedLoginCount: _f, lockedUntil: _l, ...publicUser } = stored;
@@ -119,6 +120,25 @@ export class MockUsersApi implements UsersApi {
       if (data.bio !== undefined) patch.bio = optionalText(data.bio, 1000) ?? null;
       if (data.logoUrl !== undefined) patch.logoUrl = optionalImage(data.logoUrl) ?? null;
       if (data.bannerUrl !== undefined) patch.bannerUrl = optionalImage(data.bannerUrl) ?? null;
+      if (data.bannerImages !== undefined) {
+        const images = Array.isArray(data.bannerImages)
+          ? data.bannerImages.map((image) => optionalImage(image)).filter((image): image is string => Boolean(image)).slice(0, 5)
+          : [];
+        patch.bannerImages = images.length ? images : null;
+        if (data.bannerUrl === undefined) patch.bannerUrl = images[0] ?? null;
+      }
+      if (data.storeTemplate !== undefined) {
+        // Whitelist against the registered storefront templates — unknown or
+        // empty values reset to null (the classic boutique look).
+        patch.storeTemplate =
+          data.storeTemplate && isKnownStoreTemplate(data.storeTemplate) ? data.storeTemplate : null;
+      }
+      if (data.pickupLocation !== undefined) {
+        patch.pickupLocation = optionalText(data.pickupLocation, 120) ?? null;
+      }
+      if (data.supportEmail !== undefined) {
+        patch.supportEmail = optionalText(data.supportEmail, 120) ?? null;
+      }
 
       const profiles = mockDb.query('sellerProfiles', (p) => p.userId === user.id);
       if (profiles.length === 0) {

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import GoogleSignInButton from './GoogleSignInButton';
 import { useRegister, useGoogleLogin } from '../../hooks/useAuth';
 import { ApiError } from '../../api/errors';
@@ -104,7 +104,7 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
     setServerError(null);
     setErrors({});
     googleLogin.mutate(
-      { credential },
+      { credential, accountType },
       {
         onError: (error) => {
           if (error instanceof ApiError && error.fieldErrors && Object.keys(error.fieldErrors).length > 0) {
@@ -414,9 +414,9 @@ const SignupForm = ({ onBackToAccountSelection, accountType = 'buyer' }) => {
           />
           <span>
             I agree to the{' '}
-            <a href="#" style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>Terms of Service</a>
+            <Link to="/terms" style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>Terms of Service</Link>
             {' '}and{' '}
-            <a href="#" style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>Privacy Policy</a>
+            <Link to="/terms" style={{ color: 'var(--color-primary)', fontWeight: 500, textDecoration: 'none' }}>Privacy Policy</Link>
           </span>
         </label>
         {errors.agreeToTerms && <p style={errorStyle}>{errors.agreeToTerms}</p>}
