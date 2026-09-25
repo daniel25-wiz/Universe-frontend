@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 import ArrowIcon from '../ui/ArrowIcon';
 import GoogleSignInButton from './GoogleSignInButton';
@@ -6,6 +7,7 @@ import { useLogin, useGoogleLogin } from '../../hooks/useAuth';
 import { ApiError } from '../../api/errors';
 
 const LoginForm = ({ onSwitchToAccountSelection }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -73,7 +75,7 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    console.log('Forgot password clicked');
+    navigate('/auth/forgot-password');
   };
 
   // REAL Google flow: Google Identity Services hands back a signed ID token
@@ -385,34 +387,6 @@ const LoginForm = ({ onSwitchToAccountSelection }) => {
           loading={googleLogin.isPending}
           disabled={isLoading}
         />
-        <button
-          type="button"
-          className="auth-social-btn"
-          disabled={loginMutation.isPending}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            padding: '14px 20px',
-            border: '1.5px solid var(--color-gray-200)',
-            borderRadius: '14px',
-            background: 'var(--color-white)',
-            cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            fontWeight: 500,
-            fontSize: '0.95rem',
-            color: 'var(--color-gray-700)',
-            opacity: loginMutation.isPending ? 0.6 : 1,
-          }}
-          onMouseOver={(e) => !loginMutation.isPending && (e.target.style.borderColor = 'var(--color-primary)', e.target.style.backgroundColor = 'var(--color-primary-light)', e.target.style.transform = 'translateY(-2px)', e.target.style.boxShadow = '0 8px 24px -4px rgba(37, 99, 235, 0.15)')}
-          onMouseOut={(e) => !loginMutation.isPending && (e.target.style.borderColor = 'var(--color-gray-200)', e.target.style.backgroundColor = 'var(--color-white)', e.target.style.transform = 'translateY(0)', e.target.style.boxShadow = 'none')}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-          Facebook
-        </button>
       </div>
 
       {/* Sign Up Link */}

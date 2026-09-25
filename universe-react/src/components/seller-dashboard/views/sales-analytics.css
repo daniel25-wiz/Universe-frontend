@@ -192,3 +192,64 @@
   color: var(--gs-on-surface);
   flex-shrink: 0;
 }
+
+/* Refresh control in the header toolbar (auto + manual refresh) */
+.sa-refresh {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--gs-outline-variant);
+  border-radius: var(--gs-r-full);
+  background: var(--gs-surface);
+  color: var(--gs-on-surface-variant);
+  cursor: pointer;
+}
+.sa-refresh:hover { color: var(--gs-primary); border-color: var(--gs-primary-container); }
+.sa-refresh:disabled { opacity: 0.55; cursor: default; }
+.sa-refresh .material-symbols-outlined { font-size: 18px; }
+.sa-refresh.spinning .material-symbols-outlined { animation: sa-spin 1s linear infinite; }
+@keyframes sa-spin { to { transform: rotate(360deg); } }
+
+/* Loading / error / empty states — honest data states, never fake numbers */
+.sa-message {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--gs-on-surface-variant);
+  font-family: var(--gs-font-label);
+  font-size: 13px;
+  line-height: 20px;
+}
+.sa-message p { margin: 0; font-weight: 600; color: var(--gs-on-surface); }
+.sa-message small { color: var(--gs-on-surface-variant); }
+.sa-message--error p { color: var(--gs-error); }
+.sa-retry {
+  margin-top: 8px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: var(--gs-r-lg);
+  background: var(--gs-primary);
+  color: white;
+  font-family: var(--gs-font-label);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sa-retry:hover { filter: brightness(1.05); }
+
+/* Footnote under the chart explaining what the figures are based on */
+.sa-note {
+  margin: 12px 0 0;
+  font-family: var(--gs-font-label);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--gs-on-surface-variant);
+}
+
+/* Denser bars for the 30-day daily chart */
+.sa-chart--dense { gap: 4px; }
+.sa-chart--dense .sa-bar { border-radius: 3px 3px 0 0; }

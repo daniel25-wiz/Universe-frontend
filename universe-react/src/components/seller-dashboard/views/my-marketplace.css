@@ -150,6 +150,42 @@
   border-radius: var(--gs-r-default);
 }
 
+/* Always-visible Edit action on each workshop card. Edit is also available in
+   the card's "⋮" menu, but a control hidden behind a menu was not
+   discoverable, so the primary edit action is a labelled button. */
+.ws-card-actions {
+  margin-top: var(--gs-stack-md);
+}
+
+.ws-edit-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--gs-outline-variant);
+  border-radius: var(--gs-r-lg, 12px);
+  background: var(--gs-surface);
+  color: var(--gs-primary, #0052fe);
+  font-family: var(--gs-font-label);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.ws-edit-btn:hover {
+  border-color: var(--gs-primary, #0052fe);
+  background: var(--gs-surface-container-low);
+}
+.ws-edit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.ws-edit-btn .material-symbols-outlined {
+  font-size: 17px;
+}
+
 /* "Create New Product" ghost card */
 .ws-add-card {
   background: var(--gs-surface-container-low);
@@ -195,6 +231,68 @@
   color: var(--gs-on-surface);
   margin-bottom: 8px;
 }
+
+/* ==========================================================================
+   PUBLIC MARKETPLACE LISTING — featured badge + cap error banner.
+   Sellers may list at most 2 active products in the shared marketplace
+   (MARKETPLACE_LISTING_LIMIT, enforced by the products API).
+   ========================================================================== */
+
+/* "On Marketplace" badge — sits under the Active/Draft badge (both top-left). */
+.ws-badge-featured {
+  top: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 82, 254, 0.16);
+  color: var(--gs-primary, #0052fe);
+}
+.ws-badge-featured .material-symbols-outlined {
+  font-size: 13px;
+}
+
+/* "Not listed" badge — an active product that is NOT in the shared marketplace
+   (the seller switched the listing off). Shown so the state is never inferred
+   from the absence of a badge. */
+.ws-badge-unlisted {
+  top: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.55);
+  color: #f8fafc;
+}
+.ws-badge-unlisted .material-symbols-outlined {
+  font-size: 13px;
+}
+
+/* Inline error shown above the grid when the listing cap is hit. */
+.ws-listing-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--gs-gutter);
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-radius: var(--gs-r-lg, 12px);
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ws-listing-error .material-symbols-outlined { font-size: 20px; flex: 0 0 auto; }
+.ws-listing-error-close {
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--gs-r-full, 999px);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.ws-listing-error-close:hover { background: rgba(185, 28, 28, 0.08); }
+.ws-listing-error-close .material-symbols-outlined { font-size: 16px; }
+
 .ws-add-sub {
   font-size: 14px;
   line-height: 20px;

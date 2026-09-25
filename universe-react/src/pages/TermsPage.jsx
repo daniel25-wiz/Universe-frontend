@@ -11,7 +11,7 @@
  * shared white multi-column footer.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './terms.css';
 
 const ICON_PROPS = {
@@ -44,14 +44,6 @@ const ChevronIcon = () => (
 const WarningIcon = () => (
   <svg className="tou-binding-icon" width={48} height={48} {...ICON_PROPS}>
     <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-  </svg>
-);
-
-const CartIcon = () => (
-  <svg className="tou-brand-cart" width={20} height={20} viewBox="0 0 24 24" {...ICON_PROPS}>
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
 
@@ -333,6 +325,7 @@ function TermsPage() {
   const [query, setQuery] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     document.title = 'UNIVERSE Terms of Service';
@@ -340,6 +333,32 @@ function TermsPage() {
       document.title = 'Universe - Launch, Manage, and Scale Your Online Marketplace';
     };
   }, []);
+
+  // Deep-link support: arriving from another page at /terms#section-N (e.g. the
+  // home footer's "Sellers Agreement" → /terms#section-3) scrolls that clause
+  // card into view once it has rendered. The browser's native hash scroll runs
+  // before React renders anything, so it never lands — this retries until the
+  // target card exists. `.tou-card` already sets scroll-margin-top for the
+  // sticky header.
+  useEffect(() => {
+    const hash = location.hash.replace(/^#/, '');
+    if (!hash) return undefined;
+    let cancelled = false;
+    const tryScroll = (attempt) => {
+      if (cancelled) return;
+      const el = document.getElementById(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (attempt < 25) window.setTimeout(() => tryScroll(attempt + 1), 120);
+    };
+    const timer = window.setTimeout(() => tryScroll(0), 80);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [location.pathname, location.hash]);
 
   // Live clause search — replicates the mockup's whatever-user-types filter.
   const visible = useMemo(() => {
@@ -382,11 +401,7 @@ function TermsPage() {
       <header className="tou-header">
         <div className="tou-header-inner">
           <Link to="/" className="tou-brand" aria-label="UNIVERSE Home">
-            <span className="tou-brand-badge"><CartIcon /></span>
-            <span className="tou-brand-name">
-              UNIVERSE
-              <span className="tou-brand-tag">— all in one —</span>
-            </span>
+            <img src="/logo.png" alt="Universe" className="tou-brand-logo" />
           </Link>
 
           <div className="tou-search-wrap">
@@ -548,8 +563,7 @@ function TermsPage() {
           <div className="tou-footer-grid">
             <div className="tou-footer-brand-col">
               <div className="tou-footer-brand">
-                <span className="tou-footer-logo">U</span>
-                <span className="tou-footer-name">UNIVERSE</span>
+                <img src="/logo.png" alt="Universe" className="tou-footer-logo-img" />
               </div>
               <p className="tou-footer-desc">
                 The premier multi-vendor university and commerce platform connecting campus

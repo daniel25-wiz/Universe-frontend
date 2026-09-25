@@ -10,6 +10,12 @@
    .mm-page specificity, so section class rules below (e.g. .mm-product-info,
    .mm-screen-header) still apply their own intended spacing. */
 .mm-page :where(section) { padding-top: 0; padding-bottom: 0; }
+/* seller-dashboard.css zeroes every <section> inside .sd-root at higher
+   specificity (.sd-root section = 0,1,1 beats the 0,1,0 rules here). Re-assert
+   the shell's own section spacing at 0,2,0 so /seller/public-marketplace
+   renders identically to /marketplace. */
+.mm-page .mm-discover-heading { padding: 2px 5px 10px; }
+.mm-page .mm-empty-cart { padding: 70px 22px; }
 .mm-page { min-height: 100dvh; display: flex; justify-content: stretch; align-items: stretch; background: var(--mm-bg); color: var(--mm-ink); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
 .mm-device { width: 100%; height: 100dvh; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--mm-bg); }
 .mm-icon { width: 20px; height: 20px; flex: 0 0 auto; }
@@ -47,9 +53,13 @@
 .mm-product-link { display: block; min-width: 0; padding: 0; border: 0; color: inherit; text-align: left; background: transparent; cursor: pointer; }
 .mm-product-art { width: 100%; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 10px; overflow: hidden; border-radius: 16px; background: #f8fafc; }
 .mm-product-image { width: 100%; height: 100%; display: block; object-fit: contain; }
-.mm-product-art > .mm-product-image { position: relative; z-index: 1; }
+/* Fill the square art box (crop the overflow) instead of letterboxing with `contain`. */
+.mm-product-art > .mm-product-image { position: relative; z-index: 1; object-fit: cover; }
 .mm-image-fallback { display: none; }
-.mm-gallery-art > .mm-product-image { width: 78%; height: 78%; object-fit: contain; }
+/* The product image nearly fills the art box — 94% height leaves a ~9px
+   breathing gap at the top/bottom instead of the old centered 78% that
+   pushed the image far down the box. */
+.mm-gallery-art > .mm-product-image { width: 92%; height: 94%; object-fit: contain; }
 .mm-gallery-art > .mm-product-image + .mm-image-fallback { display: none; }
 .mm-thumbnails { display: flex; gap: 9px; overflow-x: auto; padding: 10px 2px 0; scrollbar-width: none; }
 .mm-thumbnails::-webkit-scrollbar { display: none; }
@@ -57,10 +67,20 @@
 .mm-thumbnails button.active { border: 2px solid var(--mm-blue); box-shadow: 0 0 0 2px #dbeafe; }
 .mm-thumbnails img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 8px; }
 .mm-product-meta { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 4px; }
-.mm-product-meta h2 { min-width: 0; overflow: hidden; margin: 0; color: #334155; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.mm-product-meta h2 { min-width: 0; overflow: hidden; margin: 0; color: #334155; font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .mm-product-meta span { flex: 0 0 auto; color: #64748b; font-size: 11px; }
 .mm-product-desc { display: -webkit-box; overflow: hidden; margin: 0 0 6px; color: #64748b; font-size: 10px; line-height: 14px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.mm-product-card p { margin: 0; color: var(--mm-ink); font-size: 14px; font-weight: 700; }
+/* Delivery hub of the listing — the platform default ("Motion Ground At DHL
+   Building") is shown on every marketplace card so buyers know where to collect. */
+.mm-product-location { display: flex; align-items: center; gap: 4px; min-width: 0; margin: 0 0 4px; color: #64748b; font-size: 10px; font-weight: 600; }
+.mm-product-location .mm-icon { width: 11px; height: 11px; flex: 0 0 11px; stroke-width: 2.2; }
+.mm-product-location span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Price only. As `.mm-product-card p` this outranked `.mm-product-desc`
+   (0,1,1 vs 0,1,0) and forced the description to 14px/700 inside its 14px
+   line boxes — cramped, clipped-looking text sitting flush under the pill. */
+.mm-product-footer p { margin: 0; color: var(--mm-ink); font-size: 14px; font-weight: 700; }
+.mm-stock-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; margin: 6px 0 0; padding: 4px 8px; border: 1px solid #bbf7d0; border-radius: 6px; color: #059669; background: #ecfdf5; font-size: 10px; font-weight: 700; }
+.mm-stock-pill.mm-stock-out { border-color: #fecaca; color: #dc2626; background: #fef2f2; }
 .mm-product-footer { display: flex; flex-direction: column; gap: 8px; margin-top: 2px; }
 .mm-add-cart { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 32px; padding: 0 10px; border: 0; border-radius: 999px; color: white; background: var(--mm-blue); box-shadow: 0 5px 12px rgb(37 99 235 / 25%); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: background .2s ease, transform .15s ease; }
 .mm-add-cart .mm-icon { width: 14px; height: 14px; stroke-width: 2.2; }
@@ -104,6 +124,11 @@
 .mm-category-scroll button.active { border-color: #0f172a; color: white; background: #0f172a; }
 .mm-product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding-top: 2px; }
 .mm-loading { grid-column: 1 / -1; padding: 32px; color: #64748b; text-align: center; }
+/* "Load more" control — appends the next server page so listings past the
+   first page stay reachable instead of being silently dropped. */
+.mm-load-more { display: grid; justify-items: center; padding: 16px 0 4px; }
+.mm-load-more button { padding: 11px 18px; border: 1px solid #e2e8f0; border-radius: 14px; color: var(--mm-blue); background: white; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgb(0 0 0 / 4%); }
+.mm-load-more button:disabled { color: #94a3b8; cursor: progress; }
 .mm-search-page { padding-top: 4px; }
 .mm-search-page-form { display: flex; align-items: center; gap: 9px; padding: 5px 6px 5px 14px; border: 1px solid #e2e8f0; border-radius: 16px; background: white; box-shadow: 0 2px 8px rgb(0 0 0 / 4%); }
 .mm-search-page-form > .mm-icon { width: 19px; height: 19px; flex: 0 0 auto; color: #94a3b8; }
@@ -143,6 +168,15 @@
 .mm-empty-cart h2 { font-size: 18px; }
 .mm-empty-cart p { color: #64748b; font-size: 13px; }
 .mm-empty-cart a { margin-top: 4px; padding: 11px 18px; border-radius: 14px; color: white; background: var(--mm-blue); font-size: 13px; font-weight: 600; text-decoration: none; }
+/* Ordered products — "Go To Checkout" snapshots the cart here so the buyer
+   keeps a receipt of completed orders on the cart page, even after reload. */
+.mm-ordered { display: grid; gap: 12px; padding-top: 8px; }
+.mm-ordered > h2 { margin: 0; color: #0f172a; font-size: 16px; letter-spacing: -.02em; }
+.mm-order { display: grid; gap: 9px; padding: 12px; border: 1px solid #f1f5f9; border-radius: 16px; background: white; box-shadow: 0 2px 8px rgb(0 0 0 / 3%); }
+.mm-order-date { margin: 0; color: #94a3b8; font-size: 11px; }
+.mm-order-item { margin-bottom: 0; box-shadow: none; }
+.mm-order-badge { flex: 0 0 auto; padding: 4px 9px; border-radius: 999px; color: #047857; background: #ecfdf5; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.mm-order-qty { color: #64748b; font-size: 12px; font-weight: 600; }
 .mm-product-page .mm-device { background: white; }
 .mm-product-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; border-bottom: 1px solid #f1f5f9; background: rgb(255 255 255 / 95%); }
 .mm-product-header > button, .mm-product-header > div button { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; color: #334155; background: #f8fafc; cursor: pointer; }
@@ -153,11 +187,26 @@
 .mm-product-scroll { padding-top: 13px; padding-bottom: 115px; }
 .mm-gallery-art { height: 286px; position: relative; display: grid; place-items: center; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 24px; background: linear-gradient(#f8fafc, #f1f5f9); }
 .mm-gallery-art .mm-art { transform: scale(1.8); }
-.mm-verified, .mm-condition, .mm-view-360, .mm-zoom { position: absolute; z-index: 2; }
-.mm-verified { top: 14px; left: 14px; padding: 5px 10px; border-radius: 999px; color: white; background: var(--mm-blue); font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.mm-condition { top: 14px; left: 90px; padding: 5px 10px; border: 1px solid #e2e8f0; border-radius: 999px; color: #334155; background: white; font-size: 10px; }
-.mm-zoom { top: 14px; right: 14px; width: 29px; height: 29px; border: 0; border-radius: 50%; color: #64748b; background: rgb(255 255 255 / 85%); font-size: 20px; cursor: pointer; }
-.mm-view-360 { right: 12px; bottom: 12px; padding: 6px 9px; border: 1px solid #e2e8f0; border-radius: 999px; color: #475569; background: rgb(255 255 255 / 85%); font-size: 10px; }
+/* Verified + condition pills sit in one flex row so longer condition labels
+   ("Condition unavailable") can never run into the fullscreen button. */
+.mm-badges { position: absolute; z-index: 2; top: 14px; left: 14px; display: flex; align-items: center; gap: 6px; }
+.mm-verified { padding: 5px 10px; border-radius: 999px; color: white; background: var(--mm-blue); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.mm-condition { padding: 5px 10px; border: 1px solid #e2e8f0; border-radius: 999px; color: #334155; background: white; font-size: 10px; }
+.mm-zoom { position: absolute; z-index: 2; top: 14px; right: 14px; width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; color: #334155; background: rgb(255 255 255 / 88%); cursor: pointer; box-shadow: 0 2px 6px rgb(15 23 42 / 8%); }
+.mm-zoom .mm-icon { width: 16px; height: 16px; }
+.mm-zoom:hover { color: var(--mm-blue); }
+/* Full-screen product image viewer — opened from the gallery's expand button. */
+.mm-fullscreen { position: fixed; z-index: 100; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 20px; background: rgb(2 6 23 / 94%); backdrop-filter: blur(8px); }
+.mm-fullscreen > img { max-width: 100%; max-height: 74vh; object-fit: contain; border-radius: 12px; }
+.mm-fullscreen-close { position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; display: grid; place-items: center; padding: 0; border: 1px solid rgb(255 255 255 / 28%); border-radius: 50%; color: white; background: rgb(255 255 255 / 12%); cursor: pointer; }
+.mm-fullscreen-close:hover { background: rgb(255 255 255 / 24%); }
+.mm-fullscreen-close .mm-icon { width: 20px; height: 20px; }
+.mm-fullscreen-thumbs { display: flex; gap: 10px; max-width: 100%; overflow-x: auto; padding: 4px 2px; scrollbar-width: none; }
+.mm-fullscreen-thumbs::-webkit-scrollbar { display: none; }
+.mm-fullscreen-thumbs button { width: 54px; height: 54px; flex: 0 0 54px; padding: 3px; border: 1px solid rgb(255 255 255 / 35%); border-radius: 10px; background: transparent; cursor: pointer; }
+.mm-fullscreen-thumbs button.active { border-color: white; box-shadow: 0 0 0 2px rgb(255 255 255 / 30%); }
+.mm-fullscreen-thumbs img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 6px; }
+.mm-fullscreen small { color: rgb(255 255 255 / 65%); font-size: 11px; }
 .mm-dots { display: flex; justify-content: center; gap: 7px; padding: 11px 0 0; }
 .mm-dots i { width: 6px; height: 6px; border-radius: 50%; background: #cbd5e1; }
 .mm-dots i:first-child { width: 24px; border-radius: 5px; background: var(--mm-blue); }
@@ -177,11 +226,14 @@
 .mm-pickup strong b { color: var(--mm-blue); }
 .mm-pickup small { margin-top: 4px; color: #64748b; }
 .mm-pickup > span { padding: 5px 7px; border: 1px solid #bbf7d0; border-radius: 6px; color: #059669; background: #ecfdf5; font-size: 10px; font-weight: 700; }
-.mm-variants { display: grid; gap: 10px; padding-top: 20px; }
-.mm-variants > div:first-child, .mm-variants > label { color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.mm-variants > div:first-child { display: flex; justify-content: space-between; }
-.mm-variants > div:first-child b { color: #0f172a; text-transform: none; }
-.mm-variants > div:first-child small { color: var(--mm-blue); font-weight: 500; text-transform: none; }
+.mm-pickup > span.mm-stock-out { border-color: #fecaca; color: #dc2626; background: #fef2f2; }
+.mm-variants { display: grid; gap: 16px; padding-top: 20px; }
+.mm-variant { display: grid; gap: 10px; }
+.mm-variant-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mm-variant-head label, .mm-variant-head b, .mm-variant-head small { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.mm-variant-head label { color: #64748b; }
+.mm-variant-head b { color: #0f172a; text-transform: none; }
+.mm-variant-head small { color: var(--mm-blue); font-weight: 500; text-transform: none; }
 .mm-swatches { display: flex; gap: 11px; }
 .mm-swatches button { width: 35px; height: 35px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 50%; background: #f1f5f9; cursor: pointer; }
 .mm-swatches button:first-child { background: white; }
@@ -243,9 +295,170 @@
 @media (min-width: 700px) {
   .mm-scroll { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding-right: 0; padding-left: 0; }
   .mm-discover-heading { padding-right: 0; padding-left: 0; }
+  .mm-page .mm-discover-heading { padding-right: 0; padding-left: 0; }
+  /* .mm-scroll loses its 20px side padding here, so the category row must stop
+     bleeding -20px past the container (it caused a 20px horizontal overflow). */
+  .mm-category-scroll { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
   .mm-banner-slide { height: 270px; }
   .mm-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
   .mm-bottom { padding-right: max(24px, calc((100% - 1180px) / 2)); padding-left: max(24px, calc((100% - 1180px) / 2)); }
   .mm-bottom nav { max-width: 560px; margin: 0 auto; }
-  .mm-product-page .mm-product-scroll { width: min(900px, calc(100% - 64px)); }
+   .mm-product-page .mm-product-scroll {
+      width: min(1180px, calc(100% - 64px));
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+      column-gap: clamp(28px, 5vw, 64px);
+   }
+   .mm-product-page .mm-gallery {
+      grid-column: 1;
+      grid-row: 1 / span 6;
+   }
+   .mm-product-page .mm-gallery-art {
+      height: auto;
+      aspect-ratio: 1;
+      border-radius: 16px;
+   }
+   .mm-product-page .mm-product-info,
+   .mm-product-page .mm-seller-row,
+   .mm-product-page .mm-owner-row,
+   .mm-product-page .mm-variants,
+   .mm-product-page .mm-contact-seller,
+   .mm-product-page .mm-seller-profile-cta,
+   .mm-product-page .mm-overview {
+      grid-column: 2;
+   }
+   .mm-product-page .mm-product-info { padding-top: 0; }
+   .mm-product-page .mm-product-info h1 { font-size: clamp(25px, 3vw, 36px); }
+   .mm-product-page .mm-buy-bar {
+      right: max(32px, calc((100% - 1180px) / 2));
+      left: auto;
+      width: min(540px, calc(50% - 32px));
+   }
 }
+
+/* ==========================================================================
+   SELLER SHOP — "View all products from this seller".
+   The product page carries a tappable seller row that opens
+   /marketplace/seller/:sellerId (SellerShopPage) where buyers can browse
+   every product the seller has posted.
+   ========================================================================== */
+.mm-seller-row { padding-top: 14px; }
+.mm-seller-btn { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 16px; background: white; box-shadow: 0 2px 8px rgb(15 23 42 / 4%); font: inherit; text-align: left; cursor: pointer; }
+.mm-seller-btn:hover { border-color: var(--mm-blue); }
+
+/* Owner-only edit shortcut on the product page — sellers browse the public
+   marketplace themselves, so let them edit the listing they are viewing
+   without hunting through the dashboard menu. Hidden for everyone else. */
+.mm-owner-row { padding-top: 12px; display: grid; gap: 7px; }
+.mm-owner-edit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 16px; border: 0; border-radius: 14px; color: white; background: var(--mm-blue); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.mm-owner-edit:hover { filter: brightness(1.06); }
+.mm-owner-edit .mm-icon { width: 16px; height: 16px; }
+.mm-owner-row small { color: #64748b; font-size: 11px; text-align: center; }
+.mm-contact-seller { display: grid; gap: 7px; padding-top: 14px; }
+/* Matches the "Contact On WhatsApp" button on the buyer profile (buyer-profile.css)
+   — same WhatsApp-green fill, radius, weight and hover/active states, and the
+   same filled brand glyph instead of the stroked marketplace outline icon. */
+.mm-whatsapp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 46px; padding: 14px 16px; border: 0; border-radius: 12px; color: white; background: #22c55e; font: inherit; font-size: 14px; font-weight: 500; box-shadow: 0 1px 2px rgb(0 0 0 / 4%); transition: background 0.15s ease; cursor: pointer; }
+.mm-whatsapp:hover { background: #1eb354; }
+.mm-whatsapp:active { background: #1a9f4a; }
+.mm-whatsapp svg { width: 20px; height: 20px; flex: 0 0 auto; fill: currentColor; }
+.mm-contact-seller small { color: #64748b; font-size: 11px; text-align: center; }
+.mm-seller-avatar { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--mm-blue); font-size: 15px; font-weight: 700; }
+.mm-seller-avatar img, .mm-seller-shop-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.mm-seller-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.mm-seller-text b { overflow: hidden; color: #0f172a; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.mm-seller-text small { color: #64748b; font-size: 10px; font-weight: 600; }
+.mm-seller-arrow { width: 16px; height: 16px; margin-left: auto; flex: 0 0 auto; transform: rotate(180deg); }
+
+/* Seller shop page header (above the product grid). */
+.mm-seller-shop-head { display: flex; align-items: center; gap: 12px; padding: 8px 0 16px; }
+.mm-seller-shop-avatar { width: 52px; height: 52px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 16px; color: white; background: var(--mm-blue); font-size: 22px; font-weight: 800; }
+.mm-seller-shop-id h2 { margin: 0; color: #0f172a; font-size: 19px; line-height: 1.2; letter-spacing: -.03em; }
+.mm-seller-shop-id p { margin: 3px 0 0; color: #64748b; font-size: 11px; }
+
+/* Checkout error notification */
+.mm-checkout-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.mm-checkout-error .mm-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: #dc2626;
+}
+.mm-checkout-error p {
+  flex: 1;
+  margin: 0;
+}
+.mm-checkout-error button {
+  padding: 4px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #991b1b;
+  background: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mm-checkout-error button:hover {
+  background: #fee2e2;
+}
+.mm-checkout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   PUBLIC SELLER PROFILE — the "View seller profile" button at the bottom of
+   the product page opens /marketplace/seller-profile/:sellerSlug
+   (SellerProfilePage). The path segment is the seller NAME (slugified with
+   src/lib/storeDomain), the seller id travels in the query string.
+   ========================================================================== */
+.mm-seller-profile-cta { padding-top: 22px; }
+.mm-seller-profile-btn { display: flex; align-items: center; gap: 11px; width: 100%; padding: 14px; border: 0; border-radius: 16px; color: white; background: var(--mm-blue); box-shadow: 0 10px 24px rgb(37 99 235 / 22%); font: inherit; text-align: left; cursor: pointer; }
+.mm-seller-profile-btn:hover { filter: brightness(1.06); }
+.mm-seller-profile-btn .mm-icon { width: 18px; height: 18px; }
+.mm-seller-profile-btn span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mm-seller-profile-btn b { font-size: 13px; font-weight: 700; }
+.mm-seller-profile-btn small { overflow: hidden; color: rgb(255 255 255 / 80%); font-size: 10px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Profile page: hero, derived stats and the seller's own details. */
+.mm-seller-profile-hero { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 6px 0 18px; text-align: center; }
+.mm-seller-profile-avatar { width: 84px; height: 84px; display: grid; place-items: center; overflow: hidden; border-radius: 26px; color: white; background: var(--mm-blue); font-size: 32px; font-weight: 800; }
+.mm-seller-profile-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.mm-seller-profile-hero h2 { margin: 0; color: #0f172a; font-size: 22px; letter-spacing: -.03em; }
+.mm-seller-profile-hero p { margin: 0; color: #64748b; font-size: 11px; }
+.mm-seller-profile-verified { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid #bbf7d0; border-radius: 999px; color: #059669; background: #ecfdf5; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.mm-seller-profile-verified .mm-icon { width: 12px; height: 12px; stroke-width: 2.6; }
+.mm-seller-profile-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.mm-seller-profile-stats > div { padding: 11px 6px; border: 1px solid #f1f5f9; border-radius: 14px; background: #f8fafc; text-align: center; }
+.mm-seller-profile-stats strong { display: block; color: #0f172a; font-size: 15px; letter-spacing: -.02em; }
+.mm-seller-profile-stats span { display: block; margin-top: 3px; color: #64748b; font-size: 9px; font-weight: 600; text-transform: uppercase; }
+.mm-seller-profile-facts { margin-top: 16px; padding: 3px 13px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; }
+.mm-seller-profile-facts div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+.mm-seller-profile-facts div:last-child { border-bottom: 0; }
+.mm-seller-profile-facts span { flex: 0 0 auto; color: #64748b; }
+.mm-seller-profile-facts b { color: #0f172a; font-weight: 600; text-align: right; }
+.mm-seller-profile-heading { margin: 24px 0 12px; color: var(--mm-ink); font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+/* Seller-published bio — the "About <store>" paragraph under the details. */
+.mm-seller-profile-bio { padding-top: 20px; }
+.mm-seller-profile-bio h2 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+.mm-seller-profile-bio p { margin: 0; color: #475569; font-size: 12px; line-height: 1.65; white-space: pre-line; }
+.mm-seller-profile .mm-contact-seller { padding-top: 18px; }
+
+@media (min-width: 700px) {
+  .mm-seller-profile-hero, .mm-seller-profile-stats, .mm-seller-profile-facts, .mm-seller-profile-bio { width: min(720px, 100%); margin-right: auto; margin-left: auto; }
+  .mm-seller-profile-stats { gap: 12px; }
+}
+

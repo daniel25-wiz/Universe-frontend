@@ -9,9 +9,14 @@ import type {
   AuthResponse,
   GoogleLoginRequest,
   LoginRequest,
+  PasswordResetRequest,
+  PasswordResetResponse,
   RefreshTokenResponse,
   RegisterRequest,
+  ResetPasswordRequest,
   User,
+  VerifyResetCodeRequest,
+  VerifyResetCodeResponse,
 } from '../types';
 import { apiConfig } from '../config';
 import { MockAuthApi } from '../mock/auth.mock';
@@ -30,6 +35,19 @@ export interface AuthApi {
   logout(): Promise<void>;
   getCurrentUser(): Promise<User>;
   refreshToken(refreshToken: string): Promise<RefreshTokenResponse>;
+  /**
+   * Request password reset — generates an OTP and simulates emailing it.
+   * Mock mode returns the OTP in devOtp for testing; real mode never does.
+   */
+  requestPasswordReset(data: PasswordResetRequest): Promise<PasswordResetResponse>;
+  /**
+   * Verify the OTP sent to the user's email. Returns verified: true on success.
+   */
+  verifyResetCode(data: VerifyResetCodeRequest): Promise<VerifyResetCodeResponse>;
+  /**
+   * Complete password reset with verified code and new password.
+   */
+  resetPassword(data: ResetPasswordRequest): Promise<{ message: string }>;
 }
 
 export const authApi: AuthApi = apiConfig.mode === 'real' ? new RealAuthApi() : new MockAuthApi();

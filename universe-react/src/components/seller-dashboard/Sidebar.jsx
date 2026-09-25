@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { prefetchPropsForPath } from '../../lib/prefetch';
+import { FEEDBACK_WHATSAPP_URL, SUPPORT_EMAIL } from '../../lib/support';
 import { useCurrentUser, useLogout } from '../../hooks/useAuth';
 import { getUserInitials } from '../../lib/user';
 import './ui/widgets.css';
+import MaterialIcon from '../../components/ui/MaterialIcon';
 
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: 'home', to: '/seller' },
@@ -45,7 +47,7 @@ function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = f
             onClick={onMobileClose}
             {...prefetchPropsForPath(item.to)}
           >
-            <span className="material-symbols-outlined sd-nav-icon">{item.icon}</span>
+            <MaterialIcon name={item.icon} className="sd-nav-icon" />
             {isProfile ? (
               <span className="sd-nav-label">{item.label}</span>
             ) : (
@@ -65,12 +67,24 @@ function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = f
             </div>
           </div>
         )}
-        <a href="#" className="sd-foot-link" onClick={(e) => { e.preventDefault(); onMobileClose?.(); }}>
-          <span className="material-symbols-outlined">feedback</span>
+        <a
+          href={FEEDBACK_WHATSAPP_URL}
+          className="sd-foot-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onMobileClose}
+        >
+          <MaterialIcon name="feedback" />
           {isProfile ? <span className="sd-nav-label">Feedback</span> : 'Feedback'}
         </a>
-        <a href="#" className="sd-foot-link" onClick={(e) => { e.preventDefault(); onMobileClose?.(); }}>
-          <span className="material-symbols-outlined">help</span>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="sd-foot-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onMobileClose}
+        >
+          <MaterialIcon name="help" />
           {isProfile ? <span className="sd-nav-label">Help Center</span> : 'Help Center'}
         </a>
         <button
@@ -80,7 +94,7 @@ function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = f
           disabled={logout.isPending}
           style={{ background: 'none', border: 0, font: 'inherit', cursor: 'pointer', textAlign: 'left', width: '100%' }}
         >
-          <span className="material-symbols-outlined">logout</span>
+          <MaterialIcon name="logout" />
           {isProfile ? <span className="sd-nav-label">{logout.isPending ? 'Logging out…' : 'Logout'}</span> : logout.isPending ? 'Logging out…' : 'Logout'}
         </button>
       </div>
@@ -98,7 +112,7 @@ function Sidebar({ active, showLogo = true, variant = 'workshop', mobileOpen = f
           <div className="sd-mobile-overlay" onClick={onMobileClose} />
           <nav className="sd-sidebar sd-sidebar-mobile">
             <button className="sd-drawer-close" aria-label="Close menu" onClick={onMobileClose}>
-              <span className="material-symbols-outlined">close</span>
+              <MaterialIcon name="close" />
             </button>
             {content}
           </nav>

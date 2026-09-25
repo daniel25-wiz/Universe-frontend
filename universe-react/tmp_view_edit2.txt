@@ -1,0 +1,71 @@
+                    <span className="ap-prefix">₦</span>
+                    <input className="ap-input" id="salePrice" type="number" min="0" step="0.01" placeholder="0.00" value={form.salePrice} onChange={handleChange} />
+                  </div>
+                </div>
+                <div className="ap-field">
+                  <label className="ap-label" htmlFor="stock">
+                    Stock
+                  </label>
+                  <input className="ap-input" id="stock" type="number" min="0" step="1" placeholder="0" value={form.stock} onChange={handleChange} />
+                </div>
+              </div>
+            </section>
+
+            {/* Visibility Section */}
+            <section className="ap-section">
+              <h2 className="ap-section-title">Visibility</h2>
+              <div className="ap-grid-2">
+                <label className="ap-field" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 0 }}>
+                  <input type="radio" name="status" value="active" checked={form.status === 'active'} onChange={handleChange} />
+                  <span className="ap-label" style={{ marginBottom: 0 }}>Published (visible in marketplace)</span>
+                </label>
+                <label className="ap-field" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 0 }}>
+                  <input type="radio" name="status" value="draft" checked={form.status === 'draft'} onChange={handleChange} />
+                  <span className="ap-label" style={{ marginBottom: 0 }}>Draft (only you can see it)</span>
+                </label>
+              </div>
+              {/* Public marketplace listing toggle (at most 2 per seller). */}
+              <div className="ap-toggle-row" style={{ marginTop: 14 }}>
+                <div className="ap-toggle-block">
+                  <div className="ap-toggle-line">
+                    <span className="ap-toggle-label">List on marketplace</span>
+                    <button
+                      type="button"
+                      className={`ap-switch ${form.featuredInMarketplace ? 'on' : ''}`}
+                      aria-label={form.featuredInMarketplace ? 'Remove from marketplace' : 'List on marketplace'}
+                      disabled={!form.featuredInMarketplace && !canAddListing}
+                      title={
+                        !form.featuredInMarketplace && !canAddListing
+                          ? `You already have ${MARKETPLACE_LISTING_LIMIT} products listed on the marketplace. Remove one first.`
+                          : undefined
+                      }
+                      onClick={() => {
+                        if (!form.featuredInMarketplace && !canAddListing) return;
+                        setForm((f) => ({ ...f, featuredInMarketplace: !f.featuredInMarketplace }));
+                      }}
+                    >
+                      <span className="ap-switch-thumb" />
+                    </button>
+                  </div>
+                  <p style={{ fontSize: 11, marginTop: 4 }}>
+                    {form.featuredInMarketplace
+                      ? form.status === 'draft'
+                        ? 'Listed on the marketplace as soon as you publish it.'
+                        : 'This product appears in the public marketplace.'
+                      : `List on the public marketplace (${featuredActiveCount}/${MARKETPLACE_LISTING_LIMIT} used)`}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Media Section */}
+            <section className="ap-section">
+              <div className="ap-media-head">
+                <h2 className="ap-section-title">Product Images</h2>
+                <span className="ap-media-hint">
+                  Up to {MAX_IMAGES} images · first image is the cover
+                </span>
+              </div>
+
+              {/* Upload Area (multi-file, wired to a real file input, compressed in-browser) */}
+              <label className="ap-upload" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>

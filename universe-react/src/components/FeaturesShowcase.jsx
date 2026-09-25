@@ -1,6 +1,8 @@
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import { useNavigate } from 'react-router-dom';
 import Button from './ui/Button';
 import ArrowIcon from './ui/ArrowIcon';
+import { prefetchPropsForPath } from '../lib/prefetch';
 
 // Feature Icons - Blue gradient icons in soft rounded-square containers
 const FeatureIcons = [
@@ -49,6 +51,7 @@ const featuresData = [
 
 const FeaturesShowcase = () => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const navigate = useNavigate();
 
   return (
     <section ref={ref} id="features-showcase" className={`features-showcase reveal ${isVisible ? "active" : ""}`}>
@@ -71,7 +74,7 @@ const FeaturesShowcase = () => {
         
         {/* Bottom CTA Button - Full Width */}
         <div className="features-showcase-cta">
-          <Button className="btn-features-showcase-primary" onClick={() => window.location.href = 'signup.html'}>
+          <Button className="btn-features-showcase-primary" onClick={() => navigate('/auth/signup')} {...prefetchPropsForPath('/auth/signup')}>
             <span className="btn-text">Get Started →</span>
           </Button>
         </div>

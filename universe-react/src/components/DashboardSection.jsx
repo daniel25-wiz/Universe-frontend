@@ -139,7 +139,7 @@ const DashboardSection = () => {
               >
                 <div className="db-card-label">Revenue</div>
                 <div className="db-card-value">
-                  <Counter value={currentData.revenue} prefix="$" />
+                  <Counter value={currentData.revenue} prefix="₦" />
                 </div>
                 <div className={`db-card-trend ${currentData.revenueUp ? "up" : "down"}`}>
                   {currentData.revenueUp ? "↑" : "↓"} {currentData.revenueTrend}

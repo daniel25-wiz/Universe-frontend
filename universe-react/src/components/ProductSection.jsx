@@ -9,7 +9,7 @@ const ProductSection = ({ onAddToCart }) => {
   const [wishlist, setWishlist] = useState({});
 
   const categories = [
-    'All', 'Electronics', 'Phones', 'Fashion', 'Shoes', 'Watches', 'Furniture', 'Grocery', 'Beauty', 'Computers'
+    'All', 'Fashion', 'Electronics', 'Gadgets', 'Books', 'Others'
   ];
 
   const { data: products, isLoading } = useProducts({ status: 'active' });

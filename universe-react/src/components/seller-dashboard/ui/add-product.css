@@ -5,6 +5,49 @@
   align-items: flex-start;
   padding: 28px 18px 36px;
   background: rgba(214, 220, 236, 0.82);
+  position: relative;
+}
+
+/* Full-screen loading overlay during submit */
+.ap-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.ap-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 60px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+}
+
+.ap-loading-icon {
+  font-size: 4rem;
+  color: #0d5ed1;
+  animation: ap-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ap-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.ap-loading-text {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .ap-card {
@@ -142,6 +185,100 @@
   pointer-events: none;
 }
 
+/* --- Image slots (add form): cover badge + per-image remove button -------- */
+
+/* The slot owns the overlays so the box itself can stay a single <button>. */
+.ap-upload-slot {
+  position: relative;
+}
+
+.ap-upload-slot.is-uploading .ap-upload-box {
+  opacity: 0.6;
+}
+
+.ap-upload-box:disabled {
+  cursor: not-allowed;
+}
+
+.ap-upload-box:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.ap-upload-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #1f67d7;
+  font-size: 2rem;
+  pointer-events: none;
+}
+
+.ap-upload-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.7);
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ap-upload-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Transparent "Replace" pill floating over a chosen image — lets the seller
+   swap a mistaken pick for another file without removing it first. Centered
+   so it clears the top-right remove button and the bottom-left Cover badge. */
+.ap-upload-replace {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.15s ease;
+}
+
+.ap-upload-replace .material-symbols-outlined {
+  font-size: 0.9rem;
+}
+
+.ap-upload-replace:hover {
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.ap-upload-replace:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .ap-row {
   display: grid;
   gap: 18px;
@@ -204,6 +341,11 @@
   padding-left: 42px;
 }
 
+/* Inputs without a leading icon or prefix sit flush with the field edge. */
+.ap-input-wrap.ap-no-icon input {
+  padding-left: 16px;
+}
+
 .ap-field textarea {
   min-height: 112px;
   resize: vertical;
@@ -241,10 +383,6 @@
   font-size: 1.15rem;
 }
 
-.location-wrap input {
-  padding-left: 42px;
-}
-
 .ap-select-wrap {
   padding-right: 38px;
 }
@@ -279,6 +417,14 @@
   min-height: 84px;
 }
 
+/**
+ * Marketplace listing toggle — spans the full width of the toggle row since it
+ * is the only choice that affects the shared public catalog (max 2 listings).
+ */
+.ap-toggle-block--wide {
+  grid-column: 1 / -1;
+}
+
 .ap-toggle-line {
   display: flex;
   align-items: center;
@@ -311,8 +457,44 @@
   padding: 4px;
 }
 
+/**
+ * ON must be unmistakable. The previous pair (#9fa8bd on vs #d2d8e2 off) was
+ * two near-identical greys, so a seller could not tell whether their product
+ * was listed — the state has to be readable at a glance.
+ */
 .ap-switch.on {
-  background: #9fa8bd;
+  background: var(--gs-primary, #0052fe);
+}
+
+/* Sentence under the marketplace switch. It states what IS ("Listed." /
+   "Not listed.") rather than naming an action to click, so it cannot be
+   misread as "press this to enable listing". */
+.ap-listing-state strong {
+  color: #1f2937;
+}
+
+.ap-listing-state.is-listed strong {
+  color: var(--gs-primary, #0052fe);
+}
+
+/* Visible at-the-cap notice — a `title` tooltip never shows on touch devices,
+   which left blocked taps with no explanation at all. */
+.ap-toggle-block .ap-listing-cap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #b91c1c;
+}
+
+.ap-listing-cap .material-symbols-outlined {
+  font-size: 17px;
+}
+
+/* At the 2-listing cap the marketplace switch can still be turned OFF. */
+.ap-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .ap-switch-thumb {
@@ -384,9 +566,24 @@
   font-weight: 500;
 }
 
-.ap-location-box > span:first-of-type {
+/* Locked delivery location: the hub name plus a one-line caption. */
+.ap-location-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ap-location-copy > span {
   font-size: 1.1rem;
   color: #4d607a;
+}
+
+.ap-location-copy small {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #7b8797;
 }
 
 .ap-lock-icon {
@@ -394,27 +591,149 @@
   color: #5b6474;
 }
 
-.ap-add-variant {
+/* ------------------------------- Variants ------------------------------- */
+
+.ap-variants {
   margin-top: 22px;
-  width: 100%;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #1585ff 0%, #0d5ed1 100%);
-  color: white;
-  min-height: 52px;
-  font-size: 1.15rem;
+}
+
+.ap-variant-block {
+  border: 1px solid #d9e1ee;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 16px 18px 12px;
+  margin-bottom: 16px;
+}
+
+.ap-variant-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ap-variant-index {
+  color: #1f67d7;
+  font-size: 0.8rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ap-variant-remove {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: #b42318;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.ap-variant-remove .material-symbols-outlined {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.ap-variant-fields {
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.ap-variant-extra-values {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* Variant inputs carry no leading icon, so reset the generic icon padding. */
+.ap-variant-value-wrap input {
+  padding-left: 16px;
+}
+
+/* Only the extra value rows, which carry the round remove button, reserve room. */
+.ap-variant-extra-values .ap-variant-value-wrap input {
+  padding-right: 44px;
+}
+
+.ap-variant-value-remove {
+  position: absolute;
+  right: 12px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(180, 35, 24, 0.1);
+  color: #b42318;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ap-variant-value-remove:hover {
+  background: rgba(180, 35, 24, 0.18);
+}
+
+.ap-variant-add-value {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  border: none;
+  background: transparent;
+  color: #0d5ed1;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.ap-variant-add-value:hover {
+  text-decoration: underline;
+}
+
+.ap-variant-add-value .material-symbols-outlined,
+.ap-variant-add .material-symbols-outlined {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.ap-variant-add {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border: 2px dashed rgba(31, 103, 215, 0.6);
+  border-radius: 12px;
+  background: rgba(31, 103, 215, 0.04);
+  color: #0d5ed1;
+  font-family: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 12px 24px rgba(29, 103, 216, 0.18);
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.ap-add-variant .material-symbols-outlined {
-  font-size: 1.6rem;
-  line-height: 1;
+.ap-variant-add:hover {
+  background: rgba(31, 103, 215, 0.1);
+  border-color: #0d5ed1;
+}
+
+.ap-variant-add-value:disabled,
+.ap-variant-add:disabled {
+  color: #9aa4b2;
+  border-color: rgba(154, 164, 178, 0.6);
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 .ap-action-bar {
@@ -453,9 +772,170 @@
 }
 
 .ap-clear-btn:hover,
-.ap-submit-btn:hover,
-.ap-add-variant:hover {
+.ap-submit-btn:hover {
   transform: translateY(-1px);
+}
+
+/* Edit view fields use the same product form with a more detailed layout. */
+.ap-body {
+  background: #f4f7fb;
+}
+
+.ap-header-brand {
+  position: relative;
+  z-index: 1;
+}
+
+.ap-header-brand .ap-brand-logo {
+  display: none;
+}
+
+.ap-close {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ap-grid-2,
+.ap-grid-3 {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.ap-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ap-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.ap-section-title {
+  margin: 0 0 18px;
+  color: #1f2937;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.ap-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.ap-input {
+  width: 100%;
+  min-height: 52px;
+  box-sizing: border-box;
+  border: 1px solid #d9e1ee;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  font: inherit;
+  padding: 14px 16px;
+  outline: none;
+}
+
+.ap-field .ap-input:focus {
+  border-color: #1f67d7;
+  box-shadow: 0 0 0 3px rgba(31, 103, 215, 0.12);
+}
+
+.ap-price-wrap {
+  position: relative;
+}
+
+.ap-price-wrap .ap-input {
+  padding-left: 42px;
+}
+
+.ap-upload {
+  display: block;
+  border: 2px dashed rgba(31, 103, 215, 0.6);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 24px;
+  text-align: center;
+  color: #1f67d7;
+}
+
+.ap-upload-icon .material-symbols-outlined {
+  font-size: 2.4rem;
+}
+
+.ap-upload-text,
+.ap-upload-hint {
+  margin: 8px 0 0;
+}
+
+.ap-upload-hint,
+.ap-media-hint {
+  color: #6b7280;
+  font-size: 0.86rem;
+}
+
+.ap-media-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ap-image-url-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ap-btn-add-url {
+  border: 0;
+  border-radius: 10px;
+  background: #0d5ed1;
+  color: #fff;
+  padding: 0 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ap-btn-add-url:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ap-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ap-preview,
+.ap-thumb,
+.ap-thumb-add {
+  position: relative;
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d9e1ee;
+  border-radius: 10px;
+  background: #eef6ff;
+  color: #1f67d7;
+}
+
+.ap-preview img { width: 100%; height: 100%; object-fit: cover; }
+.ap-cover-badge { position: absolute; left: 6px; bottom: 6px; padding: 3px 6px; border-radius: 4px; background: #0d5ed1; color: #fff; font-size: 0.7rem; }
+.ap-preview-remove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: 0; border-radius: 50%; background: rgba(15, 23, 42, 0.7); color: #fff; cursor: pointer; }
+
+@media (max-width: 740px) {
+  .ap-grid-2,
+  .ap-grid-3 { grid-template-columns: 1fr; }
+
+  .ap-media-head { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .ap-image-url-row { flex-direction: column; }
+  .ap-btn-add-url { min-height: 46px; }
 }
 
 @media (max-width: 740px) {

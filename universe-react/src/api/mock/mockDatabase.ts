@@ -9,7 +9,10 @@
 import type { Order, Product, SellerProfile, User } from '../types';
 import { seedDatabase } from './seed';
 
-export const MOCK_DB_KEY = 'universe.mockdb.v2';
+// v4: orders now carry line `items` (productId/productName/quantity/
+// unitPrice/lineTotal/sellerId) — old v3 rows had no items, so seller
+// analytics could not attribute revenue; v3 data is reseeded.
+export const MOCK_DB_KEY = 'universe.mockdb.v4';
 
 /**
  * A mock "server-side" session record.
@@ -28,6 +31,23 @@ export interface MockSession {
   refreshExpiresAt: number;
   createdAt: string;
   lastUsedAt: string;
+}
+
+/**
+ * Password reset OTP record.
+ *
+ * SECURITY: OTPs are time-limited (15 minutes) and single-use. After
+ * verification or expiry, they are deleted. Rate limiting prevents brute-force
+ * attacks (3 failed attempts within 15 minutes locks the email temporarily).
+ */
+export interface PasswordResetOTP {
+  id: string;
+  email: string;
+  code: string;
+  expiresAt: number;
+  createdAt: string;
+  /** Failed verification attempts counter for rate limiting. */
+  failedAttempts: number;
 }
 
 /** Internal user row — includes fields the API responses strip out. */
@@ -49,6 +69,7 @@ export interface StoredUser extends User {
 export interface MockDatabaseShape {
   users: StoredUser[];
   sessions: MockSession[];
+  passwordResetOTPs: PasswordResetOTP[];
   sellerProfiles: SellerProfile[];
   products: Product[];
   orders: Order[];

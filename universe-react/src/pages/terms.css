@@ -92,39 +92,17 @@
   color: inherit;
 }
 
-.tou-brand-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--tou-sapphire-600);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-  flex-shrink: 0;
-  transition: background 0.15s ease;
-}
-
-.tou-brand:hover .tou-brand-badge { background: var(--tou-sapphire-700); }
-
-.tou-brand-name {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--tou-slate-900);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.tou-brand-tag {
+.tou-brand-logo {
   display: block;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--tou-slate-500);
-  margin-top: -2px;
+  height: 40px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .tou-brand-logo { height: 34px; }
 }
 
 /* --- Document search ----------------------------------------------------- */
@@ -833,25 +811,13 @@
   margin-bottom: 12px;
 }
 
-.tou-footer-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--tou-sapphire-600);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tou-footer-logo-img {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
   flex-shrink: 0;
-}
-
-.tou-footer-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--tou-slate-900);
-  letter-spacing: -0.02em;
 }
 
 .tou-footer-desc {

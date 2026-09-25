@@ -4,7 +4,7 @@ import { Icon, MobileFrame, ProductCard, ScreenHeader } from './MobileMarketplac
 
 function SavedItemsPage({ savedProducts = [], onToggleSaved, cartItems = [] }) {
   const navigate = useNavigate();
-  const { data: products } = useProducts({ status: 'active', pageSize: 200 });
+  const { data: products } = useProducts({ status: 'active', page: 1, pageSize: 50 });
   const items = savedProducts;
   const savedIds = new Set(savedProducts.map((product) => product.id));
   return <MobileFrame active="saved" cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}>

@@ -5,7 +5,6 @@ const DashboardSection = lazy(() => import('../components/DashboardSection'));
 const ProductSection = lazy(() => import('../components/ProductSection'));
 const ConnectionSection = lazy(() => import('../components/ConnectionSection'));
 const Features = lazy(() => import('../components/Features'));
-const Testimonials = lazy(() => import('../components/Testimonials'));
 const CTA = lazy(() => import('../components/CTA'));
 const Footer = lazy(() => import('../components/Footer'));
 
@@ -56,7 +55,6 @@ const HomeSections = ({ onAddToCart }) => (
     <Section><ProductSection onAddToCart={onAddToCart} /></Section>
     <Section><ConnectionSection /></Section>
     <Section><Features /></Section>
-    <Section><Testimonials /></Section>
     <Section><CTA /></Section>
     <Section><Footer /></Section>
   </>

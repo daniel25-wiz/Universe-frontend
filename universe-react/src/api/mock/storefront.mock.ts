@@ -73,6 +73,10 @@ const DEMO_PRODUCTS: StorefrontProduct[] = [
     image: IMG_MUG,
     imageAlt:
       'Modern artisanal minimalist ceramic coffee mug in matte stone gray glaze, placed on a contemporary wooden study table with study notebook, soft morning window lighting, studio product photography.',
+    variants: [
+      { name: 'Size', values: ['Small', 'Medium', 'Large'] },
+      { name: 'Colour', values: ['Stone Gray', 'Classic White'] },
+    ],
   },
   {
     id: 'sf-wallet',
@@ -124,6 +128,10 @@ const DEMO_PRODUCTS: StorefrontProduct[] = [
     image: IMG_HEADPHONES,
     imageAlt:
       'High-end matte black over-ear noise cancelling studio headphones resting on sleek minimalist metal stand, dramatic moody studio rim lighting, premium consumer electronics photography.',
+    variants: [
+      { name: 'Colour', values: ['Matte Black', 'Space Gray', 'Midnight Blue'] },
+      { name: 'Edition', values: ['MagSafe (USB-C)', 'Lightning Case'] },
+    ],
   },
   {
     id: 'sf-sleeve',
@@ -167,6 +175,8 @@ function buildDemoStore(): Storefront {
     owner: 'Jane Doe',
     school: 'Olabisi Onabanjo University',
     storeId: '#GS-9021',
+    // Demo store has no real seller account behind it.
+    sellerId: null,
     rating: 4.9,
     reviewCount: 2104,
     followers: 2400,
@@ -277,15 +287,17 @@ function buildPersonalizedStore(
   ownerEmail: string,
   memberSinceIso?: string | null,
   ownerProducts?: Array<{
-    id: string; name: string; description?: string | null; price: number; salePrice?: number | null;
+    id: string; name: string; description?: string | null; price: number | null; salePrice?: number | null;
     stock?: number | null; category?: string | null; imageUrl?: string | null; imageAlt?: string | null; images?: string[] | null;
-    rating: number; reviews: number;
+    variants?: Array<{ name: string; values: string[] }> | null;
+    rating: number | null; reviews: number | null;
   }>,
 ): Storefront {
   const name = (profile.storeName || ownerName || 'My Store').trim();
   const products = (ownerProducts ?? []).map((p, index) => {
     const bucket = toBucket(p.category);
-    const onSale = p.salePrice != null && p.salePrice < p.price;
+    const listPrice = p.price ?? 0;
+    const onSale = p.salePrice != null && p.salePrice < listPrice;
     const images = p.images?.length ? p.images : (p.imageUrl ? [p.imageUrl] : [FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]]);
     return {
       id: `sf-${p.id}`,
@@ -293,9 +305,9 @@ function buildPersonalizedStore(
       description: p.description || p.name,
       category: bucket,
       categoryLabel: CATEGORY_LABELS[bucket],
-      price: Math.round(onSale ? p.salePrice! : p.price),
-      priceLabel: ngn(onSale ? p.salePrice! : p.price),
-      oldPriceLabel: onSale ? ngn(p.price) : null,
+      price: Math.round(onSale ? p.salePrice! : listPrice),
+      priceLabel: ngn(onSale ? p.salePrice! : listPrice),
+      oldPriceLabel: onSale ? ngn(listPrice) : null,
       rating: p.rating || 4.9,
       reviews: p.reviews || 0,
       popularity: p.reviews || Math.round((p.rating || 4.9) * 20),
@@ -305,6 +317,9 @@ function buildPersonalizedStore(
       image: images[0],
       imageAlt: p.imageAlt || p.name,
       images,
+      variants: p.variants?.length
+        ? p.variants.map((variant) => ({ name: variant.name, values: [...variant.values] }))
+        : undefined,
     } satisfies StorefrontProduct;
   });
 
@@ -331,6 +346,9 @@ function buildPersonalizedStore(
     owner: ownerName || 'Seller',
     school: profile.school || 'Olabisi Onabanjo University',
     storeId: `#${(slugifyStoreName(name).slice(0, 2) || 'ST').toUpperCase()}-${9000 + (hashish(profile.userId) % 999)}`,
+    // Real seller id so the storefront page can fetch this seller's catalog
+    // through the products API when the mock embeds none.
+    sellerId: profile.userId,
     rating: Math.round(avgRating * 10) / 10,
     reviewCount: Math.max(totalReviews, 1),
     domain: getPrettyStoreDomain(slug),

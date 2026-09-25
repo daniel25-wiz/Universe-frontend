@@ -1,0 +1,163 @@
+/*
+ * Buyer Profile page styles.
+ *
+ * Pixel-for-pixel port of buyer_profile_streamlined.html (Tailwind v3 utility
+ * classes) to the app's plain-CSS setup. Every rule is scoped under .bp-page
+ * so the landing page's global styles never leak in, and this file's own
+ * section/button resets keep index.css globals (100px section padding, etc.)
+ * from breaking the mobile layout.
+ */
+
+.bp-page {
+  --bp-blue: #2563eb;
+  --bp-blue-dark: #1d4ed8;
+  --bp-ink: #0f172a;
+  --bp-slate-800: #1e293b;
+  --bp-slate-700: #334155;
+  --bp-slate-500: #64748b;
+  --bp-slate-400: #94a3b8;
+  --bp-border: #e2e8f0;
+  --bp-border-soft: #f1f5f9;
+  --bp-bg: #f8fafc;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 48px;
+  background: var(--bp-bg);
+  color: var(--bp-slate-800);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+}
+
+/* index.css gives every <section> 100px vertical padding — neutralize it here
+   (same :where() trick mobile-marketplace.css uses). */
+.bp-page :where(section) { padding-top: 0; padding-bottom: 0; position: static; }
+.bp-page :where(h1, h2, h3, p, form) { margin: 0; }
+
+/* Page wrapper. Fills the viewport at every size — the phone-width cap from
+   the design mock is intentionally NOT applied (see the desktop layout rules
+   at the bottom of this file), so /account renders full screen on desktop. */
+.bp-shell { width: 100%; min-height: 100dvh; display: flex; flex-direction: column; }
+
+/* ------------------------------ Top nav ------------------------------ */
+.bp-topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: white; border-bottom: 1px solid var(--bp-border-soft); }
+.bp-menu-btn { margin-left: -4px; padding: 4px; border: 0; border-radius: 8px; color: var(--bp-ink); background: transparent; cursor: pointer; }
+.bp-menu-btn:active { background: var(--bp-border-soft); }
+.bp-menu-btn svg { width: 24px; height: 24px; display: block; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.bp-topbar-actions { display: flex; align-items: center; gap: 14px; }
+.bp-bell { position: relative; padding: 4px; border: 0; border-radius: 999px; color: var(--bp-slate-700); background: transparent; cursor: pointer; }
+.bp-bell svg { width: 24px; height: 24px; display: block; stroke: currentColor; fill: none; stroke-width: 2; }
+.bp-bell-dot { position: absolute; top: 4px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: var(--bp-blue); border: 2px solid white; }
+.bp-avatar-pill { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 0; border: 0; border-radius: 999px; color: white; background: var(--bp-blue); box-shadow: 0 1px 2px rgb(0 0 0 / 5%); font-size: 12px; font-weight: 600; letter-spacing: -0.01em; cursor: default; }
+
+/* ------------------------------- Main -------------------------------- */
+.bp-main { padding: 24px 16px 0; display: flex; flex-direction: column; gap: 24px; }
+.bp-title h1 { font-size: 24px; line-height: 1.2; font-weight: 700; letter-spacing: -0.015em; color: var(--bp-ink); }
+.bp-title p { margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--bp-slate-500); }
+
+/* -------------------------------- Card ------------------------------- */
+.bp-card { padding: 20px; background: white; border: 1px solid rgb(226 232 240 / 80%); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 4%); }
+.bp-card-head { display: flex; align-items: flex-start; justify-content: space-between; }
+.bp-identity { display: flex; align-items: center; gap: 16px; }
+.bp-initials-badge { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 999px; background: #eaf2fe; overflow: hidden; }
+.bp-initials-badge span { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: #1e40af; }
+.bp-initials-badge img { width: 100%; height: 100%; object-fit: cover; }
+.bp-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.bp-name-row h2 { font-size: 18px; line-height: 1.3; font-weight: 700; color: var(--bp-ink); }
+.bp-verified-pill { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid #dbeafe; border-radius: 999px; background: #eff6ff; color: var(--bp-blue-dark); font-size: 11px; font-weight: 500; }
+.bp-identity-email { margin-top: 4px; font-size: 12px; color: var(--bp-slate-500); word-break: break-all; }
+.bp-identity-since { margin-top: 2px; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--bp-slate-400); }
+.bp-edit-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0 0; border: 0; background: transparent; color: var(--bp-blue); font-size: 12px; font-weight: 600; letter-spacing: 0.025em; cursor: pointer; }
+.bp-edit-btn:hover { color: #1d4ed8; }
+.bp-edit-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.bp-edit-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------------------------- Buyer stats ---------------------------- */
+.bp-stats { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--bp-border-soft); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.bp-stat { padding: 10px 4px; border-radius: 12px; background: rgb(248 250 252 / 80%); }
+.bp-stat b { display: block; font-size: 16px; font-weight: 700; color: var(--bp-ink); }
+.bp-stat span { font-size: 11px; color: var(--bp-slate-500); }
+.bp-stat.is-cart b { color: var(--bp-blue); }
+
+
+/* ----------------------------- Details form -------------------------- */
+.bp-form { display: flex; flex-direction: column; gap: 16px; }
+.bp-field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: var(--bp-slate-700); }
+.bp-input { width: 100%; padding: 12px 16px; border: 1px solid var(--bp-border); border-radius: 12px; background: white; color: var(--bp-slate-800); font: inherit; font-size: 14px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.bp-input::placeholder { color: var(--bp-slate-400); }
+.bp-input:focus { outline: none; border-color: var(--bp-blue); box-shadow: 0 0 0 3px rgb(37 99 235 / 20%); }
+.bp-input:disabled { background: #f8fafc; color: var(--bp-slate-500); }
+.bp-form-feedback { font-size: 12px; font-weight: 500; }
+.bp-form-feedback.is-error { color: #dc2626; }
+.bp-form-feedback.is-ok { color: #16a34a; }
+
+/* --------------------------- Contact us card -------------------------
+   1:1 port of the seller profile's "Contact Us" card (SellerProfile.jsx
+   + settings.css .sp-contact*): Material support_agent / call / mail
+   glyphs, a padded head with a divider rule, secondary-container icon
+   tiles, monospace uppercase labels and 18px values. Colors below are
+   the resolved --gs-* tokens from seller-dashboard.css (this page has
+   its own bp-* token set, so the values are inlined like .bp-whatsapp). */
+.bp-contact { padding: 0; border-color: #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03); overflow: hidden; }
+.bp-contact-head { padding: 24px; border-bottom: 1px solid #e2e8f0; }
+.bp-contact-title { display: flex; align-items: center; gap: 8px; font-family: "Segoe UI", system-ui, sans-serif; font-size: 20px; line-height: 28px; font-weight: 600; color: #191b23; }
+.bp-contact-title .material-symbols-outlined { color: #004ac6; }
+.bp-contact-sub { margin-top: 4px; font-size: 14px; line-height: 20px; color: #434655; }
+.bp-contact-grid { padding: 24px; display: grid; grid-template-columns: 1fr; gap: 24px; }
+.bp-contact-item { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1px solid transparent; border-radius: 8px; background: #f8fafc; color: inherit; text-decoration: none; transition: background 0.15s ease, border-color 0.15s ease; }
+.bp-contact-item:hover { background: #f3f3fe; border-color: rgba(195, 198, 215, 0.3); }
+.bp-contact-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 9999px; background: #dae2fd; color: #5c647a; }
+.bp-contact-icon .material-symbols-outlined { font-size: 20px; }
+.bp-contact-label { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.05em; text-transform: uppercase; color: #434655; }
+.bp-contact-value { margin-top: 4px; font-size: 18px; line-height: 28px; font-weight: 500; color: #191b23; }
+.bp-contact-value.break-all { word-break: break-all; }
+.bp-contact-wa-wrap { padding: 0 24px 24px; }
+/* Matches the "Contact On WhatsApp" button on the seller profile
+   (settings.css .sp-contact-wa) — same brand green, radius feel, weight,
+   gap and hover glow so buyer and seller account pages look identical. */
+.bp-whatsapp { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; border: 0; border-radius: 12px; background: #25d366; color: #ffffff; font: inherit; font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: 0.01em; text-decoration: none; box-shadow: 0 1px 2px rgb(0 0 0 / 4%); transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease; cursor: pointer; }
+.bp-whatsapp:hover { background: #1da851; box-shadow: 0 4px 12px -2px rgba(37, 211, 102, 0.4); }
+.bp-whatsapp:active { transform: translateY(1px); }
+.bp-whatsapp svg { width: 20px; height: 20px; flex-shrink: 0; fill: currentColor; }
+
+/* ------------------------------- Log out ----------------------------- */
+.bp-logout-wrap { padding-top: 8px; padding-bottom: 16px; }
+.bp-logout { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 16px; border: 1px solid var(--bp-border); border-radius: 12px; background: white; color: var(--bp-slate-700); font: inherit; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / 4%); transition: background 0.15s ease; cursor: pointer; }
+.bp-logout:hover { background: #f8fafc; }
+.bp-logout svg { width: 16px; height: 16px; color: var(--bp-slate-500); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bp-logout:disabled { opacity: 0.6; cursor: default; }
+
+/* --------------------------- Loading / error ------------------------- */
+.bp-state { padding: 48px 24px; text-align: center; color: var(--bp-slate-500); font-size: 14px; }
+.bp-state.is-error { color: #dc2626; }
+
+/* --------------------------- Desktop layout --------------------------
+   The design reference (buyer_profile_streamlined.html) is a 390px mobile
+   mock, but the page must FILL the viewport on large screens instead of
+   rendering as a centered phone column. The rules above are the exact
+   mobile design; from 768px up the cards stretch edge to edge and single
+   columns become grids so wide screens never look sparse. */
+
+@media (min-width: 768px) {
+  .bp-topbar { padding: 16px 32px; }
+  .bp-main { padding: 32px 32px 0; gap: 28px; }
+
+  /* Details form: two fields per row (Full Name + Level, Department + School). */
+  .bp-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+  .bp-form .bp-form-feedback { grid-column: 1 / -1; }
+
+  /* Contact card: phone + email side by side from 768px — same breakpoint
+     and column count as the seller profile's .sp-contact-grid. The
+     WhatsApp button keeps its own full-width row below the grid. */
+  .bp-contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1200px) {
+  .bp-topbar { padding: 18px 48px; }
+  .bp-main { padding: 40px 48px 0; gap: 32px; }
+
+  /* Ultra-wide screens: three columns keep the form balanced. */
+  .bp-form { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+

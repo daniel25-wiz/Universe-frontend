@@ -71,6 +71,15 @@
   padding: 0;
 }
 
+/* Hide the browser-native password reveal/clear buttons that Edge/IE inject
+   into input[type="password"] (::-ms-reveal / ::-ms-clear). Without this the
+   native eye icon shows up next to the app's own show/hide toggle, producing
+   two hide/show buttons on the login and signup password fields. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
@@ -2126,77 +2135,6 @@ img, svg {
   line-height: 1.6;
 }
 
-/* --- Section Six: Testimonials --- */
-.testimonials {
-  background-color: var(--color-gray-50);
-}
-
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-}
-
-.testimonial-card {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-gray-200);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.testimonial-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-}
-
-.testimonial-quote {
-  font-size: 1rem;
-  color: var(--color-gray-700);
-  line-height: 1.6;
-  margin-bottom: 24px;
-  font-style: italic;
-}
-
-.testimonial-author {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-gray-100);
-}
-
-.testimonial-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: var(--color-primary-light);
-  overflow: hidden;
-  border: 2px solid var(--color-white);
-  box-shadow: var(--shadow-sm);
-}
-
-.testimonial-avatar img, .testimonial-avatar svg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.testimonial-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-black);
-}
-
-.testimonial-role {
-  font-size: 0.8rem;
-  color: var(--color-gray-50);
-}
-
 /* --- Section Seven: CTA --- */
 .cta-section {
   padding-top: 120px;
@@ -2303,6 +2241,14 @@ img, svg {
 .footer-link:hover {
   color: var(--color-black);
   padding-left: 2px;
+}
+
+/* Non-interactive footer entry (e.g. "Buyer Protection") — same look as
+   .footer-link but with no hover effect or cursor so it doesn't read
+   as a clickable link. */
+.footer-link--static {
+  font-size: 0.9rem;
+  color: var(--color-gray-600);
 }
 
 .footer-newsletter {
@@ -2560,7 +2506,7 @@ img, svg {
     width: 200px;
     height: 130px;
   }
-  .features-grid, .testimonials-grid {
+  .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .footer-grid {
@@ -2630,7 +2576,7 @@ img, svg {
   .db-grid {
     grid-template-columns: 1fr;
   }
-  .features-grid, .testimonials-grid {
+  .features-grid {
     grid-template-columns: 1fr;
   }
   .connection-container {

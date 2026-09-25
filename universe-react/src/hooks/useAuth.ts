@@ -18,7 +18,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/services/auth';
 import { ApiError, isAuthError } from '../api/errors';
 import { sessionStore } from '../api/session';
-import type { GoogleLoginRequest, LoginRequest, RegisterRequest, User } from '../api/types';
+import type {
+  GoogleLoginRequest,
+  LoginRequest,
+  PasswordResetRequest,
+  PasswordResetResponse,
+  RegisterRequest,
+  ResetPasswordRequest,
+  User,
+  VerifyResetCodeRequest,
+  VerifyResetCodeResponse,
+} from '../api/types';
 
 const CURRENT_USER_KEY = ['currentUser'];
 const BUYER_LANDING_PATH = '/marketplace';
@@ -118,7 +128,7 @@ export function useGoogleLogin() {
         throw new ApiError({
           message: 'Unexpected response from the authentication server.',
           status: 0,
-          code: 'UNKNOWN',
+          code: 'UNKNOWN_ERROR',
         });
       }
       return { user: res.user, isNewUser: Boolean(res.isNewUser) };
@@ -156,5 +166,40 @@ export function useLogout() {
       sessionStore.clear();
       navigate('/');
     },
+  });
+}
+
+/**
+ * Request password reset mutation — sends OTP to email.
+ *
+ * Returns PasswordResetResponse with devOtp in development mode for testing.
+ * Generic success response prevents email enumeration.
+ */
+export function useRequestPasswordReset() {
+  return useMutation<PasswordResetResponse, ApiError, PasswordResetRequest>({
+    mutationFn: (data) => authApi.requestPasswordReset(data),
+  });
+}
+
+/**
+ * Verify reset code mutation — validates the OTP.
+ *
+ * Returns verified: true on success. Rate limited to prevent brute force.
+ */
+export function useVerifyResetCode() {
+  return useMutation<VerifyResetCodeResponse, ApiError, VerifyResetCodeRequest>({
+    mutationFn: (data) => authApi.verifyResetCode(data),
+  });
+}
+
+/**
+ * Reset password mutation — completes the password reset flow.
+ *
+ * Requires verified OTP. Updates password, revokes all sessions, consumes OTP.
+ * User must log in again with the new password.
+ */
+export function useResetPassword() {
+  return useMutation<{ message: string }, ApiError, ResetPasswordRequest>({
+    mutationFn: (data) => authApi.resetPassword(data),
   });
 }

@@ -15,6 +15,7 @@
 import type {
   ChangePasswordRequest,
   DeleteAccountRequest,
+  PublicSellerProfile,
   SellerProfile,
   UpdateEmailRequest,
   UpdateSellerProfileRequest,
@@ -105,12 +106,45 @@ export class MockUsersApi implements UsersApi {
     })());
   }
 
+  /**
+   * PUBLIC seller profile — deliberately session-free (marketplace visitors are
+   * anonymous). Read-only: only seller-PUBLISHED fields are returned, and an
+   * unknown id or a buyer account is a real 404 so the UI can show "seller not
+   * found" instead of an empty shell.
+   */
+  async getPublicSellerProfile(sellerId: string): Promise<PublicSellerProfile> {
+    logApi('GET', `/users/${sellerId}/seller-profile`);
+    return withMockLatency((async () => {
+      const seller = mockDb.query('users', (u) => u.id === sellerId && u.accountType === 'seller')[0];
+      if (!seller) {
+        throw new ApiError({ message: 'Seller not found.', status: 404, code: 'NOT_FOUND' });
+      }
+      const profile = mockDb.query('sellerProfiles', (p) => p.userId === seller.id)[0];
+      // Store name first, account name as the documented fallback — never a
+      // prefilled demo value.
+      return {
+        userId: seller.id,
+        name: profile?.storeName || seller.fullName || 'Campus Seller',
+        email: seller.email || null,
+        phone: profile?.phone ?? seller.phone ?? null,
+        level: profile?.level ?? null,
+        department: profile?.department ?? null,
+        course: profile?.course ?? null,
+        school: profile?.school ?? null,
+        bio: profile?.bio ?? null,
+        logoUrl: profile?.logoUrl ?? seller.avatarUrl ?? null,
+      };
+    })());
+  }
+
   async updateSellerProfile(data: UpdateSellerProfileRequest): Promise<SellerProfile> {
     logApi('PATCH', '/users/me/seller-profile');
     return withMockLatency((async () => {
       const { user } = await requireSession();
-      // Whitelist + sanitize every field (length caps, trimming).
-      const patch: Record<string, string | null | undefined> = {};
+      // Whitelist + sanitize every field (length caps, trimming). Values are
+      // typed loosely because the patch mixes strings with the bannerImages
+      // array (image fields are validated separately below).
+      const patch: Record<string, unknown> = {};
       if (data.storeName !== undefined) patch.storeName = optionalText(data.storeName, 80) ?? null;
       if (data.phone !== undefined) patch.phone = optionalText(data.phone, 20) ?? null;
       if (data.level !== undefined) patch.level = optionalText(data.level, 10) ?? null;

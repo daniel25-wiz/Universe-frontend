@@ -82,9 +82,8 @@
   color: var(--gs-on-secondary-container);
   transform: scale(0.98);
 }
-.dh-sb-link.active .material-symbols-outlined {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
+.dh-sb-link.active .material-symbols-outlined .mi-f { display: block; }
+.dh-sb-link.active .material-symbols-outlined .mi-o { display: none; }
 .dh-sb-label {
   font-family: var(--gs-font-label);
   font-size: 12px;
@@ -421,6 +420,16 @@
   margin-top: 4px;
 }
 .dh-stat-trend .material-symbols-outlined { font-size: 16px; }
+/* Sub row: supporting count on the left, the secondary figure (e.g. total
+   stock) on the far right. Wraps onto its own line on narrow bento cards. */
+.dh-stat-sub {
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+}
+.dh-stat-sub span { white-space: nowrap; }
+.dh-stat-sub-extra { font-weight: 600; }
 .dh-trend-up { color: var(--gs-success); }
 .dh-trend-down { color: var(--gs-error); }
 

@@ -16,6 +16,12 @@ export function mockDelayMs(): number {
 /** Wait for a simulated network round-trip (300–800ms by default). */
 export async function withMockLatency<T>(value: T | Promise<T>): Promise<T> {
   const ms = mockDelayMs();
+  // Endpoints call this with an already-started promise, so a failing request
+  // rejects while the latency timer is still ticking. Attaching a no-op handler
+  // NOW marks that rejection as handled (the caller still receives it through
+  // the returned promise) and keeps expected 4xx responses from being reported
+  // as "unhandled rejection" console noise.
+  if (value instanceof Promise) value.catch(() => {});
   if (ms > 0) {
     await new Promise((resolve) => window.setTimeout(resolve, ms));
   }

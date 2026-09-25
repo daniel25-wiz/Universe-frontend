@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { prefetchPropsForPath } from '../lib/prefetch';
+import { FEEDBACK_WHATSAPP_URL } from '../lib/support';
 
 const Footer = () => {
   return (
@@ -37,20 +38,33 @@ const Footer = () => {
           <div>
             <h4 className="footer-heading">Marketplace</h4>
             <ul className="footer-links">
-              <li><a href="#marketplace" className="footer-link">Explore Products</a></li>
-              <li><a href="#features" className="footer-link">Featured Brands</a></li>
-              <li><a href="#" className="footer-link">Global Shipping</a></li>
-              <li><a href="#" className="footer-link">Buyer Protection</a></li>
+              <li>
+                <Link to="/marketplace" className="footer-link" {...prefetchPropsForPath('/marketplace')}>
+                  Explore Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/marketplace" className="footer-link" {...prefetchPropsForPath('/marketplace')}>
+                  Featured Brands
+                </Link>
+              </li>
+              <li><span className="footer-link--static">Buyer Protection</span></li>
             </ul>
           </div>
 
           <div>
             <h4 className="footer-heading">Support</h4>
             <ul className="footer-links">
-              <li><a href="#" className="footer-link">Help Center</a></li>
-              <li><a href="#" className="footer-link">Contact Sales</a></li>
-              <li><a href="#" className="footer-link">System Status</a></li>
-              <li><a href="#" className="footer-link">API Reference</a></li>
+              <li>
+                <a
+                  href={FEEDBACK_WHATSAPP_URL}
+                  className="footer-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Help Center
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -63,8 +77,11 @@ const Footer = () => {
                   Terms of Service
                 </Link>
               </li>
-              <li><a href="#" className="footer-link">Sellers Agreement</a></li>
-              <li><a href="#" className="footer-link">GDPR Compliance</a></li>
+              <li>
+                <Link to="/terms#section-3" className="footer-link" {...prefetchPropsForPath('/terms')}>
+                  Sellers Agreement
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

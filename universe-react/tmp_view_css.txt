@@ -1,0 +1,66 @@
+
+.ap-location-box > span:first-of-type {
+  font-size: 1.1rem;
+  color: #4d607a;
+}
+
+.ap-lock-icon {
+  font-size: 1.2rem;
+  color: #5b6474;
+}
+
+/* ------------------------------- Variants ------------------------------- */
+
+.ap-variants {
+  margin-top: 22px;
+}
+
+.ap-variant-block {
+  border: 1px solid #d9e1ee;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 16px 18px 12px;
+  margin-bottom: 16px;
+}
+
+.ap-variant-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ap-variant-index {
+  color: #1f67d7;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ap-variant-remove {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: #b42318;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.ap-variant-remove .material-symbols-outlined {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.ap-variant-fields {
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.ap-variant-extra-values {

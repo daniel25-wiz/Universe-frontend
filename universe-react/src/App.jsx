@@ -6,6 +6,37 @@ import DashboardSkeleton from './components/skeletons/DashboardSkeleton';
 import TermsSkeleton from './components/skeletons/TermsSkeleton';
 import { useCurrentUser } from './hooks/useAuth';
 import { sessionStore } from './api/session';
+import { ordersApi } from './api/services/orders';
+
+/** localStorage keys for state that must survive a page reload. */
+const CART_STORAGE_KEY = 'universe.cart.v1';
+const SAVED_STORAGE_KEY = 'universe.saved.v1';
+const ORDERS_STORAGE_KEY = 'universe.orders.v1';
+
+/**
+ * Read a persisted list out of localStorage. The cart, saved items and order
+ * history used to live only in React state, so every reload wiped them.
+ * Corrupted or non-array values simply fall back to an empty list.
+ */
+function loadStoredList(key) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Best-effort write; private mode or a full quota must never break the UI. */
+function saveStoredList(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage unavailable — in-memory state still works for this session */
+  }
+}
 
 /**
  * Route-level code splitting.
@@ -40,15 +71,19 @@ const DashboardOverview = lazy(() => import('./components/seller-dashboard/views
 const MyMarketplace = lazy(() => import('./components/seller-dashboard/views/MyMarketplace'));
 const PublicMarketplace = lazy(() => import('./components/seller-dashboard/views/PublicMarketplace'));
 const MarketplaceProductPage = lazy(() => import('./components/marketplace/MarketplaceProductPage'));
+const SellerShopPage = lazy(() => import('./components/marketplace/SellerShopPage'));
+const SellerProfilePage = lazy(() => import('./components/marketplace/SellerProfilePage'));
 const CartPage = lazy(() => import('./components/marketplace/CartPage'));
 const SavedItemsPage = lazy(() => import('./components/marketplace/SavedItemsPage'));
 const MarketplaceSearchPage = lazy(() => import('./components/marketplace/MarketplaceSearchPage'));
+const BuyerProfile = lazy(() => import('./components/marketplace/BuyerProfile'));
 const SalesAnalytics = lazy(() => import('./components/seller-dashboard/views/SalesAnalytics'));
 const SellerProfile = lazy(() => import('./components/seller-dashboard/views/SellerProfile'));
 const SellerSettings = lazy(() => import('./components/seller-dashboard/views/SellerSettings'));
 const AddProductPage = lazy(() => import('./components/seller-dashboard/ui/AddProductPage'));
 const EditProductPage = lazy(() => import('./components/seller-dashboard/ui/EditProductPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function HomeRoute({ cartCount, onAddToCart }) {
   const { data: user, isLoading } = useCurrentUser();
@@ -63,8 +98,9 @@ function HomeRoute({ cartCount, onAddToCart }) {
 }
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
-  const [savedProducts, setSavedProducts] = useState([]);
+  const [cartItems, setCartItems] = useState(() => loadStoredList(CART_STORAGE_KEY));
+  const [savedProducts, setSavedProducts] = useState(() => loadStoredList(SAVED_STORAGE_KEY));
+  const [orders, setOrders] = useState(() => loadStoredList(ORDERS_STORAGE_KEY));
   const [showWarning, setShowWarning] = useState(false);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -94,16 +130,30 @@ function App() {
     return () => window.removeEventListener("scroll", handleScrollReveal);
   }, []);
 
-  const handleAddToCart = (product) => {
+  // Mirror cart / saved / ordered state into localStorage on every change so a
+  // reload (or closing the tab) keeps the buyer's basket intact.
+  useEffect(() => {
+    saveStoredList(CART_STORAGE_KEY, cartItems);
+  }, [cartItems]);
+
+  useEffect(() => {
+    saveStoredList(SAVED_STORAGE_KEY, savedProducts);
+  }, [savedProducts]);
+
+  useEffect(() => {
+    saveStoredList(ORDERS_STORAGE_KEY, orders);
+  }, [orders]);
+
+  const handleAddToCart = (product, options) => {
     if (!product) return;
     setCartItems((current) => {
       const existing = current.find((item) => item.product.id === product.id);
       if (existing) {
         return current.map((item) => item.product.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
+          ? { ...item, quantity: item.quantity + 1, options: options ?? item.options }
           : item);
       }
-      return [...current, { product, quantity: 1 }];
+      return [...current, { product, quantity: 1, options }];
     });
   };
 
@@ -125,6 +175,58 @@ function App() {
     setSavedProducts((current) => current.some((item) => item.id === product.id)
       ? current.filter((item) => item.id !== product.id)
       : [...current, product]);
+  };
+
+  /**
+   * "Go To Checkout" on the cart page: create a real order through the API
+   * (this is what makes the sale appear in analytics), snapshot it in local
+   * history, and empty the cart. The WhatsApp handoff stays inside CartPage.
+   */
+  const handleCheckout = async (items) => {
+    if (!items?.length) return;
+    
+    try {
+      // Create the order through the API. This is CRITICAL for sales analytics
+      // to work — the order must exist in the backend.
+      const orderPayload = {
+        items: items.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          unitPrice: item.product.salePrice ?? item.product.price,
+          variantSelection: item.options ? { selection: item.options } : undefined,
+        })),
+        // For WhatsApp checkout, we use a default delivery address.
+        // In a full implementation, you'd collect this from the user.
+        deliveryAddress: {
+          fullName: 'Marketplace Customer',
+          phone: '0000000000',
+          addressLine1: 'Will be confirmed via WhatsApp',
+          city: 'Lagos',
+          state: 'Lagos',
+          country: 'Nigeria',
+        },
+        note: 'Order placed via WhatsApp checkout',
+      };
+      
+      // Call the API to create the order
+      const createdOrder = await ordersApi.createOrder(orderPayload);
+      
+      // Snapshot the cart into local "Ordered products" history
+      setOrders((current) => [{
+        id: createdOrder.id || `order-${Date.now()}`,
+        date: createdOrder.createdAt || new Date().toISOString(),
+        items,
+      }, ...current]);
+      
+      // Empty the cart after successful order creation
+      setCartItems([]);
+      
+      return createdOrder;
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      // Re-throw so CartPage can show the error
+      throw error;
+    }
   };
 
   return (
@@ -195,6 +297,22 @@ function App() {
           }
         />
         <Route
+          path="/marketplace/seller/:sellerId"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <SellerShopPage onAddToCart={handleAddToCart} savedProducts={savedProducts} onToggleSaved={handleToggleSaved} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace/seller-profile/:sellerSlug"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <SellerProfilePage onAddToCart={handleAddToCart} savedProducts={savedProducts} onToggleSaved={handleToggleSaved} />
+            </Suspense>
+          }
+        />
+        <Route
           path="/marketplace/search"
           element={
             <Suspense fallback={<HomeSkeleton />}>
@@ -206,7 +324,7 @@ function App() {
           path="/cart"
           element={
             <Suspense fallback={<HomeSkeleton />}>
-              <CartPage cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onUpdateQuantity={handleUpdateCartQuantity} />
+              <CartPage cartItems={cartItems} orders={orders} onRemoveFromCart={handleRemoveFromCart} onUpdateQuantity={handleUpdateCartQuantity} onCheckout={handleCheckout} />
             </Suspense>
           }
         />
@@ -215,6 +333,16 @@ function App() {
           element={
             <Suspense fallback={<HomeSkeleton />}>
               <SavedItemsPage savedProducts={savedProducts} onToggleSaved={handleToggleSaved} cartItems={cartItems} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <RequireAuth>
+                <BuyerProfile cartItems={cartItems} savedProducts={savedProducts} orders={orders} />
+              </RequireAuth>
             </Suspense>
           }
         />
@@ -311,7 +439,14 @@ function App() {
             </Suspense>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<HomeSkeleton />}>
+              <NotFoundPage />
+            </Suspense>
+          }
+        />
       </Routes>
     </>
   );

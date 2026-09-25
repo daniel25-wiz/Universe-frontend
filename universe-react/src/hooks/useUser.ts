@@ -11,6 +11,7 @@ import { sessionStore } from '../api/session';
 import type {
   ChangePasswordRequest,
   DeleteAccountRequest,
+  PublicSellerProfile,
   SellerProfile,
   UpdateEmailRequest,
   UpdateSellerProfileRequest,
@@ -19,6 +20,7 @@ import type {
 } from '../api/types';
 
 const SELLER_PROFILE_KEY = ['sellerProfile'];
+const PUBLIC_SELLER_PROFILE_KEY = ['sellerProfile', 'public'];
 const CURRENT_USER_KEY = ['currentUser'];
 
 /** Fetch the current user's seller profile. */
@@ -26,6 +28,23 @@ export function useSellerProfile() {
   return useQuery<SellerProfile, ApiError>({
     queryKey: SELLER_PROFILE_KEY,
     queryFn: () => usersApi.getSellerProfile(),
+  });
+}
+
+/**
+ * Fetch a seller's PUBLIC profile by their user id (no session required) — the
+ * data behind the public seller profile page and the "View seller profile"
+ * button on a product page. Stays disabled until the id is resolved, so the
+ * route can look the seller up first without firing a bogus request.
+ */
+export function usePublicSellerProfile(sellerId?: string | null) {
+  return useQuery<PublicSellerProfile, ApiError>({
+    queryKey: [...PUBLIC_SELLER_PROFILE_KEY, sellerId ?? ''],
+    queryFn: () => usersApi.getPublicSellerProfile(sellerId as string),
+    enabled: Boolean(sellerId),
+    // A published profile barely changes while a buyer browses; this keeps the
+    // page instant on repeat visits without going stale for long.
+    staleTime: 5 * 60 * 1000,
   });
 }
 

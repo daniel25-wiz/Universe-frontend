@@ -15,6 +15,10 @@ function uuid(seed: string): string {
 
 const now = '2026-09-05T08:00:00.000Z';
 const earlier = '2026-09-04T10:00:00.000Z';
+// Static seed dates spread across the last weeks so the analytics day/week
+// buckets have real rows to aggregate in mock mode.
+const daysAgo2 = '2026-09-03T10:00:00.000Z';
+const weeksAgo4 = '2026-08-25T14:00:00.000Z';
 
 const users: (User & { passwordHash: string; failedLoginCount: number; lockedUntil: null })[] = [
   {
@@ -52,6 +56,8 @@ const users: (User & { passwordHash: string; failedLoginCount: number; lockedUnt
 
 const sessions: MockDatabaseShape['sessions'] = [];
 
+const passwordResetOTPs: MockDatabaseShape['passwordResetOTPs'] = [];
+
 const sellerProfiles: SellerProfile[] = [
   {
     id: uuid('profile-1'),
@@ -82,6 +88,9 @@ const products: Product[] = [
     sku: 'ELEC-HP-001',
     category: 'Electronics',
     status: 'active',
+    // Demo listing choice — 2 of the 3 active seed products are featured in
+    // the public marketplace, mirroring the seller-facing 2-listing cap.
+    featuredInMarketplace: true,
     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB5frr_1zYp3aISI9xcW1doII1_rsRu-whdcY-t-tmxK6xV1paBHOxrRGrL0H9SY1Rh15vZljoqRdEW980kPnjB9ZdBzpoDJrgiRHwzus3Lft1lxzBiV8EZsNkIxSOU92x1upf6mI95CLlxfM809LoI3wslBGpAzy93fX83_nIBxm4N6IMNkKSkuk3dvdsPJTYGE0mNMtR0OoCNvBlSBb7kx1955h7P79P4awYS17NBVYs492Ei8xNe',
     imageAlt: 'Premium wireless noise-cancelling headphones in matte black.',
     rating: 4.5,
@@ -99,8 +108,9 @@ const products: Product[] = [
     salePrice: null,
     stock: 120,
     sku: 'HOME-CM-002',
-    category: 'Home',
+    category: 'Others',
     status: 'active',
+    featuredInMarketplace: true,
     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjh81Qmmt90nqCzxc5YGlmAI90cBmkFJytnbMNU2lux1qBBgSKbQkiRbkeZ3CyHbLf6EB3t021y6NwVK95sPuNWWA7IYQBJV1ShJGaPRskxfOW64FXanNFhK1VkH08y48YrhouvWUkzQP49tiftv0Ij_HhRWeBN7PLYByto4pM4I9HAYET3x-10WXAf10sL29pGeoXrBii4nBUnsUHFwt5aKpriFzUJErzzHQMMOQFoH8NW35uniBy',
     imageAlt: 'Minimalist ceramic mug on a light slate background.',
     rating: 4.8,
@@ -120,6 +130,9 @@ const products: Product[] = [
     sku: 'FASH-LW-003',
     category: 'Fashion',
     status: 'active',
+    // Not featured — stays visible only on the seller's shop page, keeping the
+    // demo seller at the 2-listing marketplace cap.
+    featuredInMarketplace: false,
     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBaclE2t1cNJVCuDqR2Z3IhRUFnx5kpd4yWmbY2oHOqHNojBLzbdgEBGiIk4V9ITIdP9V25qDrmBX_xEzUYdnWPwFMGvDIIvitJx6_XWZJ6XCWmeZtCKYKIlXMC41VtNk_KzoTKVT1QAieZjLedYObn4RJd-eGr2L3nMYIJ2WHmOSjQeB1A3F85dzMhZZ7O6UO8r1nlVDLpBwBPUuSys3LQz-fs9QdHcMNdpn3BphWg4lfL2njKJDEg',
     imageAlt: 'Sleek leather wallet on a clean light gray surface.',
     rating: 4.6,
@@ -137,8 +150,9 @@ const products: Product[] = [
     salePrice: null,
     stock: 12,
     sku: 'HOME-DL-004',
-    category: 'Home',
+    category: 'Gadgets',
     status: 'draft',
+    featuredInMarketplace: false,
     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvb_57BM1dTHXtBnhxJfZoy8pjnj8_0yxNef9QVn9PCZy4Lv6wWgLCslx_CsPjUzufUHIFravcRP5Obp_w-w7NxUpInT5cd7foE4qF_44xuJsf-ikZ7cV3bgBbdsBtC9BEEZwUOcfG9YmerfMdM4jyeBTKs4Q85hUAuDrqNGDTNdykeyHcvJYYyYU98CntrSG_D118pG5kEi3H-xKYyL2cIaBSCX7SO-MJs8bFrof1VV4rUPTt3Rldf',
     imageAlt: 'Modern brushed steel desk lamp against a soft slate background.',
     rating: 4.3,
@@ -148,33 +162,50 @@ const products: Product[] = [
   },
 ];
 
+/**
+ * Demo orders — dev data for the mock backend only. Line items are real
+ * catalog rows (prices the seller actually set) and every order's `amount`
+ * equals the sum of its line totals, so Sales Analytics aggregates exactly
+ * like it will against the real Django API.
+ */
 const orders: Order[] = [
   {
     id: uuid('order-1'),
     reference: 'GS-2041',
     buyerName: 'Jane Doe',
     buyerInitials: 'JD',
-    amount: 192200,
+    amount: 232485,
     status: 'processing',
     createdAt: now,
+    items: [
+      { productId: uuid('prod-1'), productName: 'Premium Wireless Headphones', quantity: 1, unitPrice: 232485, lineTotal: 232485, sellerId: uuid('user-1') },
+    ],
   },
   {
     id: uuid('order-2'),
     reference: 'GS-2040',
     buyerName: 'Samuel Okafor',
     buyerInitials: 'SM',
-    amount: 138725,
+    amount: 96100,
     status: 'shipped',
-    createdAt: earlier,
+    createdAt: daysAgo2,
+    items: [
+      { productId: uuid('prod-2'), productName: 'Minimalist Ceramic Mug', quantity: 1, unitPrice: 37200, lineTotal: 37200, sellerId: uuid('user-1') },
+      { productId: uuid('prod-3'), productName: 'Classic Leather Wallet', quantity: 1, unitPrice: 58900, lineTotal: 58900, sellerId: uuid('user-1') },
+    ],
   },
   {
     id: uuid('order-3'),
     reference: 'GS-2039',
     buyerName: 'Aisha Bello',
     buyerInitials: 'AK',
-    amount: 540950,
+    amount: 523870,
     status: 'delivered',
-    createdAt: earlier,
+    createdAt: weeksAgo4,
+    items: [
+      { productId: uuid('prod-1'), productName: 'Premium Wireless Headphones', quantity: 2, unitPrice: 232485, lineTotal: 464970, sellerId: uuid('user-1') },
+      { productId: uuid('prod-3'), productName: 'Classic Leather Wallet', quantity: 1, unitPrice: 58900, lineTotal: 58900, sellerId: uuid('user-1') },
+    ],
   },
 ];
 
@@ -182,12 +213,14 @@ export function seedDatabase(): MockDatabaseShape {
   return {
     users,
     sessions: [...sessions],
+    passwordResetOTPs: [...passwordResetOTPs],
     sellerProfiles: [...sellerProfiles],
     products: [...products],
     orders: [...orders],
     counters: {
       users: users.length,
       sessions: sessions.length,
+      passwordResetOTPs: passwordResetOTPs.length,
       sellerProfiles: sellerProfiles.length,
       products: products.length,
       orders: orders.length,

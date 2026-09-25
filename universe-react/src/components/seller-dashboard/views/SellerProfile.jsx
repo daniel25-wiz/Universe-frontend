@@ -9,6 +9,7 @@ import { useCurrentUser } from '../../../hooks/useAuth';
 import { getUserInitials, getFirstName } from '../../../lib/user';
 import '../seller-dashboard.css';
 import './settings.css';
+import MaterialIcon from '../../../components/ui/MaterialIcon';
 
 function SellerProfile() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,12 +66,12 @@ function SellerProfile() {
       <div className="sd-main">
         <header className="sd-topbar">
           <div className="sd-topbar-left">
-            <button className="sd-topbar-menu" aria-label="Open menu" onClick={() => setMenuOpen(true)}><span className="material-symbols-outlined">menu</span></button>
+            <button className="sd-topbar-menu" aria-label="Open menu" onClick={() => setMenuOpen(true)}><MaterialIcon name="menu" /></button>
             <h2 className="sp-title">Seller Dashboard</h2>
           </div>
                               <div className="sd-topbar-actions">
-            <div className="sp-search"><span className="material-symbols-outlined">search</span><input type="text" placeholder="Search..." /></div>
-            <button className="sd-icon-btn" aria-label="Notifications"><span className="material-symbols-outlined">notifications</span></button>
+            <div className="sp-search"><MaterialIcon name="search" /><input type="text" placeholder="Search..." /></div>
+            <button className="sd-icon-btn" aria-label="Notifications"><MaterialIcon name="notifications" /></button>
             <div className="sd-avatar-sm ws-avatar-initials" title={user?.fullName}>
               {getUserInitials(user?.fullName)}
               <span className="sd-avatar-name">Hi, {getFirstName(user?.fullName)}</span>
@@ -103,7 +104,7 @@ function SellerProfile() {
                   className="sp-edit-btn"
                   onClick={() => setEditing((v) => !v)}
                 >
-                  <span className="material-symbols-outlined">{editing ? 'close' : 'edit'}</span>
+                  <MaterialIcon name={editing ? "close" : "edit"} />
                   {editing ? 'CANCEL' : 'EDIT'}
                 </button>
               </div>
@@ -174,16 +175,16 @@ function SellerProfile() {
             </div>
             <div className="sp-card sp-contact">
               <div className="sp-contact-head">
-                <h3 className="sp-contact-title"><span className="material-symbols-outlined">support_agent</span>Contact Us</h3>
+                <h3 className="sp-contact-title"><MaterialIcon name="support_agent" />Contact Us</h3>
                 <p className="sp-contact-sub">Need help with your seller account? Reach out to support.</p>
               </div>
               <div className="sp-contact-grid">
                 <div className="sp-contact-item">
-                  <div className="sp-contact-icon"><span className="material-symbols-outlined">call</span></div>
+                  <div className="sp-contact-icon"><MaterialIcon name="call" /></div>
                   <div><p className="sp-contact-label">Phone No.</p><p className="sp-contact-value">07051917468</p></div>
                 </div>
                 <div className="sp-contact-item">
-                  <div className="sp-contact-icon"><span className="material-symbols-outlined">mail</span></div>
+                  <div className="sp-contact-icon"><MaterialIcon name="mail" /></div>
                   <div><p className="sp-contact-label">Email</p><p className="sp-contact-value">universe26@gmail.com</p></div>
                 </div>
               </div>

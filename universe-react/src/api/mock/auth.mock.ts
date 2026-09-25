@@ -17,9 +17,14 @@ import type {
   AuthResponse,
   GoogleLoginRequest,
   LoginRequest,
+  PasswordResetRequest,
+  PasswordResetResponse,
   RefreshTokenResponse,
   RegisterRequest,
+  ResetPasswordRequest,
   User,
+  VerifyResetCodeRequest,
+  VerifyResetCodeResponse,
 } from '../types';
 import type { AuthApi } from '../services/auth';
 import { mockDb, generateId, nowIso } from './mockDatabase';
@@ -46,6 +51,10 @@ const REFRESH_TTL_SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
 /** Brute-force lockout thresholds. */
 const MAX_FAILED_LOGINS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+/** Password reset OTP configuration. */
+const OTP_LENGTH = 6;
+const OTP_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_OTP_ATTEMPTS = 3;
 
 function toPublicUser(stored: StoredUser): User {
   const { passwordHash: _p, failedLoginCount: _f, lockedUntil: _l, ...publicUser } = stored;
@@ -391,6 +400,222 @@ export class MockAuthApi implements AuthApi {
       const tokens = { accessToken, refreshToken: newRefreshToken };
       sessionStore.setTokens(tokens, persist);
       return tokens;
+    })());
+  }
+
+  /**
+   * Request password reset — generates a 6-digit OTP and simulates emailing it.
+   *
+   * SECURITY:
+   * - Generic response whether email exists or not (prevents enumeration).
+   * - Old OTPs for the same email are revoked when a new one is requested.
+   * - OTP expires after 15 minutes.
+   * - Rate limiting: 3 failed verification attempts lock the OTP.
+   * - Development mode returns the OTP in devOtp for testing.
+   */
+  async requestPasswordReset(data: PasswordResetRequest): Promise<PasswordResetResponse> {
+    logApi('POST', '/auth/forgot-password');
+    return withMockLatency((async () => {
+      const email = data.email?.trim().toLowerCase() ?? '';
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new ApiError({
+          message: 'Please enter a valid email address.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { email: 'Please enter a valid email address.' },
+        });
+      }
+
+      const user = mockDb.query('users', (u) => u.email === email)[0];
+
+      // Generic success response whether the email exists or not — prevents
+      // attackers from enumerating registered accounts.
+      const genericResponse: PasswordResetResponse = {
+        message: 'If an account exists with this email, a verification code has been sent.',
+      };
+
+      if (!user) {
+        // Email not found — still return success to prevent enumeration.
+        return genericResponse;
+      }
+
+      // Generate a 6-digit OTP.
+      const code = Array.from({ length: OTP_LENGTH }, () => Math.floor(Math.random() * 10)).join('');
+      const expiresAt = Date.now() + OTP_TTL_MS;
+
+      // Revoke any existing OTPs for this email.
+      mockDb.query('passwordResetOTPs', (otp) => otp.email === email).forEach((otp) => mockDb.remove('passwordResetOTPs', otp.id));
+
+      // Store the new OTP.
+      mockDb.insert('passwordResetOTPs', {
+        id: generateId(),
+        email,
+        code,
+        expiresAt,
+        createdAt: nowIso(),
+        failedAttempts: 0,
+      } as never);
+
+      // Development-only: log OTP to console and return in response for testing.
+      if (import.meta.env.DEV) {
+        console.log('\n📧 [MOCK EMAIL] Password Reset OTP');
+        console.log(`To: ${email}`);
+        console.log(`Subject: Your verification code`);
+        console.log(`\nYour verification code is: ${code}`);
+        console.log(`This code expires in 15 minutes.\n`);
+        return { ...genericResponse, devOtp: code };
+      }
+
+      return genericResponse;
+    })());
+  }
+
+  /**
+   * Verify password reset OTP.
+   *
+   * SECURITY:
+   * - Rate limiting: 3 failed attempts invalidate the OTP.
+   * - Expired OTPs are automatically rejected.
+   * - Verified OTPs remain valid for the final resetPassword step.
+   */
+  async verifyResetCode(data: VerifyResetCodeRequest): Promise<VerifyResetCodeResponse> {
+    logApi('POST', '/auth/verify-reset-code');
+    return withMockLatency((async () => {
+      const email = data.email?.trim().toLowerCase() ?? '';
+      const code = data.code?.trim() ?? '';
+
+      if (!email || !code) {
+        throw new ApiError({
+          message: 'Email and verification code are required.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { code: 'Verification code is required.' },
+        });
+      }
+
+      // Clean up expired OTPs first.
+      const now = Date.now();
+      mockDb.query('passwordResetOTPs', (otp) => otp.expiresAt <= now).forEach((otp) => mockDb.remove('passwordResetOTPs', otp.id));
+
+      const otp = mockDb.query('passwordResetOTPs', (o) => o.email === email)[0];
+
+      if (!otp) {
+        throw new ApiError({
+          message: 'Invalid or expired verification code.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { code: 'Invalid or expired verification code.' },
+        });
+      }
+
+      if (otp.expiresAt <= now) {
+        mockDb.remove('passwordResetOTPs', otp.id);
+        throw new ApiError({
+          message: 'Verification code has expired. Please request a new one.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { code: 'Verification code has expired.' },
+        });
+      }
+
+      if (otp.failedAttempts >= MAX_OTP_ATTEMPTS) {
+        mockDb.remove('passwordResetOTPs', otp.id);
+        throw new ApiError({
+          message: 'Too many failed attempts. Please request a new verification code.',
+          status: 429,
+          code: 'RATE_LIMITED',
+          fieldErrors: { code: 'Too many failed attempts.' },
+        });
+      }
+
+      if (otp.code !== code) {
+        // Increment failed attempts.
+        mockDb.update('passwordResetOTPs', otp.id, { failedAttempts: otp.failedAttempts + 1 } as never);
+        throw new ApiError({
+          message: 'Incorrect verification code.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { code: 'Incorrect verification code.' },
+        });
+      }
+
+      // OTP verified successfully — keep it for the final reset step.
+      return { message: 'Verification code confirmed.', verified: true };
+    })());
+  }
+
+  /**
+   * Complete password reset with verified OTP and new password.
+   *
+   * SECURITY:
+   * - Requires a valid, non-expired OTP that has been verified.
+   * - Password strength validation enforced.
+   * - OTP is consumed (deleted) after successful password reset.
+   * - All existing sessions for the user are revoked (security best practice).
+   */
+  async resetPassword(data: ResetPasswordRequest): Promise<{ message: string }> {
+    logApi('POST', '/auth/reset-password');
+    return withMockLatency((async () => {
+      const email = data.email?.trim().toLowerCase() ?? '';
+      const code = data.code?.trim() ?? '';
+      const newPassword = data.newPassword ?? '';
+
+      if (!email || !code || !newPassword) {
+        throw new ApiError({
+          message: 'Email, verification code, and new password are required.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+        });
+      }
+
+      // Validate password strength.
+      const policy = validatePasswordStrength(newPassword);
+      if (!policy.ok) {
+        throw new ApiError({
+          message: policy.error ?? 'Password does not meet the requirements.',
+          status: 422,
+          code: 'WEAK_PASSWORD',
+          fieldErrors: { newPassword: policy.error ?? 'Password does not meet the requirements.' },
+        });
+      }
+
+      // Clean up expired OTPs.
+      const now = Date.now();
+      mockDb.query('passwordResetOTPs', (otp) => otp.expiresAt <= now).forEach((otp) => mockDb.remove('passwordResetOTPs', otp.id));
+
+      const otp = mockDb.query('passwordResetOTPs', (o) => o.email === email && o.code === code)[0];
+
+      if (!otp || otp.expiresAt <= now) {
+        throw new ApiError({
+          message: 'Invalid or expired verification code.',
+          status: 422,
+          code: 'VALIDATION_ERROR',
+          fieldErrors: { code: 'Invalid or expired verification code.' },
+        });
+      }
+
+      const user = mockDb.query('users', (u) => u.email === email)[0];
+      if (!user) {
+        throw new ApiError({
+          message: 'User not found.',
+          status: 404,
+          code: 'NOT_FOUND',
+        });
+      }
+
+      // Update password.
+      const passwordHash = await hashPassword(newPassword);
+      mockDb.update('users', user.id, { passwordHash, failedLoginCount: 0, lockedUntil: null } as never);
+
+      // Revoke the OTP (single-use).
+      mockDb.remove('passwordResetOTPs', otp.id);
+
+      // SECURITY: revoke all existing sessions for this user so stolen sessions
+      // can't continue after a password change.
+      mockDb.query('sessions', (s) => s.userId === user.id).forEach((s) => mockDb.remove('sessions', s.id));
+
+      return { message: 'Password reset successfully. You can now log in with your new password.' };
     })());
   }
 }

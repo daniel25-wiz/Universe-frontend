@@ -54,7 +54,6 @@ const Navbar = ({ cartCount }) => {
             <li><Link to="#marketplace" className="nav-link" onClick={handleSectionClick('#marketplace')}>Marketplace</Link></li>
             <li><Link to="#features-showcase" className="nav-link" onClick={handleSectionClick('#features-showcase')}>Features</Link></li>
             <li><Link to="#dashboard" className="nav-link" onClick={handleSectionClick('#dashboard')}>Dashboard</Link></li>
-            <li><Link to="#testimonials" className="nav-link" onClick={handleSectionClick('#testimonials')}>Reviews</Link></li>
             <li><Link to="#contact" className="nav-link" onClick={handleSectionClick('#contact')}>Contact</Link></li>
           </ul>
 
@@ -87,7 +86,6 @@ const Navbar = ({ cartCount }) => {
           <li><Link to="#marketplace" className="mobile-nav-link" onClick={handleSectionClick('#marketplace')}>Marketplace</Link></li>
           <li><Link to="#features-showcase" className="mobile-nav-link" onClick={handleSectionClick('#features-showcase')}>Features</Link></li>
           <li><Link to="#dashboard" className="mobile-nav-link" onClick={handleSectionClick('#dashboard')}>Dashboard</Link></li>
-          <li><Link to="#testimonials" className="mobile-nav-link" onClick={handleSectionClick('#testimonials')}>Reviews</Link></li>
           <li><Link to="#contact" className="mobile-nav-link" onClick={handleSectionClick('#contact')}>Contact</Link></li>
         </ul>
         <div className="mobile-actions">

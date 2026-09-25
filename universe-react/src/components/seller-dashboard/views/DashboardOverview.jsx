@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom';
 import '../seller-dashboard.css';
 import './dashboard-overview.css';
 import { prefetchPropsForPath } from '../../../lib/prefetch';
+import { FEEDBACK_WHATSAPP_URL, SUPPORT_EMAIL } from '../../../lib/support';
 import { useCurrentUser, useLogout } from '../../../hooks/useAuth';
 import { useSellerProfile } from '../../../hooks/useUser';
 import { useProducts } from '../../../hooks/useProducts';
+import '../ui/widgets.css';
 import { getUserInitials, getFirstName, getStoreDisplayName, timeAgo, formatMoney } from '../../../lib/user';
+import MaterialIcon from '../../../components/ui/MaterialIcon';
 
 const NAV = [
   { key: 'home', label: 'Home', icon: 'home', to: '/seller', fill: true },
@@ -37,7 +40,7 @@ function DashboardOverview() {
 
   // Own products only — the API scopes this server-side as well.
   const sellerId = user?.id;
-  const { data: products } = useProducts(sellerId ? { sellerId, pageSize: 200 } : { sellerId: '__loading__' });
+  const { data: products } = useProducts(sellerId ? { sellerId, page: 1, pageSize: 50 } : { sellerId: '__loading__' });
 
   // Close the identity dropdown on outside click / Escape.
   useEffect(() => {
@@ -63,11 +66,14 @@ function DashboardOverview() {
     const active = list.filter((p) => p.status === 'active');
     const drafts = list.filter((p) => p.status === 'draft');
     const inventoryValue = list.reduce((sum, p) => sum + (p.price ?? 0) * (p.stock ?? 0), 0);
+    // Units on hand across every product this seller has — a null/undefined
+    // stock counts as 0 so the total never becomes NaN.
+    const totalStock = list.reduce((sum, p) => sum + (p.stock ?? 0), 0);
     const lowStock = active.filter((p) => p.stock != null && p.stock <= 5);
     const rated = list.filter((p) => p.reviews > 0);
     const avgRating = rated.length > 0 ? rated.reduce((s, p) => s + (p.rating ?? 0), 0) / rated.length : null;
     const reviewCount = rated.reduce((s, p) => s + (p.reviews ?? 0), 0);
-    return { list, active, drafts, inventoryValue, lowStock, avgRating, reviewCount };
+    return { list, active, drafts, inventoryValue, totalStock, lowStock, avgRating, reviewCount };
   }, [products]);
 
   const statCards = [
@@ -82,6 +88,8 @@ function DashboardOverview() {
       icon: 'payments',
       value: formatMoney(stats.inventoryValue),
       sub: `${stats.list.length} product${stats.list.length === 1 ? '' : 's'} in total`,
+      // Sits on the opposite end of the same row: how many units the seller holds.
+      subExtra: `${stats.totalStock.toLocaleString('en-US')} stock in total`,
     },
     {
       label: 'Low Stock Alerts',
@@ -170,13 +178,7 @@ function DashboardOverview() {
               onClick={closeMenu}
               {...prefetchPropsForPath(item.to)}
             >
-              <span
-                className="material-symbols-outlined"
-                data-icon={item.icon}
-                data-weight={item.fill ? 'fill' : undefined}
-              >
-                {item.icon}
-              </span>
+              <MaterialIcon name={item.icon} fill={item.fill} />
               <span className="dh-sb-label">{item.label}</span>
             </Link>
           ))}
@@ -184,16 +186,24 @@ function DashboardOverview() {
 
         <div className="dh-sb-foot">
           <div className="dh-sb-help">
-            <a href="#" className="dh-sb-link" onClick={(e) => e.preventDefault()}>
-              <span className="material-symbols-outlined" data-icon="feedback">
-                feedback
-              </span>
+            <a
+              href={FEEDBACK_WHATSAPP_URL}
+              className="dh-sb-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+            >
+              <MaterialIcon name="feedback" />
               <span className="dh-sb-label">Feedback</span>
             </a>
-            <a href="#" className="dh-sb-link" onClick={(e) => e.preventDefault()}>
-              <span className="material-symbols-outlined" data-icon="help">
-                help
-              </span>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="dh-sb-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+            >
+              <MaterialIcon name="help" />
               <span className="dh-sb-label">Help Center</span>
             </a>
             <button
@@ -203,9 +213,7 @@ function DashboardOverview() {
               onClick={() => logout.mutate()}
               disabled={logout.isPending}
             >
-              <span className="material-symbols-outlined" data-icon="logout">
-                logout
-              </span>
+              <MaterialIcon name="logout" />
               <span className="dh-sb-label">{logout.isPending ? 'Logging out…' : 'Logout'}</span>
             </button>
           </div>
@@ -224,7 +232,7 @@ function DashboardOverview() {
             <div className="dh-mobile-overlay" onClick={closeMenu} />
             <nav className="dh-sidebar dh-sidebar-mobile">
               <button className="dh-drawer-close" aria-label="Close menu" onClick={closeMenu}>
-                <span className="material-symbols-outlined">close</span>
+                <MaterialIcon name="close" />
               </button>
               {sidebarContent}
             </nav>
@@ -237,7 +245,7 @@ function DashboardOverview() {
         <header className="dh-topbar">
           <div className="dh-mobile-title">
             <button className="dh-menu-btn" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
-              <span className="material-symbols-outlined">menu</span>
+              <MaterialIcon name="menu" />
             </button>
             <h1>Seller Dashboard</h1>
           </div>
@@ -245,20 +253,20 @@ function DashboardOverview() {
           {/* Mobile Search Icon */}
           <div className="dh-mobile-search">
             <button aria-label="Search">
-              <span className="material-symbols-outlined">search</span>
+              <MaterialIcon name="search" />
             </button>
           </div>
 
           {/* Desktop Search Bar */}
           <div className="dh-search">
-            <span className="material-symbols-outlined">search</span>
+            <MaterialIcon name="search" />
             <input type="text" placeholder="Search orders, products..." />
           </div>
 
           {/* Trailing Actions */}
           <div className="dh-trailing">
             <button className="dh-notif" aria-label="Notifications">
-              <span className="material-symbols-outlined">notifications</span>
+              <MaterialIcon name="notifications" />
               <span className="dh-notif-dot"></span>
             </button>
             <div className="dh-usermenu-wrap" ref={userMenuRef}>
@@ -272,7 +280,7 @@ function DashboardOverview() {
               >
                 <span className="dh-user-avatar" aria-hidden="true">{getUserInitials(user?.fullName)}</span>
                 <span className="dh-store-label">{storeDisplayName}</span>
-                <span className="material-symbols-outlined dh-store-caret">arrow_drop_down</span>
+                <MaterialIcon name="arrow_drop_down" className="dh-store-caret" />
               </button>
 
               {userMenuOpen && (
@@ -287,7 +295,7 @@ function DashboardOverview() {
                     onClick={() => setUserMenuOpen(false)}
                     {...prefetchPropsForPath('/seller/profile')}
                   >
-                    <span className="material-symbols-outlined">account_circle</span>
+                    <MaterialIcon name="account_circle" />
                     Seller Profile
                   </Link>
                   <Link
@@ -296,7 +304,7 @@ function DashboardOverview() {
                     onClick={() => setUserMenuOpen(false)}
                     {...prefetchPropsForPath('/seller/settings')}
                   >
-                    <span className="material-symbols-outlined">settings</span>
+                    <MaterialIcon name="settings" />
                     Settings
                   </Link>
                   <div className="dh-menu-divider" />
@@ -309,7 +317,7 @@ function DashboardOverview() {
                     }}
                     disabled={logout.isPending}
                   >
-                    <span className="material-symbols-outlined">logout</span>
+                    <MaterialIcon name="logout" />
                     {logout.isPending ? 'Logging out…' : 'Log out'}
                   </button>
                 </div>
@@ -336,20 +344,16 @@ function DashboardOverview() {
                 >
                   <div className="dh-stat-head">
                     <span className="dh-stat-label">{stat.label}</span>
-                    <span
-                      className="material-symbols-outlined dh-stat-icon"
-                      data-icon={stat.icon}
-                      data-weight={stat.highlight ? 'fill' : undefined}
-                      style={stat.highlight ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                    >
-                      {stat.icon}
-                    </span>
+                    <MaterialIcon name={stat.icon} className="dh-stat-icon" fill={stat.highlight} />
                   </div>
                   <div className="dh-stat-bottom">
                     <span className="dh-stat-value">{stat.value}</span>
                     {stat.sub && (
                       <div className="dh-stat-trend dh-stat-sub">
                         <span>{stat.sub}</span>
+                        {stat.subExtra && (
+                          <span className="dh-stat-sub-extra">{stat.subExtra}</span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -401,7 +405,7 @@ function DashboardOverview() {
                     activity.map((item) => (
                       <div key={item.key} className="dh-activity-item">
                         <div className={`dh-activity-icon ${item.cls}`}>
-                          <span className="material-symbols-outlined">{item.icon}</span>
+                          <MaterialIcon name={item.icon} />
                         </div>
                         <div>
                           <p className="dh-activity-text">{item.text}</p>

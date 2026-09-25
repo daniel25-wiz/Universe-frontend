@@ -18,6 +18,7 @@ import { getUserInitials } from '../../lib/user';
 import { slugifyStoreName } from '../../lib/storeDomain';
 import './storefront.css';
 import './storefrontTemplates.css';
+import MaterialIcon from '../../components/ui/MaterialIcon';
 
 const CATEGORY_TABS = [
   { key: 'all', label: 'All Products' },
@@ -85,9 +86,11 @@ function StorefrontPage() {
       return matchesCategory && matchesSearch;
     });
     const sorted = [...list];
-    if (sort === 'popular') sorted.sort((a, b) => b.popularity - a.popularity);
-    else if (sort === 'price-low') sorted.sort((a, b) => a.price - b.price);
-    else if (sort === 'price-high') sorted.sort((a, b) => b.price - a.price);
+    // Null popularity/price = unknown; unknowns sink to the end instead of
+    // pretending a score the backend never sent.
+    if (sort === 'popular') sorted.sort((a, b) => (b.popularity ?? -1) - (a.popularity ?? -1));
+    else if (sort === 'price-low') sorted.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+    else if (sort === 'price-high') sorted.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
     return sorted; // 'newest' keeps the catalog order
   }, [store, category, query, sort]);
 
@@ -153,7 +156,7 @@ function StorefrontPage() {
     return (
       <div className="sf-root">
         <div className="sf-state">
-          <span className="material-symbols-outlined sf-state-icon sf-fill">storefront</span>
+          <MaterialIcon name="storefront" className="sf-state-icon" fill />
           <p className="sf-state-title">Opening storefront…</p>
           <p className="sf-state-text">Loading the private marketplace on this domain.</p>
           <div className="sf-loading-grid">
@@ -171,7 +174,7 @@ function StorefrontPage() {
     return (
       <div className="sf-root">
         <div className="sf-state">
-          <span className="material-symbols-outlined sf-state-icon">domain_disabled</span>
+          <MaterialIcon name="domain_disabled" className="sf-state-icon" />
           <p className="sf-state-title">Storefront unavailable</p>
           <p className="sf-state-text">{error?.message || 'We could not load this private marketplace.'}</p>
           <button type="button" className="sf-noresults-btn" onClick={() => refetch()}>
@@ -182,8 +185,9 @@ function StorefrontPage() {
     );
   }
 
-  const followerCount = store.followers + (following ? 1 : 0);
-  const followerLabel = `${(followerCount / 1000).toFixed(1)}k`;
+  const followerCount = store.followers != null ? store.followers + (following ? 1 : 0) : null;
+  // Null followers = the backend tracks none — render "—" instead of "0.0k".
+  const followerLabel = followerCount != null ? `${(followerCount / 1000).toFixed(1)}k` : '—';
   const pageTabs = store.template
     ? PAGE_TABS.filter((tab) => tab.key === 'all-products')
     : PAGE_TABS;
@@ -237,16 +241,20 @@ function StorefrontPage() {
                       </div>
                     )}
                     <div className="sf-avatar-check">
-                      <span className="material-symbols-outlined sf-i15 sf-fill">verified</span>
+                      <MaterialIcon name="verified" className="sf-i15" fill />
                     </div>
                   </div>
                   <div className="sf-hero-titleblock">
                     <div className="sf-hero-titlerow">
                       <h1 className="sf-hero-title">{store.name}</h1>
-                      <span className="sf-toprated">
-                        <span className="material-symbols-outlined sf-i13">military_tech</span>
-                        {` ${store.badgeLabel}`}
-                      </span>
+                      {/* Seller's own badge label — hidden when the backend
+                          provides none. */}
+                      {store.badgeLabel && (
+                        <span className="sf-toprated">
+                          <MaterialIcon name="military_tech" className="sf-i13" />
+                          {` ${store.badgeLabel}`}
+                        </span>
+                      )}
                     </div>
                     <div className="sf-hero-subrow">
                       <span>
@@ -255,11 +263,11 @@ function StorefrontPage() {
                       </span>
                       <span className="sf-dot2" />
                       <span className="sf-school">
-                        <span className="material-symbols-outlined sf-i16">school</span>
+                        <MaterialIcon name="school" className="sf-i16" />
                         {` ${store.school} Verified`}
                       </span>
                       <span className="sf-dot2" />
-                      <span className="sf-storeid">{`ID: ${store.storeId}`}</span>
+                      {store.storeId && <span className="sf-storeid">{`ID: ${store.storeId}`}</span>}
                     </div>
                   </div>
                 </div>
@@ -270,9 +278,7 @@ function StorefrontPage() {
                     className={following ? 'sf-btn-follow following' : 'sf-btn-follow'}
                     onClick={toggleFollow}
                   >
-                    <span className="material-symbols-outlined sf-i18">
-                      {following ? 'bookmark_added' : 'bookmark_add'}
-                    </span>
+                    <MaterialIcon name={following ? "bookmark_added" : "bookmark_add"} className="sf-i18" />
                     <span>{following ? 'Following' : 'Follow Store'}</span>
                     <span className="sf-follow-count">{followerLabel}</span>
                   </button>
@@ -282,7 +288,7 @@ function StorefrontPage() {
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    <span className="material-symbols-outlined sf-i20">chat</span>
+                    <MaterialIcon name="chat" className="sf-i20" />
                     <span>Message Seller</span>
                   </a>
                   <button
@@ -291,7 +297,7 @@ function StorefrontPage() {
                     onClick={copyStoreUrl}
                     title="Share store link"
                   >
-                    <span className="material-symbols-outlined sf-i18">share</span>
+                    <MaterialIcon name="share" className="sf-i18" />
                     <span className="sf-share-label">{store.domain}</span>
                   </button>
                 </div>
@@ -300,37 +306,37 @@ function StorefrontPage() {
               <div className="sf-metrics">
                 <div className="sf-metric">
                   <div className="sf-metric-icon tone-tertiary">
-                    <span className="material-symbols-outlined sf-i20 sf-fill">star</span>
+                    <MaterialIcon name="star" className="sf-i20" fill />
                   </div>
                   <div className="sf-metric-col">
-                    <span className="sf-metric-value">{`${store.rating.toFixed(1)} ★`}</span>
-                    <span className="sf-metric-label">{`${store.reviewCount.toLocaleString('en-US')} Reviews`}</span>
+                    <span className="sf-metric-value">{store.rating != null ? `${store.rating.toFixed(1)} ★` : 'No rating yet'}</span>
+                    <span className="sf-metric-label">{store.reviewCount != null ? `${store.reviewCount.toLocaleString('en-US')} Reviews` : 'No reviews yet'}</span>
                   </div>
                 </div>
                 <div className="sf-metric">
                   <div className="sf-metric-icon tone-secondary">
-                    <span className="material-symbols-outlined sf-i20">speed</span>
+                    <MaterialIcon name="speed" className="sf-i20" />
                   </div>
                   <div className="sf-metric-col">
-                    <span className="sf-metric-value">{store.fulfillmentLabel}</span>
+                    <span className="sf-metric-value">{store.fulfillmentLabel ?? '—'}</span>
                     <span className="sf-metric-label">Fulfillment Rate</span>
                   </div>
                 </div>
                 <div className="sf-metric">
                   <div className="sf-metric-icon tone-primary">
-                    <span className="material-symbols-outlined sf-i20">reply_all</span>
+                    <MaterialIcon name="reply_all" className="sf-i20" />
                   </div>
                   <div className="sf-metric-col">
-                    <span className="sf-metric-value">{store.responseTimeLabel}</span>
+                    <span className="sf-metric-value">{store.responseTimeLabel ?? '—'}</span>
                     <span className="sf-metric-label">Avg Response Time</span>
                   </div>
                 </div>
                 <div className="sf-metric">
                   <div className="sf-metric-icon tone-neutral">
-                    <span className="material-symbols-outlined sf-i20">verified_user</span>
+                    <MaterialIcon name="verified_user" className="sf-i20" />
                   </div>
                   <div className="sf-metric-col">
-                    <span className="sf-metric-value">{store.memberSinceLabel}</span>
+                    <span className="sf-metric-value">{store.memberSinceLabel ?? '—'}</span>
                     <span className="sf-metric-label">Active on UNIVERSE</span>
                   </div>
                 </div>
@@ -342,7 +348,7 @@ function StorefrontPage() {
           <div className="sf-assurances">
             {store.assurances.map((item) => (
               <div className="sf-assurance" key={item.title}>
-                <span className={`material-symbols-outlined tone-${item.tone}`}>{item.icon}</span>
+                <MaterialIcon name={item.icon} className={`tone-${item.tone}`} />
                 <div className="sf-assurance-col">
                   <span className="sf-assurance-title">{item.title}</span>
                   <span className="sf-assurance-sub">{item.sub}</span>
@@ -350,31 +356,34 @@ function StorefrontPage() {
               </div>
             ))}
           </div>
-          {/* Announcement & Promotion Strip */}
-          <div className="sf-announce">
+          {/* Announcement & Promotion Strip. The coupon elements render only
+              when the backend provides a code — no invented promotions. */}
+          {(store.announcementTitle || store.announcementLead || store.couponCode) && <div className="sf-announce">
             <div className="sf-announce-blur" />
             <div className="sf-announce-row">
               <div className="sf-announce-left">
                 <div className="sf-announce-icon">
-                  <span className="material-symbols-outlined sf-i26">celebration</span>
+                  <MaterialIcon name="celebration" className="sf-i26" />
                 </div>
                 <div className="sf-announce-text">
                   <div className="sf-announce-titlerow">
                     <span className="sf-announce-title">{store.announcementTitle}</span>
-                    <span className="sf-limited">LIMITED TIME</span>
+                    {store.couponCode && <span className="sf-limited">LIMITED TIME</span>}
                   </div>
                   <p className="sf-announce-sub">
-                    {`${store.announcementLead} `}
-                    <span className="sf-coupon">{store.couponCode}</span>
+                    {store.announcementLead}
+                    {store.couponCode && <span className="sf-coupon">{` ${store.couponCode}`}</span>}
                   </p>
                 </div>
               </div>
-              <button type="button" className="sf-btn-coupon" onClick={applyDiscountBanner}>
-                <span className="material-symbols-outlined sf-i18">content_copy</span>
-                <span>Copy Coupon</span>
-              </button>
+              {store.couponCode && (
+                <button type="button" className="sf-btn-coupon" onClick={applyDiscountBanner}>
+                  <MaterialIcon name="content_copy" className="sf-i18" />
+                  <span>Copy Coupon</span>
+                </button>
+              )}
             </div>
-          </div>
+          </div>}
 
           {/* Main Catalog Section */}
           <div className="sf-catalog" id="sf-catalog">
@@ -385,10 +394,14 @@ function StorefrontPage() {
                   <span className="sf-eyebrow">Catalog Selection</span>
                   <h2 className="sf-catalog-title">{`${firstName}'s Verified Inventory`}</h2>
                 </div>
-                <div className="sf-stocknote">
-                  <span className="sf-stockdot" />
-                  <span>{store.stockNote}</span>
-                </div>
+                {/* Seller assurance copy — hidden entirely when the backend
+                    provides none (never a fabricated assurance). */}
+                {store.stockNote && (
+                  <div className="sf-stocknote">
+                    <span className="sf-stockdot" />
+                    <span>{store.stockNote}</span>
+                  </div>
+                )}
               </div>
               {/* Category Pills Bar & Controls */}
               <div className="sf-controls">
@@ -408,7 +421,7 @@ function StorefrontPage() {
                 <div className="sf-controls-right">
                   <div className="sf-filter-search">
                     <span className="sf-filter-icon">
-                      <span className="material-symbols-outlined sf-i18">search</span>
+                      <MaterialIcon name="search" className="sf-i18" />
                     </span>
                     <input
                       className="sf-filter-input"
@@ -431,7 +444,7 @@ function StorefrontPage() {
                       <option value="newest">Newest Arrivals</option>
                     </select>
                     <span className="sf-sort-caret">
-                      <span className="material-symbols-outlined sf-i16">expand_more</span>
+                      <MaterialIcon name="expand_more" className="sf-i16" />
                     </span>
                   </div>
                 </div>
@@ -454,7 +467,7 @@ function StorefrontPage() {
             {/* Empty State for Search Filter */}
             {visibleProducts.length === 0 && (
               <div className="sf-noresults">
-                <span className="material-symbols-outlined sf-i48">search_off</span>
+                <MaterialIcon name="search_off" className="sf-i48" />
                 <h4 className="sf-noresults-title">No Products Found</h4>
                 <p className="sf-noresults-text">
                   Try tweaking your search keyword or explore other verified categories.
@@ -472,20 +485,21 @@ function StorefrontPage() {
               <div className="sf-bio-inner">
                 <div className="sf-bio-head">
                   <div className="sf-bio-icon">
-                    <span className="material-symbols-outlined sf-i24">store</span>
+                    <MaterialIcon name="store" className="sf-i24" />
                   </div>
                   <div>
                     <span className="sf-bio-eyebrow">Merchant Story</span>
                     <h3 className="sf-bio-title">{`About ${store.name}`}</h3>
                   </div>
                 </div>
-                <p className="sf-bio-lead">{store.bioLead}</p>
-                <p className="sf-bio-detail">{store.bioDetail}</p>
-                {/* Store Operation Badges */}
+                {/* Seller's own bio copy — each part renders only when the
+                    backend provides it; nothing is invented here. */}
+                {store.bioLead && <p className="sf-bio-lead">{store.bioLead}</p>}
+                {store.bioDetail && <p className="sf-bio-detail">{store.bioDetail}</p>}
                 <div className="sf-bio-badges">
                   {store.bioBadges.map((badge) => (
                     <span className="sf-bio-badge" key={badge.label}>
-                      <span className={`material-symbols-outlined sf-i15 tone-${badge.tone}`}>{badge.icon}</span>
+                      <MaterialIcon name={badge.icon} className={`sf-i15 tone-${badge.tone}`} />
                       {badge.label}
                     </span>
                   ))}
@@ -496,17 +510,17 @@ function StorefrontPage() {
                 <span className="sf-contact-label">Verified Contact Channels</span>
                 <div className="sf-contact-row">
                   <span className="sf-contact-key">
-                    <span className="material-symbols-outlined sf-i16">call</span>
+                    <MaterialIcon name="call" className="sf-i16" />
                     {' Phone / WhatsApp:'}
                   </span>
-                  <a className="sf-contact-val" href={`tel:${store.phone}`}>{store.phone}</a>
+                  {store.phone ? <a className="sf-contact-val" href={`tel:${store.phone}`}>{store.phone}</a> : <span className="sf-contact-val">Not provided</span>}
                 </div>
                 <div className="sf-contact-row">
                   <span className="sf-contact-key">
-                    <span className="material-symbols-outlined sf-i16">mail</span>
+                    <MaterialIcon name="mail" className="sf-i16" />
                     {' Official Email:'}
                   </span>
-                  <a className="sf-contact-val" href={`mailto:${store.email}`}>{store.email}</a>
+                  {store.email ? <a className="sf-contact-val" href={`mailto:${store.email}`}>{store.email}</a> : <span className="sf-contact-val">Not provided</span>}
                 </div>
               </div>
             </div>
@@ -519,8 +533,8 @@ function StorefrontPage() {
                     <h3 className="sf-reviews-title">What Students Say</h3>
                   </div>
                   <div className="sf-rating-pill">
-                    <span className="material-symbols-outlined sf-i18 sf-fill">star</span>
-                    <strong>{`${store.rating.toFixed(1)} / 5.0`}</strong>
+                    <MaterialIcon name="star" className="sf-i18" fill />
+                    <strong>{store.rating != null ? `${store.rating.toFixed(1)} / 5.0` : 'No rating yet'}</strong>
                   </div>
                 </div>
                 {/* Reviews Grid */}
@@ -537,7 +551,7 @@ function StorefrontPage() {
                         </div>
                         <div className="sf-review-stars">
                           {[0, 1, 2, 3, 4].map((starIndex) => (
-                            <span key={starIndex} className="material-symbols-outlined sf-i14 sf-fill">star</span>
+                            <MaterialIcon name="star" className="sf-i14" fill />
                           ))}
                         </div>
                       </div>
@@ -549,12 +563,12 @@ function StorefrontPage() {
               {/* Rating Breakdown Bar Mini Visual */}
               <div className="sf-reviews-foot">
                 <div className="sf-reviews-foot-left">
-                  <span className="material-symbols-outlined sf-i18">verified</span>
-                  <span>{store.reviewsNote}</span>
+                  <MaterialIcon name="verified" className="sf-i18" />
+                  <span>{store.reviewsNote ?? 'No reviews yet'}</span>
                 </div>
                 <a className="sf-reviews-link" href="#sf-reviews" onClick={(event) => event.preventDefault()}>
                   {'Read all reviews '}
-                  <span className="material-symbols-outlined sf-i14">arrow_forward</span>
+                  <MaterialIcon name="arrow_forward" className="sf-i14" />
                 </a>
               </div>
             </div>
@@ -563,7 +577,7 @@ function StorefrontPage() {
       </main>
 
       <div className={toast?.show ? 'sf-toast show' : 'sf-toast'}>
-        <span className="material-symbols-outlined sf-i20">{toast?.icon ?? 'check_circle'}</span>
+        <MaterialIcon name={toast?.icon ?? "check_circle"} className="sf-i20" />
         <span className="sf-toast-msg">{toast?.message ?? 'Action completed'}</span>
       </div>
     </div>
@@ -584,27 +598,33 @@ function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSe
               <div className="sf-brand-row">
                 <span className="sf-brand-name">{store.name}</span>
                 <span className="sf-brand-verified" title="Verified Merchant">
-                  <span className="material-symbols-outlined sf-i18">verified</span>
+                  <MaterialIcon name="verified" className="sf-i18" />
                 </span>
                 <span className="sf-brand-rating">
-                  <span className="material-symbols-outlined sf-i14 sf-fill">star</span>
-                  {store.rating.toFixed(1)}
+                  <MaterialIcon name="star" className="sf-i14" fill />
+                  {store.rating != null ? store.rating.toFixed(1) : '—'}
                 </span>
               </div>
               <div className="sf-brand-row">
                 <span className="sf-brand-owner">{`by ${store.owner}`}</span>
-                <span className="sf-dot" />
-                <span className="sf-brand-campus">
-                  <span className="material-symbols-outlined sf-i14">school</span>
-                  {store.campusTag}
-                </span>
+                {/* Seller's own campus tag — hidden when the backend provides
+                    none. */}
+                {store.campusTag && (
+                  <>
+                    <span className="sf-dot" />
+                    <span className="sf-brand-campus">
+                      <MaterialIcon name="school" className="sf-i14" />
+                      {store.campusTag}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
           <div className="sf-header-search">
             <div className="sf-search-wrap">
               <span className="sf-search-icon">
-                <span className="material-symbols-outlined sf-i20">search</span>
+                <MaterialIcon name="search" className="sf-i20" />
               </span>
               <input
                 className="sf-search-input"
@@ -622,11 +642,11 @@ function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSe
               target="_blank"
               type="button"
             >
-              <span className="material-symbols-outlined sf-i18">chat</span>
+              <MaterialIcon name="chat" className="sf-i18" />
               <span>WhatsApp</span>
             </a>
             <button className="sf-btn-cart" type="button" aria-label={`Basket, ${cartCount} items`}>
-              <span className="material-symbols-outlined sf-i22">shopping_bag</span>
+              <MaterialIcon name="shopping_bag" className="sf-i22" />
               <span className="sf-cart-badge">{cartCount}</span>
             </button>
             <div className="sf-avatar-circle">
@@ -652,10 +672,14 @@ function StorefrontChrome({ store, firstName, cartCount, activePageTab, onGoToSe
               </button>
             ))}
           </nav>
-          <div className="sf-pickup-note">
-            <span className="material-symbols-outlined sf-i16">storefront</span>
-            <span>{store.pickupNote}</span>
-          </div>
+          {/* Pickup note derives from the seller's real pickupLocation —
+              hidden entirely when there is none. */}
+          {store.pickupNote && (
+            <div className="sf-pickup-note">
+              <MaterialIcon name="storefront" className="sf-i16" />
+              <span>{store.pickupNote}</span>
+            </div>
+          )}
         </div>
       </div>
     </header>
@@ -693,7 +717,7 @@ function TemplateGallery({ store, onExplore }) {
         <span className="sf-template-eyebrow">{copy.eyebrow}</span>
         <h1 id="sf-template-gallery-title">{copy.title}</h1>
         <p>{copy.text} {`Curated by ${store.owner}.`}</p>
-        <button type="button" className="sf-template-primary-action" onClick={onExplore}>Shop the collection <span className="material-symbols-outlined sf-i18">arrow_downward</span></button>
+        <button type="button" className="sf-template-primary-action" onClick={onExplore}>Shop the collection <MaterialIcon name="arrow_downward" className="sf-i18" /></button>
       </div>
       <div className="sf-template-gallery-media">
         <div
@@ -772,7 +796,7 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
           )}
           {product.campusPickup && (
             <span className="sf-badge sf-badge-pickup">
-              <span className="material-symbols-outlined sf-i12">location_on</span>
+              <MaterialIcon name="location_on" className="sf-i12" />
               Campus Pickup Available
             </span>
           )}
@@ -784,11 +808,7 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
           title="Save to wishlist"
           aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
         >
-          <span
-            className={wishlisted ? 'material-symbols-outlined sf-i18 sf-fill' : 'material-symbols-outlined sf-i18'}
-          >
-            favorite
-          </span>
+          <MaterialIcon name="favorite" className="sf-i18" fill={wishlisted} />
         </button>
       </div>
       <div className="sf-card-body">
@@ -796,9 +816,13 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
           <div className="sf-card-meta">
             <span className={`sf-card-cat ${categoryTone}`}>{product.categoryLabel}</span>
             <div className="sf-card-rating">
-              <span className="material-symbols-outlined sf-i14 sf-fill">star</span>
-              <span>{product.rating.toFixed(1)}</span>
-              <span className="sf-muted">{`(${product.reviews})`}</span>
+              {product.rating != null && (
+                <>
+                  <MaterialIcon name="star" className="sf-i14" fill />
+                  <span>{product.rating.toFixed(1)}</span>
+                  <span className="sf-muted">{`(${product.reviews ?? 0})`}</span>
+                </>
+              )}
             </div>
           </div>
           <h3 className="sf-card-name">{product.name}</h3>
@@ -806,17 +830,17 @@ function ProductCard({ product, wishlisted, onToggleWishlist, onAddToCart, onIns
         </div>
         <div className="sf-card-pricing">
           <div className="sf-price-row">
-            <span className="sf-price">{product.priceLabel}</span>
+            <span className="sf-price">{product.priceLabel ?? '—'}</span>
             {product.oldPriceLabel && <span className="sf-oldprice">{product.oldPriceLabel}</span>}
           </div>
           <div className="sf-card-actions">
             <button type="button" className="sf-btn-add" onClick={(event) => { event.stopPropagation(); onAddToCart(product); }}>
-              <span className="material-symbols-outlined sf-i18">shopping_bag</span>
+              <MaterialIcon name="shopping_bag" className="sf-i18" />
               <span>Add</span>
             </button>
             <button type="button" className="sf-btn-buy" onClick={(event) => { event.stopPropagation(); onInstantBuy(product); }}>
               <span>Buy Now</span>
-              <span className="material-symbols-outlined sf-i16">arrow_forward</span>
+              <MaterialIcon name="arrow_forward" className="sf-i16" />
             </button>
           </div>
         </div>

@@ -4,6 +4,7 @@
 import type {
   ChangePasswordRequest,
   DeleteAccountRequest,
+  PublicSellerProfile,
   SellerProfile,
   UpdateEmailRequest,
   UpdateSellerProfileRequest,
@@ -16,6 +17,12 @@ import { RealUsersApi } from '../real/users.api';
 
 export interface UsersApi {
   getSellerProfile(): Promise<SellerProfile>;
+  /**
+   * PUBLIC seller profile by seller user id. No session required — this is what
+   * the public seller profile page (reached from a product page) reads.
+   * A 404 means the seller id is unknown (never swallowed into a blank profile).
+   */
+  getPublicSellerProfile(sellerId: string): Promise<PublicSellerProfile>;
   updateSellerProfile(data: UpdateSellerProfileRequest): Promise<SellerProfile>;
   updateCurrentUser(data: UpdateUserRequest): Promise<User>;
   /** Change the password; revokes every OTHER session of the user. */

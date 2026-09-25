@@ -4,6 +4,7 @@ import AuthBackground from './AuthBackground';
 import LoginForm from './LoginForm';
 import AccountSelection from './AccountSelection';
 import SignupForm from './SignupForm';
+import PasswordResetFlow from './PasswordResetFlow';
 import { useCurrentUser } from '../../hooks/useAuth';
 
 const AuthPage = () => {
@@ -15,6 +16,9 @@ const AuthPage = () => {
     if (mode === 'signup') {
       const type = searchParams.get('type');
       return type ? 'signup' : 'account-selection';
+    }
+    if (mode === 'forgot-password') {
+      return 'forgot-password';
     }
     return 'login';
   });
@@ -39,6 +43,8 @@ const AuthPage = () => {
         const type = searchParams.get('type');
         setView(type ? 'signup' : 'account-selection');
         if (type) setAccountType(type);
+      } else if (mode === 'forgot-password') {
+        setView('forgot-password');
       } else {
         setView('login');
       }
@@ -214,6 +220,10 @@ const AuthPage = () => {
                 onBackToAccountSelection={handleBackToAccountSelection}
                 accountType={accountType}
               />
+            )}
+
+            {view === 'forgot-password' && (
+              <PasswordResetFlow />
             )}
           </div>
         </div>

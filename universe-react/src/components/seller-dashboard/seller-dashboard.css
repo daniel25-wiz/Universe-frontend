@@ -1,5 +1,5 @@
-/* Material Symbols remains external because the dashboard uses its ligatures. */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+/* Material Symbols (the dashboard's icon ligatures) is loaded eagerly from
+   index.html so icons render immediately instead of trailing this CSS chunk. */
 
 /* ==========================================================================
    SELLER DASHBOARD — Global Store (plain CSS design system)
@@ -92,32 +92,27 @@
 .sd-root button { font-family: inherit; }
 
 /* --------------------------------------------------------------------------
-   Material Symbols icons (as used in the mockups)
+   Material Symbols icons — now INLINE SVGs (see ui/MaterialIcon.jsx).
+   The font-family block is gone; only layout behavior is kept. The SVG
+   sizes itself at 1em, so font-size rules below still drive its size.
    -------------------------------------------------------------------------- */
-.sd-root .material-symbols-outlined,
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
   font-size: 24px;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-block;
   white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  flex-shrink: 0;
+  /* The SVG's 1em width/height must EXCLUDE padding (the legacy font spans
+     sized the glyph at font-size and added padding on top; border-box from
+     the global reset would otherwise eat into the glyph box). */
+  box-sizing: content-box;
 }
-.sd-root .material-symbols-outlined.filled-icon,
-.sd-root .filled-icon {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-.sd-root .material-symbols-outlined[data-weight='fill'] {
-  font-variation-settings: 'FILL' 1;
-}
+/* Fill-axis emulation: the fill variant path is hidden unless the icon is
+   marked data-fill (fill prop) or a parent rule reveals it (active nav). */
+.material-symbols-outlined .mi-f { display: none; }
+.material-symbols-outlined[data-fill] .mi-f { display: block; }
+.material-symbols-outlined[data-fill] .mi-o { display: none; }
+
 
 /* ==========================================================================
    Shared chrome — sidebar + top search bar (blue theme pages)
@@ -220,9 +215,8 @@
   color: var(--gs-on-secondary-container);
   transform: scale(0.98);
 }
-.sd-nav-link.active .sd-nav-icon {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
+.sd-nav-link.active .sd-nav-icon .mi-f { display: block; }
+.sd-nav-link.active .sd-nav-icon .mi-o { display: none; }
 
 /* Sidebar footer (help / logout) */
 .sd-foot {

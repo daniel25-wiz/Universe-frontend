@@ -40,6 +40,7 @@ const pathToKeys = {
   '/auth/login': ['auth'],
   '/auth/signup': ['auth'],
   '/terms': ['terms'],
+  '/marketplace': ['dashboard/public-marketplace'],
   '/seller': ['seller', 'dashboard/overview'],
   '/seller/marketplace': ['dashboard/marketplace'],
   '/seller/public-marketplace': ['dashboard/public-marketplace'],

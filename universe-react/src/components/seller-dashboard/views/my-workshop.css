@@ -1,7 +1,5 @@
 /* ==========================================================================
-   WORKSPACE UPGRADE — My Workshop hero, storefront config card & quick stats.
-   Ported from my_workshop_template_selector_workspace.html (sapphire #0052fe).
-   Imported after my-marketplace.css from MyMarketplace.jsx.
+   WORKSPACE UPGRADE — My Workshop with cleaner, organized layout
    ========================================================================== */
 
 /* ------------------------------- Hero banner ------------------------------ */
@@ -85,488 +83,320 @@
   .ws-hero-sub { font-size: 16px; }
 }
 
-/* Keep the reference order: hero, selector card, quick stats, then products. */
-.ws-page { display: flex; flex-direction: column; }
-.ws-page > .ws-header { display: none; }
-.ws-page > .ws-hero { order: 0; }
-.ws-page > .ws-config-card { order: 1; }
-.ws-page > .ws-stats { order: 2; }
-.ws-page > .ws-grid { order: 3; }
+/* ------------------------------- Header Section ------------------------------ */
+.ws-header-section {
+  margin-bottom: 24px;
+}
 
-/* ------------------------- Storefront config card ------------------------- */
-.ws-config-card {
-  overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+.ws-header-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
 }
-.ws-config-head {
-  padding: 32px 24px 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
-  text-align: center;
-}
-.ws-config-namewrap {
+
+.ws-add-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
-}
-.ws-config-namewrap:hover .ws-config-editname { color: #0052fe; background: #eff6ff; }
-.ws-config-shopname {
-  font-family: var(--gs-font-headline, inherit);
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: #0f172a;
-}
-.ws-config-editname {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
+  padding: 12px 24px;
+  background: #0052fe;
   border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: #94a3b8;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-.ws-config-editname .material-symbols-outlined { font-size: 16px; }
-.ws-config-namesub {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-.ws-config-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-  padding: 24px;
-  min-height: 380px;
-}
-@media (min-width: 768px) {
-  .ws-config-grid { grid-template-columns: repeat(2, 1fr); padding: 32px 24px; }
-}
-@media (min-width: 1024px) {
-  .ws-config-grid { grid-template-columns: repeat(4, 1fr); gap: 0; padding: 32px; }
-  .ws-col { padding: 0 24px; }
-  .ws-col:first-child { padding-left: 0; }
-  .ws-col:last-child { padding-right: 0; }
-  .ws-col + .ws-col { border-left: 1px solid #f1f5f9; }
-}
-@media (max-width: 1023px) {
-  .ws-col + .ws-col { border-top: 1px solid #f1f5f9; padding-top: 32px; }
+  box-shadow: 0 4px 12px -4px rgba(0, 82, 254, 0.4);
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-/* ------------------------------ Config columns ---------------------------- */
-.ws-col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
-  min-width: 0;
+.ws-add-btn-primary:hover {
+  background: #0047e0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -4px rgba(0, 82, 254, 0.5);
 }
-.ws-col-head {
+
+.ws-add-btn-primary .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* ------------------------------- Compact Stats ------------------------------ */
+.ws-stats-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ws-stat-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.ws-stat-compact .material-symbols-outlined {
+  font-size: 28px;
+  color: #0052fe;
+  background: #eff6ff;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.ws-stat-value {
+  font-family: var(--gs-font-headline, inherit);
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.ws-stat-label {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+/* ------------------------------- Toolbar Compact ------------------------------ */
+.ws-toolbar-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ------------------------- Simplified Settings Card ------------------------- */
+.ws-settings-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  margin-bottom: 24px;
+}
+
+.ws-settings-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 12px;
 }
-.ws-col-head h2 { margin: 0; }
-.ws-col-title {
-  margin: 0 0 20px;
+
+.ws-settings-title {
+  margin: 0;
+  font-family: var(--gs-font-headline, inherit);
   font-size: 18px;
   font-weight: 700;
   color: #0f172a;
 }
-.ws-col-head h2,
-.ws-col-title { font-family: var(--gs-font-headline, inherit); }
-.ws-col-sub {
-  margin: 0 0 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-}
-.ws-pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border: 1px solid transparent;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.ws-pill-blue { background: #eff6ff; border-color: #dbeafe; color: #0052fe; }
-.ws-col-foot { padding-top: 8px; }
-.ws-viewall {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 16px;
-  background: #eff6ff;
-  border-radius: 12px;
-  color: #0052fe;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.ws-viewall:hover { background: #dbeafe; color: #0047e0; }
-.ws-viewall .material-symbols-outlined { font-size: 16px; }
 
-/* ---------------------- Column 1: template picker ------------------------- */
-.ws-tpl-list { display: flex; flex-direction: column; gap: 12px; }
-.ws-tpl {
-  position: relative;
-  display: block;
-  padding: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-.ws-tpl:hover { border-color: #cbd5e1; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05); }
-.ws-tpl.is-active {
-  padding: 11px;
-  background: rgba(239, 246, 255, 0.45);
-  border: 2px solid #0052fe;
-}
-.ws-tpl-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.ws-tpl-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  background: #f1f5f9;
-  border-radius: 8px;
-  color: #475569;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.ws-tpl-icon .material-symbols-outlined { font-size: 16px; }
-.ws-tpl:hover .ws-tpl-icon { background: #eff6ff; color: #0052fe; }
-.ws-tpl.is-active .ws-tpl-icon { background: #0052fe; color: #ffffff; }
-.ws-tpl-info { flex: 1; min-width: 0; }
-.ws-tpl-name { display: flex; align-items: center; gap: 6px; }
-.ws-tpl-name h3 {
-  margin: 0;
+.ws-settings-sub {
+  margin: 4px 0 0;
   font-size: 13px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: #1e293b;
-}
-.ws-tpl-info p {
-  margin: 2px 0 0;
-  font-size: 11px;
-  line-height: 1.35;
   color: #64748b;
 }
-.ws-tpl input[type='radio'] {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  margin: 2px 0 0;
-  accent-color: #0052fe;
-  cursor: pointer;
-}
-.ws-tpl-tag {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 9999px;
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.ws-tpl-tag-blue { background: #0052fe; color: #ffffff; }
-.ws-tpl-tag-green,
-.ws-tpl-tag-emerald { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
-.ws-tpl-tag-purple { background: #f5f3ff; color: #7c3aed; }
-.ws-tpl-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 6px;
-  border-top: 1px solid #f1f5f9;
-  font-size: 11px;
-}
-.ws-tpl-foot span { color: #64748b; }
-.ws-tpl.is-active .ws-tpl-foot { border-top-color: #dbeafe; }
-.ws-tpl.is-active .ws-tpl-foot span { color: #1d4ed8; font-weight: 500; }
-.ws-tpl-foot a {
+
+.ws-settings-expand {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  color: #64748b;
-  font-weight: 600;
-  text-decoration: none;
-}
-.ws-tpl-foot a:hover { color: #0052fe; text-decoration: underline; }
-.ws-tpl.is-active .ws-tpl-foot a { color: #0052fe; }
-.ws-tpl-foot a .material-symbols-outlined { font-size: 12px; }
-
-/* --------------------------- Column 2: logo ------------------------------- */
-.ws-logo-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 210px;
-  margin: 0 auto;
-  aspect-ratio: 1;
-  background: rgba(239, 246, 255, 0.25);
-  border: 2px dashed #60a5fa;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-.ws-logo-box:hover { border-color: #0052fe; background: rgba(239, 246, 255, 0.55); }
-.ws-logo-box input[type='file'] {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-.ws-logo-plus {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: #ffffff;
-  border-radius: 9999px;
-  color: #0052fe;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
-  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-.ws-logo-box:hover .ws-logo-plus { transform: scale(1.1); background: #0052fe; color: #ffffff; }
-.ws-logo-img {
-  position: absolute;
-  inset: 8px;
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  object-fit: contain;
-  border-radius: 10px;
-}
-.ws-logo-meta { margin-top: 8px; text-align: left; }
-.ws-logo-meta h3 { margin: 0; font-size: 14px; font-weight: 700; color: #1e293b; }
-.ws-logo-meta p { margin: 2px 0 0; font-size: 12px; color: #94a3b8; }
-.ws-field-error { margin: 4px 0 0; font-size: 12px; font-weight: 500; color: #dc2626; }
-.ws-contact-note { padding-top: 8px; font-size: 12px; color: #94a3b8; }
-
-/* --------------------------- Column 3: location --------------------------- */
-.ws-loc-add-card {
-  width: 100%;
-  max-width: 220px;
-  min-height: 0;
-  aspect-ratio: 1;
-  margin-bottom: 16px;
-  box-sizing: border-box;
-  text-decoration: none;
-}
-.ws-loc-add-card .ws-add-icon {
-  width: 42px;
-  height: 42px;
-  margin-bottom: 8px;
-}
-.ws-loc-add-card .ws-add-icon .material-symbols-outlined { font-size: 22px; }
-.ws-loc-add-card .ws-add-title {
-  margin: 0 0 4px;
-  font-size: 15px;
-  line-height: 20px;
-  text-align: center;
-}
-.ws-loc-add-card .ws-add-sub {
-  max-width: 150px;
-  margin: 0;
-  padding: 0;
-  font-size: 11px;
-  line-height: 15px;
-}
-.ws-loc-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-.ws-loc-select {
-  width: 100%;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 8px 16px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.ws-loc-select:focus {
-  outline: none;
-  border-color: #0052fe;
-  box-shadow: 0 0 0 3px rgba(0, 82, 254, 0.15);
-}
-.ws-loc-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin: 12px 0 0;
-  font-size: 12px;
-  color: #94a3b8;
-}
-.ws-loc-status .material-symbols-outlined { font-size: 16px; color: #10b981; }
-
-/* --------------------------- Column 4: contact ---------------------------- */
-.ws-col-contact { justify-content: flex-start; }
-.ws-contact-fields { display: flex; flex-direction: column; gap: 12px; }
-.ws-contact-fields label { display: block; }
-.ws-field-label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 8px;
   color: #475569;
-}
-.ws-phone-wrap {
-  display: flex;
-  align-items: center;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.ws-phone-wrap:focus-within {
-  border-color: #0052fe;
-  box-shadow: 0 0 0 3px rgba(0, 82, 254, 0.15);
-}
-.ws-phone-prefix {
-  flex-shrink: 0;
-  padding-left: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #94a3b8;
-  white-space: nowrap;
-}
-.ws-phone-wrap input[type='tel'] {
-  width: 100%;
-  min-width: 0;
-  padding: 10px 12px;
-  background: transparent;
-  border: 0;
-  color: #1e293b;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-}
-.ws-contact-fields input[type='email'] {
-  width: 100%;
-  padding: 10px 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  color: #334155;
-  font-size: 13px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.ws-contact-fields input:focus { outline: none; }
-.ws-contact-fields input[type='email']:focus {
-  border-color: #0052fe;
-  box-shadow: 0 0 0 3px rgba(0, 82, 254, 0.15);
-}
-.ws-save-pending { margin: 0; font-size: 12px; color: #0052fe; }
-.ws-save-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #059669;
-}
-
-/* ----------------------------- Add product bar ---------------------------- */
-.ws-add-product-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  margin-top: 0;
-  padding: 16px 24px;
-  background: #0052fe;
-  border: 0;
-  border-radius: 16px;
-  color: #ffffff;
-  font-family: var(--gs-font-headline, inherit);
-  font-size: 16px;
-  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 12px 28px -12px rgba(0, 82, 254, 0.55);
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: all 0.2s ease;
 }
-.ws-add-product-btn:hover { background: #0047e0; }
-.ws-add-product-btn:active { transform: scale(0.99); }
-.ws-add-product-btn .material-symbols-outlined { font-size: 20px; }
-.ws-card-footer-bar { padding: 32px; border-top: 1px solid #f1f5f9; background: #ffffff; }
 
-/* ------------------------------ Quick stats ------------------------------- */
-.ws-stats {
+.ws-settings-expand:hover {
+  background: #eff6ff;
+  border-color: #0052fe;
+  color: #0052fe;
+}
+
+.ws-settings-expand .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.ws-settings-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 0;
+  padding: 0;
 }
+
 @media (min-width: 768px) {
-  .ws-stats { grid-template-columns: repeat(3, 1fr); }
+  .ws-settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
-.ws-stat {
+
+.ws-setting-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
 }
-.ws-stat-icon {
+
+.ws-setting-item:hover {
+  background: #f8fafc;
+}
+
+@media (min-width: 768px) {
+  .ws-setting-item:nth-child(odd) {
+    border-right: 1px solid #f1f5f9;
+  }
+  
+  .ws-setting-item:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .ws-setting-item:last-child {
+    border-bottom: none;
+  }
+}
+
+.ws-setting-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  background: #eff6ff;
+  border-radius: 10px;
 }
-.ws-stat-icon .material-symbols-outlined { font-size: 24px; }
-.ws-stat-icon-blue { background: #eff6ff; color: #0052fe; }
-.ws-stat-icon-green { background: #ecfdf5; color: #059669; }
-.ws-stat-icon-purple { background: #f5f3ff; color: #7c3aed; }
-.ws-stat-label { margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8; }
-.ws-stat-value {
-  margin: 0;
-  font-family: var(--gs-font-headline, inherit);
+
+.ws-setting-icon .material-symbols-outlined {
+  font-size: 24px;
+  color: #0052fe;
+}
+
+.ws-setting-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.ws-setting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ws-setting-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.ws-setting-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-setting-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.ws-setting-input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #0052fe;
+  box-shadow: 0 0 0 3px rgba(0, 82, 254, 0.1);
+}
+
+.ws-setting-input::placeholder {
+  color: #94a3b8;
+}
+
+.ws-setting-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: #eff6ff;
+  border-radius: 8px;
+  color: #0052fe;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ws-setting-action:hover {
+  background: #0052fe;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.ws-setting-action .material-symbols-outlined {
   font-size: 20px;
-  font-weight: 800;
-  color: #1e293b;
+}
+
+.ws-setting-saved {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: #ecfdf5;
+  border-radius: 8px;
+  color: #10b981;
+}
+
+.ws-setting-saved .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.ws-phone-input-compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ws-phone-prefix-compact {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.ws-phone-input-compact .ws-setting-input {
+  margin-top: 0;
 }

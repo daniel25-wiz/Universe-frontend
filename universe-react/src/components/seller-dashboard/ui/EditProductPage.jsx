@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCurrentUser } from '../../../hooks/useAuth';
-import { useProduct, useUpdateProduct } from '../../../hooks/useProducts';
-import { fileToCompressedDataUrl } from '../../../lib/image';
+import { useProduct, useUpdateProduct, useProducts } from '../../../hooks/useProducts';
+import { MARKETPLACE_LISTING_LIMIT } from '../../../api/types';
+import { uploadsApi } from '../../../api/services/uploads';
 import '../seller-dashboard.css';
 import './add-product.css';
 import './widgets.css';
+import MaterialIcon from '../../../components/ui/MaterialIcon';
 
 const CATEGORIES = [
-  'Electronics',
   'Fashion',
-  'Home',
-  'Beauty',
-  'Sports',
+  'Electronics',
+  'Gadgets',
   'Books',
-  'Toys',
-  'Other',
+  'Others',
 ];
 
 const MAX_IMAGES = 5;
@@ -31,9 +30,19 @@ function EditProductPage() {
   const { data: user } = useCurrentUser();
   const { data: product, isLoading, error } = useProduct(productId);
   const updateProduct = useUpdateProduct();
+  // Other active products this seller already has, minus the one being edited,
+  // so the UI can pre-empt the 2-listing cap before the API rejects the save.
+  const { data: myProducts = [] } = useProducts(
+    user ? { sellerId: user.id, status: 'active', page: 1, pageSize: 50 } : undefined,
+  );
+  const featuredActiveCount = myProducts.filter(
+    (p) => p.id !== productId && p.featuredInMarketplace === true,
+  ).length;
+  const canAddListing = featuredActiveCount < MARKETPLACE_LISTING_LIMIT;
 
   const [serverError, setServerError] = useState(null);
   const [imageError, setImageError] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [form, setForm] = useState({
     name: '',
@@ -43,7 +52,9 @@ function EditProductPage() {
     salePrice: '',
     stock: '',
     category: '',
+    condition: 'new',
     status: 'active',
+    featuredInMarketplace: false,
     images: [],
   });
   const [loaded, setLoaded] = useState(false);
@@ -59,7 +70,10 @@ function EditProductPage() {
         salePrice: product.salePrice != null ? String(product.salePrice) : '',
         stock: product.stock != null ? String(product.stock) : '',
         category: product.category ?? '',
+        // Unknown/legacy conditions fall back to the Add Product default.
+        condition: product.condition === 'used' ? 'used' : 'new',
         status: product.status ?? 'active',
+        featuredInMarketplace: product.featuredInMarketplace === true,
         images:
           product.images?.length > 0
             ? product.images
@@ -77,6 +91,11 @@ function EditProductPage() {
     setForm((f) => ({ ...f, [e.target.id]: e.target.value }));
   };
 
+  /** Condition radio ("Brand New" / "Fairly Used") shown on the marketplace badge. */
+  const selectCondition = (condition) => {
+    setForm((f) => ({ ...f, condition }));
+  };
+
   /** Append raw image sources (data URLs from uploads, or pasted URLs). */
   const addImages = (urls) => {
     setImageError(null);
@@ -88,6 +107,13 @@ function EditProductPage() {
     });
   };
 
+  /** First human-readable message from an ApiError-shaped upload rejection. */
+  const imageErrorMessage = (error) => (
+    (error?.fieldErrors && Object.values(error.fieldErrors)[0])
+    || error?.message
+    || 'Could not process that image.'
+  );
+
   const handleImageFiles = async (e) => {
     const files = Array.from(e.target.files ?? []);
     e.target.value = ''; // allow re-selecting the same file(s)
@@ -95,28 +121,47 @@ function EditProductPage() {
     setImageError(null);
     const remaining = MAX_IMAGES - form.images.length;
     if (remaining <= 0) {
-      setImageError(`You can add up to ${MAX_IMAGES} images.`);
+      setImageError(`You can add up to ${MAX_IMAGES} images — remove one to make room.`);
       return;
     }
+    const selected = files.slice(0, remaining);
+    // Report the cap instead of silently dropping the extra files.
+    if (files.length > selected.length) {
+      setImageError(`Only ${selected.length} of ${files.length} images were uploaded — ${MAX_IMAGES} is the maximum.`);
+    }
+    setImageUploading(true);
     try {
-      const results = await Promise.all(
-        files.slice(0, remaining).map((file) => fileToCompressedDataUrl(file)),
+      // Uploads go through the documented endpoint (POST /uploads/images); the
+      // mock adapter compresses locally and resolves with the same URL shape.
+      // allSettled: one rejected file must not discard the ones that uploaded.
+      const results = await Promise.allSettled(
+        selected.map((file) => uploadsApi.uploadImage(file)),
       );
-      addImages(results);
-    } catch (err) {
-      setImageError(err.message || 'Could not process that image.');
+      const urls = results.filter((r) => r.status === 'fulfilled').map((r) => r.value.url);
+      if (urls.length) addImages(urls);
+      const failed = results.find((r) => r.status === 'rejected');
+      if (failed) setImageError(imageErrorMessage(failed.reason));
+    } finally {
+      setImageUploading(false);
     }
   };
 
   const removeImage = (index) => {
+    if (imageUploading) return;
     setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
   };
 
   const handleImageUrlAdd = () => {
+    if (imageUploading) return;
     const url = imageUrl.trim();
     if (!url) return;
+    // Mirrors the API validator (products.mock.ts) so the form fails early.
+    if (!/^(https?:\/\/|data:image\/)/i.test(url)) {
+      setImageError('Image must be an http(s) URL or an uploaded image.');
+      return;
+    }
     if (form.images.length >= MAX_IMAGES) {
-      setImageError(`You can add up to ${MAX_IMAGES} images.`);
+      setImageError(`You can add up to ${MAX_IMAGES} images — remove one to make room.`);
       return;
     }
     addImages([url]);
@@ -150,7 +195,9 @@ function EditProductPage() {
           salePrice: form.salePrice ? parseFloat(form.salePrice) : null,
           stock: form.stock ? parseInt(form.stock, 10) : null,
           category: form.category || undefined,
+          condition: form.condition,
           status: form.status,
+          featuredInMarketplace: form.featuredInMarketplace,
           imageUrl: form.images[0] || null,
           images: form.images.length ? form.images : null,
         },
@@ -170,8 +217,8 @@ function EditProductPage() {
 
   if (isLoading) {
     return (
-      <main className="ap-backdrop">
-        <div className="ap-modal">
+      <main className="ap-page-shell">
+        <div className="ap-card">
           <p style={{ padding: 24 }}>Loading product…</p>
         </div>
       </main>
@@ -180,15 +227,15 @@ function EditProductPage() {
 
   if (error || !product) {
     return (
-      <main className="ap-backdrop">
-        <div className="ap-modal">
+      <main className="ap-page-shell">
+        <div className="ap-card">
           <p style={{ padding: 24 }}>
             {error?.status === 404
               ? 'Product not found — it may have been deleted, or it belongs to another seller.'
               : error?.message || 'Could not load this product.'}
           </p>
-          <div className="ap-footer">
-            <button type="button" className="ap-btn-cancel" onClick={goBack}>
+          <div className="ap-action-bar">
+            <button type="button" className="ap-clear-btn" onClick={goBack}>
               Back to workshop
             </button>
           </div>
@@ -198,19 +245,19 @@ function EditProductPage() {
   }
 
   return (
-    <main className="ap-backdrop">
-      <div className="ap-modal">
+    <main className="ap-page-shell">
+      <div className="ap-card">
         {/* Modal Header */}
         <header className="ap-header">
           <div className="ap-header-brand">
             <img src="/logo.png" alt="Global Store" className="ap-brand-logo" />
             <div>
               <h1 className="ap-title">Edit Product</h1>
-              <p className="ap-sub">Update the details of &ldquo;{product.name}&rdquo;.</p>
+              <p className="ap-subtitle">Update the details of &ldquo;{product.name}&rdquo;.</p>
             </div>
           </div>
           <button className="ap-close" aria-label="Close modal" onClick={goBack}>
-            <span className="material-symbols-outlined">close</span>
+            <MaterialIcon name="close" />
           </button>
         </header>
 
@@ -246,10 +293,30 @@ function EditProductPage() {
                 <label className="ap-label" htmlFor="category">Category</label>
                 <select className="ap-input" id="category" value={form.category} onChange={handleChange}>
                   <option value="">Uncategorized</option>
-                  {CATEGORIES.map((c) => (
+                  {[...new Set(form.category && !CATEGORIES.includes(form.category) ? [form.category, ...CATEGORIES] : CATEGORIES)].map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
+              </div>
+              {/* Same condition selector as the Add Product page — the choice is
+                  what buyers see as the "New" / "Used" badge on the product page. */}
+              <div className="ap-row ap-row-2 ap-brand-row">
+                <button
+                  type="button"
+                  className={`ap-brand-option ${form.condition === 'new' ? 'selected' : ''}`}
+                  onClick={() => selectCondition('new')}
+                >
+                  <span className="ap-option-box" aria-hidden="true" />
+                  <span>Brand New</span>
+                </button>
+                <button
+                  type="button"
+                  className={`ap-brand-option ${form.condition === 'used' ? 'selected' : ''}`}
+                  onClick={() => selectCondition('used')}
+                >
+                  <span className="ap-option-box" aria-hidden="true" />
+                  <span>Fairly Used</span>
+                </button>
               </div>
               <div className="ap-field">
                 <label className="ap-label" htmlFor="description">Description</label>
@@ -308,6 +375,38 @@ function EditProductPage() {
                   <span className="ap-label" style={{ marginBottom: 0 }}>Draft (only you can see it)</span>
                 </label>
               </div>
+              {/* Public marketplace listing toggle (at most 2 per seller). */}
+              <div className="ap-toggle-row" style={{ marginTop: 14 }}>
+                <div className="ap-toggle-block">
+                  <div className="ap-toggle-line">
+                    <span className="ap-toggle-label">List on marketplace</span>
+                    <button
+                      type="button"
+                      className={`ap-switch ${form.featuredInMarketplace ? 'on' : ''}`}
+                      aria-label={form.featuredInMarketplace ? 'Remove from marketplace' : 'List on marketplace'}
+                      disabled={!form.featuredInMarketplace && !canAddListing}
+                      title={
+                        !form.featuredInMarketplace && !canAddListing
+                          ? `You already have ${MARKETPLACE_LISTING_LIMIT} products listed on the marketplace. Remove one first.`
+                          : undefined
+                      }
+                      onClick={() => {
+                        if (!form.featuredInMarketplace && !canAddListing) return;
+                        setForm((f) => ({ ...f, featuredInMarketplace: !f.featuredInMarketplace }));
+                      }}
+                    >
+                      <span className="ap-switch-thumb" />
+                    </button>
+                  </div>
+                  <p style={{ fontSize: 11, marginTop: 4 }}>
+                    {form.featuredInMarketplace
+                      ? form.status === 'draft'
+                        ? 'Listed on the marketplace as soon as you publish it.'
+                        : 'This product appears in the public marketplace.'
+                      : `List on the public marketplace (${featuredActiveCount}/${MARKETPLACE_LISTING_LIMIT} used)`}
+                  </p>
+                </div>
+              </div>
             </section>
 
             {/* Media Section */}
@@ -319,22 +418,25 @@ function EditProductPage() {
                 </span>
               </div>
 
-              {/* Upload Area (multi-file, wired to a real file input, compressed in-browser) */}
-              <label className="ap-upload" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
+              {/* Upload Area (multi-file, wired to a real file input, uploaded via the API) */}
+              <label className="ap-upload" htmlFor="ap-image-input" style={{ cursor: imageUploading ? 'progress' : 'pointer' }}>
                 <div className="ap-upload-icon">
-                  <span className="material-symbols-outlined">cloud_upload</span>
+                  <MaterialIcon name="cloud_upload" />
                 </div>
                 <p className="ap-upload-text">
                   <strong>Click to upload</strong> or drag and drop
                 </p>
                 <p className="ap-upload-hint">
-                  PNG or JPG — compressed automatically in your browser ({form.images.length}/{MAX_IMAGES} added)
+                  {imageUploading
+                    ? 'Uploading…'
+                    : `PNG or JPG — compressed automatically in your browser (${form.images.length}/${MAX_IMAGES} added)`}
                 </p>
                 <input
                   id="ap-image-input"
                   type="file"
                   accept="image/*"
                   multiple
+                  disabled={imageUploading}
                   style={{ display: 'none' }}
                   onChange={handleImageFiles}
                 />
@@ -347,6 +449,7 @@ function EditProductPage() {
                   type="text"
                   placeholder="Paste an image URL and press Enter to add"
                   value={imageUrl}
+                  disabled={imageUploading}
                   onChange={(e) => setImageUrl(e.target.value)}
                   onKeyDown={handleImageUrlKeyDown}
                 />
@@ -354,7 +457,7 @@ function EditProductPage() {
                   type="button"
                   className="ap-btn-add-url"
                   onClick={handleImageUrlAdd}
-                  disabled={!imageUrl.trim()}
+                  disabled={imageUploading || !imageUrl.trim()}
                 >
                   Add
                 </button>
@@ -379,14 +482,14 @@ function EditProductPage() {
                   ))}
                   {form.images.length < MAX_IMAGES && (
                     <label className="ap-thumb-add" htmlFor="ap-image-input" style={{ cursor: 'pointer' }}>
-                      <span className="material-symbols-outlined">add</span>
+                      <MaterialIcon name="add" />
                     </label>
                   )}
                 </div>
               ) : (
                 <div className="ap-thumbs">
                   <div className="ap-thumb">
-                    <span className="material-symbols-outlined">image</span>
+                    <MaterialIcon name="image" />
                   </div>
                 </div>
               )}
@@ -395,12 +498,12 @@ function EditProductPage() {
         </div>
 
         {/* Modal Footer (Actions) */}
-        <footer className="ap-footer">
-          <button className="ap-btn-cancel" type="button" onClick={goBack} disabled={updateProduct.isPending}>
+        <footer className="ap-action-bar">
+          <button className="ap-clear-btn" type="button" onClick={goBack} disabled={updateProduct.isPending}>
             Cancel
           </button>
-          <button className="ap-btn-save" type="submit" form="ap-form" disabled={updateProduct.isPending}>
-            <span className="material-symbols-outlined">save</span>
+          <button className="ap-submit-btn" type="submit" form="ap-form" disabled={updateProduct.isPending}>
+            <MaterialIcon name="save" />
             {updateProduct.isPending ? 'Saving...' : 'Save Changes'}
           </button>
         </footer>

@@ -1,0 +1,36 @@
+
+            <div className="ap-upload-grid">
+              {imageSlots.map((image, index) => (
+                <button
+                  key={`slot-${index}`}
+                  type="button"
+                  className={`ap-upload-box ${image ? 'has-image' : ''}`}
+                  aria-label={image ? `Product image ${index + 1}` : 'Add product image'}
+                  onClick={() => document.getElementById('ap-image-input')?.click()}
+                >
+                  {image ? (
+                    <img src={image} alt={`Product ${index + 1}`} className="ap-upload-preview" />
+                  ) : (
+                    <span className="material-symbols-outlined">add</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <input
+              id="ap-image-input"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageFiles}
+              className="ap-hidden-input"
+            />
+          </section>
+
+          <label className="ap-field ap-field-full ap-product-name-field">
+            <span>Product Name</span>
+            <div className="ap-input-wrap ap-no-icon">
+              <input
+                id="name"
+                type="text"
+                placeholder="Enter product name"
