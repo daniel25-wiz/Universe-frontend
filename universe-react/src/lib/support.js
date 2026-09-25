@@ -9,9 +9,11 @@
 /** Support WhatsApp number in international format without "+" (wa.me format). */
 export const SUPPORT_WHATSAPP_NUMBER = '2347051917468';
 
+/** Direct WhatsApp support URL for Universe desk. */
+export const SUPPORT_WHATSAPP_URL = `https://wa.me/${SUPPORT_WHATSAPP_NUMBER}`;
+
 /**
- * Support contact email — the same address used by the "Contact Us" action in
- * seller settings and the Email card on the seller/buyer profiles.
+ * Support contact email — the same address used on the seller/buyer profiles.
  */
 export const SUPPORT_EMAIL = 'universe26@gmail.com';
 
@@ -25,3 +27,4 @@ export function buildWhatsAppUrl(text) {
 export const FEEDBACK_WHATSAPP_URL = buildWhatsAppUrl(
   "Hello Universe Support, I'd like to share some feedback about my seller dashboard experience:"
 );
+

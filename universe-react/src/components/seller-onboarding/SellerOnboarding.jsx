@@ -180,31 +180,9 @@ function GiftIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v4H3zM5 14v7h14v-7M12 10v11M4 7h16v3H4zM12 7H8.5a2.5 2.5 0 1 1 2.2-3.7L12 7Zm0 0h3.5a2.5 2.5 0 1 0-2.2-3.7L12 7Z" /></svg>;
 }
 
-function Milestones({ onContinue, storeSlug }) {
-  const [copied, setCopied] = useState(false);
-  const domain = getPrettyStoreDomain(storeSlug);
-
-  const copyDomain = async () => {
-    try {
-      await navigator.clipboard.writeText(`https://${domain}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard unavailable — the link stays visible either way */
-    }
-  };
-
+function Milestones({ onContinue }) {
   const items = [
     { icon: <StoreIcon />, title: 'Build Your Online Store', description: 'Set up and customize your online store in minutes.', action: 'Continue Setup', active: true },
-    {
-      icon: <GlobeIcon />,
-      title: 'Get Your Own Domain',
-      description: storeSlug
-        ? `Your private marketplace is live at ${domain}`
-        : 'Find and secure the perfect domain name for your brand.',
-      action: storeSlug ? 'Open Storefront' : 'Connect Domain',
-      isDomain: Boolean(storeSlug),
-    },
     { icon: <ChartIcon />, title: 'Sale Analytics', description: 'Track your sales, customers and performance in real-time.', action: 'Configure' },
     { icon: <BoxIcon />, title: 'Post to Product', description: 'Add, manage and organize your products with ease.', action: 'Add Items' },
   ];
@@ -218,7 +196,7 @@ function Milestones({ onContinue, storeSlug }) {
       <section className="milestones-card">
         <div className="milestones-title">
           <div><span className="eyebrow">STARTERS</span><h2>Launch Checklist</h2></div>
-          <span>Step 3 of 4 completed</span>
+          <span>Step 2 of 3 completed</span>
         </div>
         <div className="milestone-list">
           {items.map((item) => (
@@ -230,23 +208,9 @@ function Milestones({ onContinue, storeSlug }) {
                   <div>
                     <h3>{item.title}</h3>
                     <p>{item.description}</p>
-                    {item.isDomain && (
-                      <div className="milestone-domain">
-                        <span className="milestone-domain-url">{domain}</span>
-                        <button type="button" className="milestone-domain-copy" onClick={copyDomain}>
-                          {copied ? 'Copied!' : 'Copy Link'}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
-                {item.isDomain ? (
-                  <Link className="milestone-domain-open" to={`/store/${storeSlug}`} onClick={onContinue}>
-                    {item.action}
-                  </Link>
-                ) : (
-                  <button type="button" onClick={item.active ? onContinue : undefined}>{item.action}</button>
-                )}
+                <button type="button" onClick={item.active ? onContinue : undefined}>{item.action}</button>
               </div>
             </div>
           ))}
