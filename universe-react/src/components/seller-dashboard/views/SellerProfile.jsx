@@ -71,7 +71,6 @@ function SellerProfile() {
           </div>
                               <div className="sd-topbar-actions">
             <div className="sp-search"><MaterialIcon name="search" /><input type="text" placeholder="Search..." /></div>
-            <button className="sd-icon-btn" aria-label="Notifications"><MaterialIcon name="notifications" /></button>
             <div className="sd-avatar-sm ws-avatar-initials" title={user?.fullName}>
               {getUserInitials(user?.fullName)}
               <span className="sd-avatar-name">Hi, {getFirstName(user?.fullName)}</span>

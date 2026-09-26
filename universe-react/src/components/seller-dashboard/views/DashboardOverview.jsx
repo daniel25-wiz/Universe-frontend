@@ -265,10 +265,6 @@ function DashboardOverview() {
 
           {/* Trailing Actions */}
           <div className="dh-trailing">
-            <button className="dh-notif" aria-label="Notifications">
-              <MaterialIcon name="notifications" />
-              <span className="dh-notif-dot"></span>
-            </button>
             <div className="dh-usermenu-wrap" ref={userMenuRef}>
               <button
                 type="button"

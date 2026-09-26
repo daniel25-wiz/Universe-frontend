@@ -395,10 +395,6 @@ function MyMarketplace() {
             </div>
           </div>
                                 <div className="sd-topbar-actions">
-            <button className="sd-icon-btn" aria-label="Notifications">
-              <MaterialIcon name="notifications" />
-              <span className="sd-notif-dot"></span>
-            </button>
             <div className="sd-avatar-sm ws-avatar-initials" title={user?.fullName}>
               {getUserInitials(user?.fullName)}
               <span className="sd-avatar-name">Hi, {getFirstName(user?.fullName)}</span>

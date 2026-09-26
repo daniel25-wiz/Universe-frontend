@@ -373,15 +373,6 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 .sd-icon-btn:hover { color: var(--gs-primary); background: var(--gs-surface-container-low); }
-.sd-notif-dot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  background: var(--gs-error);
-  border-radius: var(--gs-r-full);
-}
 .sd-avatar-sm {
   width: 32px;
   height: 32px;

@@ -93,10 +93,6 @@ function SalesAnalytics() {
             </div>
           </div>
           <div className="sd-topbar-actions">
-            <button className="sd-icon-btn" aria-label="Notifications">
-              <MaterialIcon name="notifications" />
-              <span className="sd-notif-dot"></span>
-            </button>
             <button className="sd-icon-btn" aria-label="Account">
               <MaterialIcon name="account_circle" />
             </button>

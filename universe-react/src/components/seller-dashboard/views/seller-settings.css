@@ -51,10 +51,6 @@
   width: 24px;
   height: 24px;
 }
-.st-bell svg {
-  width: 20px;
-  height: 20px;
-}
 .st-item-chevron svg {
   width: 20px;
   height: 20px;
@@ -73,22 +69,6 @@
   display: flex;
   align-items: center;
   gap: 16px;
-}
-.st-bell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: var(--st-on-surface-variant);
-  padding: 8px;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.st-bell:hover {
-  color: var(--st-primary);
-  background: var(--st-surface-container);
 }
 .st-avatar {
   width: 32px;

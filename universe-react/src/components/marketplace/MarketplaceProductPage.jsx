@@ -25,8 +25,15 @@ function MarketplaceProductPage({ onAddToCart, savedProducts = [], onToggleSaved
   // the "Added" confirmation. The timer lives in a ref and is cleared on
   // unmount so leaving the page early never fires a stale redirect.
   const buyTimer = useRef(null);
+  // Transient confirmation toast (e.g. "Product link copied to clipboard!") —
+  // same pattern as StorefrontPage's toast so share feedback is consistent.
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
 
-  useEffect(() => () => window.clearTimeout(buyTimer.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(buyTimer.current);
+    window.clearTimeout(toastTimer.current);
+  }, []);
 
   // Escape closes the full-screen viewer while it is open.
   useEffect(() => {
@@ -113,9 +120,47 @@ function MarketplaceProductPage({ onAddToCart, savedProducts = [], onToggleSaved
     ].filter(Boolean).join('\n');
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(details)}`, '_blank', 'noopener,noreferrer');
   };
+  /** Toast feedback — same behaviour as StorefrontPage's showToast(). */
+  const showToast = (message, icon = 'check') => {
+    window.clearTimeout(toastTimer.current);
+    setToast({ message, icon, show: true });
+    toastTimer.current = window.setTimeout(() => {
+      setToast((current) => (current ? { ...current, show: false } : current));
+    }, 3000);
+  };
+  /**
+   * Share this product. The native share sheet (Web Share API) is used where
+   * the browser supports it — the common case on mobile — otherwise the link
+   * is copied to the clipboard, matching the storefront's "Share store link"
+   * button (StorefrontPage.copyStoreUrl). Cancelling the sheet (AbortError)
+   * is intentional, so it stays silent; a clipboard failure surfaces the raw
+   * link in the toast so the buyer can still copy it by hand.
+   */
+  const shareProduct = async () => {
+    const url = window.location.href;
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: `${product.name} — ${formatProductPrice(product)}`,
+          url,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        // Anything else falls through to the clipboard copy below.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Product link copied to clipboard!');
+    } catch {
+      showToast(`Product link: ${url}`, 'share');
+    }
+  };
 
   return <MobileFrame active="search" cartCount={0} className="mm-product-page" showBottomNav={false}>
-    <header className="mm-product-header"><button type="button" aria-label="Go back" onClick={() => navigate(-1)}><Icon name="arrowBack" /></button><span>{product.category || 'Audio & Tech'}</span><div><button type="button" aria-label="Share product"><Icon name="share" /></button><button type="button" aria-label="Add to wishlist" className={favorite ? 'favorite' : ''} onClick={toggleFavorite}><Icon name="heart" /></button></div></header>
+    <header className="mm-product-header"><button type="button" aria-label="Go back" onClick={() => navigate(-1)}><Icon name="arrowBack" /></button><span>{product.category || 'Audio & Tech'}</span><div><button type="button" aria-label="Share product" title="Share product" onClick={shareProduct}><Icon name="share" /></button><button type="button" aria-label="Add to wishlist" className={favorite ? 'favorite' : ''} onClick={toggleFavorite}><Icon name="heart" /></button></div></header>
     <main className="mm-scroll mm-product-scroll">
       <section className="mm-gallery"><div className="mm-gallery-art"><div className="mm-badges"><span className="mm-verified">Verified</span><span className="mm-condition">{conditionLabel}</span></div><button type="button" className="mm-zoom" aria-label="View product full screen" onClick={() => setFullscreen(true)}><Icon name="expand" /></button>{activeImage ? <ProductArt product={{ ...product, imageUrl: activeImage }} variant="gallery" /> : <ProductArt product={product} variant="gallery" />}<span className="mm-image-fallback"><ProductArt product={product} variant="gallery" /></span></div>{productImages.length > 1 && <div className="mm-thumbnails" aria-label="Product images">{productImages.map((image, index) => <button type="button" key={`${image}-${index}`} className={activeImage === image ? 'active' : ''} onClick={() => setSelectedImage(image)} aria-label={`View product image ${index + 1}`}><img src={image} alt="" /></button>)}</div>}</section>
       <section className="mm-product-info"><div className="mm-product-info-top"><span>{product.seller || 'Seller unavailable'}</span>{product.rating != null ? <em>★ {product.rating.toFixed(1)}{product.reviews != null ? ` (${product.reviews})` : ''}</em> : <em>No reviews yet</em>}</div><h1>{product.name}</h1><div className="mm-price-line"><strong>{formatProductPrice(product)}</strong>{product.price != null && product.salePrice != null && product.salePrice < product.price && <del>{formatNaira(product.price)}</del>}</div><div className="mm-pickup"><div><strong>Delivery location</strong><small>{deliveryLocation}</small></div><span className={stock != null && stock <= 0 ? 'mm-stock-out' : ''}>{stockLabel}</span></div></section>
@@ -196,6 +241,11 @@ function MarketplaceProductPage({ onAddToCart, savedProducts = [], onToggleSaved
           <small>Tap anywhere to close</small>
         </div>
       )}
+    {/* Toast — sits above the sticky buy bar; mirrors the sf-toast pattern. */}
+    <div className={toast?.show ? 'mm-toast show' : 'mm-toast'} role="status" aria-live="polite">
+      <Icon name={toast?.icon ?? 'check'} />
+      <span className="mm-toast-msg">{toast?.message ?? ''}</span>
+    </div>
   </MobileFrame>;
 }
 

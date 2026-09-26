@@ -210,26 +210,6 @@
 
 .dh-trailing { display: flex; align-items: center; gap: 8px; }
 @media (min-width: 768px) { .dh-trailing { gap: 16px; } }
-.dh-notif {
-  position: relative;
-  background: none;
-  border: none;
-  color: var(--gs-on-surface-variant);
-  padding: 8px;
-  border-radius: var(--gs-r-full);
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-.dh-notif:hover { background: var(--gs-surface-container-low); }
-.dh-notif-dot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
-  background: var(--gs-error);
-  border-radius: var(--gs-r-full);
-}
 .dh-store-btn {
   display: flex;
   align-items: center;
