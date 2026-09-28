@@ -43,17 +43,18 @@
 .mm-nav-icon .mm-icon { width: 21px; height: 21px; }
 .mm-bottom a.active .mm-nav-icon .mm-icon { stroke-width: 2.2; }
 .mm-nav-icon b { position: absolute; top: -6px; right: -9px; width: 15px; height: 15px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--mm-blue); font-size: 9px; line-height: 1; box-shadow: 0 0 0 2px white; }
-/* Card chrome trimmed from 12px to 8px: the square art box is card width minus
-   this padding, so a smaller inset is what actually enlarges the product photo. */
-.mm-product-card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 8px; border: 1px solid #f1f5f9; border-radius: 24px; background: white; box-shadow: 0 4px 20px -2px rgb(0 0 0 / 4%); }
-/* Offset matches the card's 8px padding so the wishlist button stays flush with
+/* Card chrome trimmed from the original 12px down to 6px: the square art box is
+   card width minus this padding, so a smaller inset is what actually enlarges
+   the product photo. */
+.mm-product-card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 6px; border: 1px solid #f1f5f9; border-radius: 24px; background: white; box-shadow: 0 4px 20px -2px rgb(0 0 0 / 4%); }
+/* Offset matches the card's 6px padding so the wishlist button stays flush with
    the top-right corner of the product photo. */
-.mm-heart { position: absolute; z-index: 2; top: 8px; right: 8px; width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 1px solid #ffe4e6; border-radius: 50%; color: #94a3b8; background: white; box-shadow: 0 2px 5px rgb(15 23 42 / 7%); cursor: pointer; }
+.mm-heart { position: absolute; z-index: 2; top: 6px; right: 6px; width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 1px solid #ffe4e6; border-radius: 50%; color: #94a3b8; background: white; box-shadow: 0 2px 5px rgb(15 23 42 / 7%); cursor: pointer; }
 .mm-heart .mm-icon { width: 16px; height: 16px; }
 .mm-heart.saved { color: #f43f5e; }
 .mm-heart.saved .mm-icon { fill: currentColor; }
 .mm-product-link { display: block; min-width: 0; padding: 0; border: 0; color: inherit; text-align: left; background: transparent; cursor: pointer; }
-.mm-product-art { width: 100%; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 8px; overflow: hidden; border-radius: 16px; background: #f8fafc; }
+.mm-product-art { width: 100%; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 6px; overflow: hidden; border-radius: 16px; background: #f8fafc; }
 .mm-product-image { width: 100%; height: 100%; display: block; object-fit: contain; }
 /* Fill the square art box (crop the overflow) instead of letterboxing with `contain`. */
 .mm-product-art > .mm-product-image { position: relative; z-index: 1; object-fit: cover; }
@@ -123,10 +124,10 @@
 .mm-category-scroll::-webkit-scrollbar { display: none; }
 .mm-category-scroll button { flex: 0 0 auto; padding: 9px 16px; border: 1px solid #e2e8f0; border-radius: 999px; color: #64748b; background: white; font: inherit; font-size: 11px; cursor: pointer; }
 .mm-category-scroll button.active { border-color: #0f172a; color: white; background: #0f172a; }
-/* Tighter gutters (was 14px, and 18px on desktop) so every card gets a wider
-   slice of the row and the product photo inside it renders noticeably larger,
-   without changing the 2-up/4-up column count. */
-.mm-product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 2px; }
+/* Tight gutters (originally 14px, and 18px on desktop) so every card gets a
+   wider slice of the row and the product photo inside it renders noticeably
+   larger, without changing the 2-up/4-up column count. */
+.mm-product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding-top: 2px; }
 .mm-loading { grid-column: 1 / -1; padding: 32px; color: #64748b; text-align: center; }
 /* "Load more" control — appends the next server page so listings past the
    first page stay reachable instead of being silently dropped. */
@@ -310,9 +311,9 @@
      bleeding -20px past the container (it caused a 20px horizontal overflow). */
   .mm-category-scroll { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
   .mm-banner-slide { height: 270px; }
-  /* Desktop gutters trimmed from 18px to 10px — matches the tighter mobile
+  /* Desktop gutters trimmed from 18px down to 8px — matches the tight mobile
      grid so cards grow instead of the empty space between them. */
-  .mm-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .mm-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
   .mm-bottom { padding-right: max(24px, calc((100% - 1180px) / 2)); padding-left: max(24px, calc((100% - 1180px) / 2)); }
   .mm-bottom nav { max-width: 560px; margin: 0 auto; }
    .mm-product-page .mm-product-scroll {
