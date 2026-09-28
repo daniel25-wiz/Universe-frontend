@@ -19,16 +19,20 @@
 .mm-page { min-height: 100dvh; display: flex; justify-content: stretch; align-items: stretch; background: var(--mm-bg); color: var(--mm-ink); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
 .mm-device { width: 100%; height: 100dvh; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--mm-bg); }
 .mm-icon { width: 20px; height: 20px; flex: 0 0 auto; }
-.mm-status { display: flex; align-items: center; flex: 0 0 auto; padding: 14px 24px 8px; background: var(--mm-bg); }
+.mm-status { display: flex; align-items: center; flex: 0 0 auto; padding: 14px 12px 8px; background: var(--mm-bg); }
 .mm-status a { display: inline-flex; align-items: center; }
 .mm-status img { display: block; width: auto; height: 30px; max-width: 170px; object-fit: contain; }
-.mm-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 8px; flex: 0 0 auto; }
+.mm-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 8px; flex: 0 0 auto; }
 .mm-screen-header h1 { margin: 0; font-size: 21px; line-height: 28px; font-weight: 700; letter-spacing: -.03em; }
 .mm-screen-header button { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; color: var(--mm-ink); background: transparent; cursor: pointer; }
 .mm-screen-header button:hover { background: #f1f5f9; }
 .mm-screen-header .mm-icon { width: 21px; height: 21px; }
 .mm-header-spacer { width: 40px; }
-.mm-scroll { min-height: 0; flex: 1; overflow-y: auto; padding: 4px 20px 140px; scrollbar-width: none; }
+/* Outer page gutter trimmed from 20px to 12px: this is the whitespace framing the
+   whole marketplace (and therefore the width left over for the product grid).
+   Anything that bleeds past this padding — .mm-category-scroll, .mm-buy-bar,
+   .mm-status, .mm-screen-header — is kept in sync so nothing looks misaligned. */
+.mm-scroll { min-height: 0; flex: 1; overflow-y: auto; padding: 4px 12px 140px; scrollbar-width: none; }
 .mm-scroll::-webkit-scrollbar, .mm-bottom::-webkit-scrollbar { display: none; }
 .mm-discover > .mm-categories,
 .mm-discover > .mm-banner-carousel,
@@ -120,7 +124,9 @@
 .mm-categories > div:first-child { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
 .mm-categories h2 { margin: 0; font-size: 16px; }
 .mm-categories > div:first-child button { padding: 0; border: 0; color: var(--mm-blue); background: transparent; font-size: 11px; font-weight: 600; cursor: pointer; }
-.mm-category-scroll { display: flex; gap: 9px; overflow-x: auto; margin: 0 -20px; padding: 2px 20px 5px; scrollbar-width: none; }
+/* The -12px bleed (was -20px) still cancels the .mm-scroll gutter so the category
+   pills can scroll flush to the screen edge without overflowing the page. */
+.mm-category-scroll { display: flex; gap: 9px; overflow-x: auto; margin: 0 -12px; padding: 2px 12px 5px; scrollbar-width: none; }
 .mm-category-scroll::-webkit-scrollbar { display: none; }
 .mm-category-scroll button { flex: 0 0 auto; padding: 9px 16px; border: 1px solid #e2e8f0; border-radius: 999px; color: #64748b; background: white; font: inherit; font-size: 11px; cursor: pointer; }
 .mm-category-scroll button.active { border-color: #0f172a; color: white; background: #0f172a; }
@@ -183,7 +189,7 @@
 .mm-order-badge { flex: 0 0 auto; padding: 4px 9px; border-radius: 999px; color: #047857; background: #ecfdf5; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .mm-order-qty { color: #64748b; font-size: 12px; font-weight: 600; }
 .mm-product-page .mm-device { background: white; }
-.mm-product-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 20px; border-bottom: 1px solid #f1f5f9; background: rgb(255 255 255 / 95%); }
+.mm-product-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid #f1f5f9; background: rgb(255 255 255 / 95%); }
 .mm-product-header > button, .mm-product-header > div button { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; color: #334155; background: #f8fafc; cursor: pointer; }
 .mm-product-header > span { padding: 5px 10px; border-radius: 999px; color: var(--mm-blue); background: #eff6ff; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .mm-product-header > div { display: flex; gap: 7px; }
@@ -267,7 +273,9 @@
 .mm-escrow > strong { width: 35px; height: 35px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 11px; color: white; background: var(--mm-blue); }
 .mm-escrow h2 { margin: 0 0 4px; font-size: 11px; }
 .mm-escrow p { margin: 0; color: #475569; font-size: 10px; line-height: 1.4; }
-.mm-buy-bar { position: absolute; z-index: 31; right: 0; bottom: 0; left: 0; padding: 12px 20px 20px; border-top: 1px solid #e2e8f0; background: rgb(255 255 255 / 95%); box-shadow: 0 -4px 20px rgb(0 0 0 / 5%); backdrop-filter: blur(12px); }
+/* Side padding matches the .mm-scroll gutter (20px -> 12px) so the buy controls
+   line up with the product content above them. */
+.mm-buy-bar { position: absolute; z-index: 31; right: 0; bottom: 0; left: 0; padding: 12px 12px 20px; border-top: 1px solid #e2e8f0; background: rgb(255 255 255 / 95%); box-shadow: 0 -4px 20px rgb(0 0 0 / 5%); backdrop-filter: blur(12px); }
 .mm-buy-row { display: flex; gap: 10px; }
 .mm-buy-row > .mm-stepper { height: 48px; padding: 4px; border-radius: 14px; }
 .mm-buy-row > .mm-stepper button { width: 32px; height: 32px; border-radius: 10px; background: white; box-shadow: 0 2px 5px rgb(15 23 42 / 6%); font-size: 16px; }
@@ -304,20 +312,28 @@
 .mm-console span { width: 32px; height: 23px; margin-bottom: 1px; border-radius: 7px; background: #1e293b; }
 
 @media (min-width: 700px) {
-  .mm-scroll { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding-right: 0; padding-left: 0; }
+  /* Desktop frame: max width raised 1180px -> 1280px and the outer gutter halved
+     (64px -> 32px total) so the catalogue uses far more of a laptop screen. */
+  .mm-scroll { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding-right: 0; padding-left: 0; }
   .mm-discover-heading { padding-right: 0; padding-left: 0; }
   .mm-page .mm-discover-heading { padding-right: 0; padding-left: 0; }
-  /* .mm-scroll loses its 20px side padding here, so the category row must stop
-     bleeding -20px past the container (it caused a 20px horizontal overflow). */
+  /* .mm-scroll loses its 12px side padding here, so the category row must stop
+     bleeding -12px past the container (it caused horizontal overflow). */
   .mm-category-scroll { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
   .mm-banner-slide { height: 270px; }
   /* Desktop gutters trimmed from 18px down to 8px — matches the tight mobile
      grid so cards grow instead of the empty space between them. */
   .mm-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  .mm-bottom { padding-right: max(24px, calc((100% - 1180px) / 2)); padding-left: max(24px, calc((100% - 1180px) / 2)); }
+  /* Kept aligned with the widened .mm-scroll frame (1280px / 16px min gutter). */
+  .mm-bottom { padding-right: max(16px, calc((100% - 1280px) / 2)); padding-left: max(16px, calc((100% - 1280px) / 2)); }
   .mm-bottom nav { max-width: 560px; margin: 0 auto; }
+  /* Logo bar and screen header adopt the same gutter as the content frame so the
+     brand mark / back button stay flush with the product grid's left edge. */
+  .mm-status, .mm-screen-header { padding-right: max(16px, calc((100% - 1280px) / 2)); padding-left: max(16px, calc((100% - 1280px) / 2)); }
    .mm-product-page .mm-product-scroll {
-      width: min(1180px, calc(100% - 64px));
+      /* Same frame as .mm-scroll so switching listing <-> product page keeps the
+         content edges fixed. */
+      width: min(1280px, calc(100% - 32px));
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       align-items: start;
@@ -344,7 +360,8 @@
    .mm-product-page .mm-product-info { padding-top: 0; }
    .mm-product-page .mm-product-info h1 { font-size: clamp(25px, 3vw, 36px); }
    .mm-product-page .mm-buy-bar {
-      right: max(32px, calc((100% - 1180px) / 2));
+      /* Anchors the sticky buy controls to the widened 1280px frame's right edge. */
+      right: max(16px, calc((100% - 1280px) / 2));
       left: auto;
       width: min(540px, calc(50% - 32px));
    }
