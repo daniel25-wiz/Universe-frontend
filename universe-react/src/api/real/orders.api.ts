@@ -15,7 +15,7 @@ import { isRecord, toNumber, toText, unwrapEnvelope } from '../normalize';
 /** Envelopes a backend may wrap an order payload in. */
 const ORDER_ENVELOPE = ['order', 'data', 'result'];
 
-const VALID_ORDER_STATUSES = ['processing', 'shipped', 'delivered', 'cancelled'];
+const VALID_ORDER_STATUSES = ['pending', 'paid', 'fulfilled', 'cancelled'];
 
 /**
  * Normalize one order line item. Malformed entries (no productId) are dropped

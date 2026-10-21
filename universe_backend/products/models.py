@@ -3,9 +3,14 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-
 class Product(models.Model):
-    CATEGORIES = [("tech", "Tech & Gadgets"), ("campus", "Campus Essentials"), ("lifestyle", "Lifestyle & Accessories")]
+    CATEGORIES = [
+        ("Fashion", "Fashion"),
+        ("Electronics", "Electronics"),
+        ("Gadgets", "Gadgets"),
+        ("Books", "Books"),
+        ("Others", "Others"),
+    ]
     STATUSES = [("draft", "Draft"), ("active", "Active"), ("archived", "Archived")]
     BADGES = [("flash", "Flash"), ("bestseller", "Bestseller")]
 
@@ -13,12 +18,12 @@ class Product(models.Model):
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="products")
     name = models.CharField(max_length=180)
     description = models.TextField(blank=True, default="")
-    category = models.CharField(max_length=20, choices=CATEGORIES, default="lifestyle")
+    category = models.CharField(max_length=20, choices=CATEGORIES, default="Others")
     price = models.DecimalField(max_digits=12, decimal_places=2)
     sale_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     stock = models.PositiveIntegerField(default=0)
-    images = models.JSONField(default=list, blank=True)   # list[str] URLs, first = cover
-    variants = models.JSONField(default=list, blank=True)  # [{name, values: []}]
+    images = models.JSONField(default=list, blank=True)
+    variants = models.JSONField(default=list, blank=True)
     status = models.CharField(max_length=10, choices=STATUSES, default="active")
     featured = models.BooleanField(default=False)
     badge = models.CharField(max_length=12, choices=BADGES, null=True, blank=True)

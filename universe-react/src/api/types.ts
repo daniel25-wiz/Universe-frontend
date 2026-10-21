@@ -388,7 +388,7 @@ export interface PaginatedResponse<T> {
 
 /* -------------------------------- Orders ------------------------------- */
 
-export type OrderStatus = 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus = 'pending' | 'paid' | 'fulfilled' | 'cancelled';
 
 /**
  * One line item inside an order, as reported by the backend. `unitPrice` is

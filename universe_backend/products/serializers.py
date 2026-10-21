@@ -2,21 +2,20 @@ from rest_framework import serializers
 
 from .models import Product
 
-
 class ProductSerializer(serializers.ModelSerializer):
-    seller_id = serializers.UUIDField(source="seller_id", read_only=True)
+    featured_in_marketplace = serializers.BooleanField(source='featured', required=False)
     seller_name = serializers.CharField(source="seller.full_name", read_only=True)
     image = serializers.SerializerMethodField()
     old_price = serializers.SerializerMethodField()
     images = serializers.ListField(child=serializers.CharField(), required=False, max_length=12)
-    variants = serializers.ListField(child=serializers.DictField(), required=False, max_length=10)
+    variants = serializers.ListField (child=serializers.DictField(), required=False, allow_null=True, max_length=10)
 
     class Meta:
         model = Product
         fields = [
             "id", "seller_id", "seller_name", "name", "description", "category",
             "price", "sale_price", "old_price", "stock", "image", "images", "variants",
-            "status", "featured", "badge", "campus_pickup", "rating", "review_count",
+            "status", "featured_in_marketplace", "badge", "campus_pickup", "rating", "review_count",
             "sold_count", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "seller_id", "seller_name", "rating", "review_count", "sold_count", "created_at", "updated_at"]
@@ -45,3 +44,4 @@ class ProductSerializer(serializers.ModelSerializer):
         if sale is not None and price is not None and sale >= price:
             raise serializers.ValidationError({"sale_price": "Sale price must be lower than the regular price."})
         return attrs
+    

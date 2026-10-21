@@ -36,8 +36,6 @@ INSTALLED_APPS = [
     "storefront",
     "uploads",
 ]
-SHOWONLY
-Output
 
 INSTALLED_APPS = [
     "django.contrib.admin",

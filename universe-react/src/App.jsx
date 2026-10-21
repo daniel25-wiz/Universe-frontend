@@ -183,51 +183,36 @@ function App() {
    * history, and empty the cart. The WhatsApp handoff stays inside CartPage.
    */
   const handleCheckout = async (items) => {
-    if (!items?.length) return;
+  if (!items?.length) return;
+  
+  try {
+    const orderPayload = {
+      items: items.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+      // Flatten to a plain string — backend expects CharField
+      deliveryAddress: 'Will be confirmed via WhatsApp, Lagos, Lagos, Nigeria',
+      // Send phone as its OWN top-level field
+      deliveryPhone: '0000000000',
+    };
     
-    try {
-      // Create the order through the API. This is CRITICAL for sales analytics
-      // to work — the order must exist in the backend.
-      const orderPayload = {
-        items: items.map((item) => ({
-          productId: item.product.id,
-          quantity: item.quantity,
-          unitPrice: item.product.salePrice ?? item.product.price,
-          variantSelection: item.options ? { selection: item.options } : undefined,
-        })),
-        // For WhatsApp checkout, we use a default delivery address.
-        // In a full implementation, you'd collect this from the user.
-        deliveryAddress: {
-          fullName: 'Marketplace Customer',
-          phone: '0000000000',
-          addressLine1: 'Will be confirmed via WhatsApp',
-          city: 'Lagos',
-          state: 'Lagos',
-          country: 'Nigeria',
-        },
-        note: 'Order placed via WhatsApp checkout',
-      };
-      
-      // Call the API to create the order
-      const createdOrder = await ordersApi.createOrder(orderPayload);
-      
-      // Snapshot the cart into local "Ordered products" history
-      setOrders((current) => [{
-        id: createdOrder.id || `order-${Date.now()}`,
-        date: createdOrder.createdAt || new Date().toISOString(),
-        items,
-      }, ...current]);
-      
-      // Empty the cart after successful order creation
-      setCartItems([]);
-      
-      return createdOrder;
-    } catch (error) {
-      console.error('Order creation failed:', error);
-      // Re-throw so CartPage can show the error
-      throw error;
-    }
-  };
+    const createdOrder = await ordersApi.createOrder(orderPayload);
+    
+    setOrders((current) => [{
+      id: createdOrder.id || `order-${Date.now()}`,
+      date: createdOrder.createdAt || new Date().toISOString(),
+      items,
+    }, ...current]);
+    
+    setCartItems([]);
+    
+    return createdOrder;
+  } catch (error) {
+    console.error('Order creation failed:', error);
+    throw error;
+  }
+};
 
   return (
     <>
