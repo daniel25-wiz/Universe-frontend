@@ -19,6 +19,7 @@ const loaders = {
   'dashboard/public-marketplace': () => import('../components/seller-dashboard/views/PublicMarketplace'),
   'dashboard/sales': () => import('../components/seller-dashboard/views/SalesAnalytics'),
   'dashboard/settings': () => import('../components/seller-dashboard/views/SellerSettings'),
+  'dashboard/store-link': () => import('../components/seller-dashboard/views/SellerStoreLink'),
   'dashboard/profile': () => import('../components/seller-dashboard/views/SellerProfile'),
   'dashboard/add-product': () => import('../components/seller-dashboard/ui/AddProductPage'),
 };
@@ -46,6 +47,7 @@ const pathToKeys = {
   '/seller/public-marketplace': ['dashboard/public-marketplace'],
   '/seller/sales': ['dashboard/sales'],
   '/seller/settings': ['dashboard/settings'],
+  '/seller/store-link': ['dashboard/store-link'],
   '/seller/profile': ['dashboard/profile'],
   '/seller/add-product': ['dashboard/add-product'],
 };

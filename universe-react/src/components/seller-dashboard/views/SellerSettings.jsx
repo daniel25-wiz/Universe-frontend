@@ -88,6 +88,13 @@ const MenuIcon = () => (
 
 const SETTINGS_ITEMS = [
   {
+    key: 'store-link',
+    to: '/seller/store-link',
+    icon: <MaterialIcon name="share" />,
+    title: 'Share Store Link',
+    desc: 'View And Share Your Store URL',
+  },
+  {
     key: 'profile',
     to: '/seller/profile',
     icon: <UserIcon />,

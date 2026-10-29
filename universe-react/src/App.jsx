@@ -80,6 +80,7 @@ const BuyerProfile = lazy(() => import('./components/marketplace/BuyerProfile'))
 const SalesAnalytics = lazy(() => import('./components/seller-dashboard/views/SalesAnalytics'));
 const SellerProfile = lazy(() => import('./components/seller-dashboard/views/SellerProfile'));
 const SellerSettings = lazy(() => import('./components/seller-dashboard/views/SellerSettings'));
+const SellerStoreLink = lazy(() => import('./components/seller-dashboard/views/SellerStoreLink'));
 const AddProductPage = lazy(() => import('./components/seller-dashboard/ui/AddProductPage'));
 const EditProductPage = lazy(() => import('./components/seller-dashboard/ui/EditProductPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
@@ -388,6 +389,14 @@ function App() {
             element={
               <DashboardView>
                 <SellerSettings />
+              </DashboardView>
+            }
+          />
+          <Route
+            path="store-link"
+            element={
+              <DashboardView>
+                <SellerStoreLink />
               </DashboardView>
             }
           />
